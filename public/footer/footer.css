@@ -1,0 +1,441 @@
+/* =====================================================
+   JIGATO FOOTER
+===================================================== */
+
+.jg-footer {
+
+    width: 100%;
+
+    margin-top: 70px;
+
+    background: #171717;
+
+    color: #ffffff;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    display: block;
+
+}
+
+
+/* =====================================================
+   MAIN FOOTER
+===================================================== */
+
+.jg-footer-container {
+
+    width: min(1200px, 92%);
+
+    margin: 0 auto;
+
+    padding: 55px 0 45px;
+
+    display: grid;
+
+    grid-template-columns:
+        1.7fr
+        1fr
+        1fr
+        1.2fr;
+
+    gap: 50px;
+
+}
+
+
+/* =====================================================
+   BRAND
+===================================================== */
+
+.jg-footer-brand {
+
+    min-width: 0;
+
+}
+
+
+.jg-footer-logo {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    color: #ffffff;
+
+    text-decoration: none;
+
+    font-size: 24px;
+
+    font-weight: 800;
+
+}
+
+
+.jg-footer-logo-icon {
+
+    width: 44px;
+
+    height: 44px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background: #ff5a1f;
+
+    border-radius: 12px;
+
+    font-size: 21px;
+
+}
+
+
+.jg-footer-logo-text {
+
+    line-height: 1;
+
+}
+
+
+.jg-footer-description {
+
+    max-width: 280px;
+
+    margin: 16px 0 0;
+
+    color: #999999;
+
+    font-size: 13px;
+
+    line-height: 1.7;
+
+}
+
+
+/* =====================================================
+   SOCIAL
+===================================================== */
+
+.jg-footer-social {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    margin-top: 20px;
+
+}
+
+
+.jg-footer-social a {
+
+    width: 35px;
+
+    height: 35px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border: 1px solid #333333;
+
+    border-radius: 9px;
+
+    background: #202020;
+
+    color: #aaaaaa;
+
+    text-decoration: none;
+
+    font-size: 14px;
+
+    transition:
+        0.2s ease;
+
+}
+
+
+.jg-footer-social a:hover {
+
+    background: #ff5a1f;
+
+    border-color: #ff5a1f;
+
+    color: #ffffff;
+
+    transform:
+        translateY(-2px);
+
+}
+
+
+/* =====================================================
+   COLUMNS
+===================================================== */
+
+.jg-footer-column {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 11px;
+
+}
+
+
+.jg-footer-column h3 {
+
+    margin: 0 0 8px;
+
+    color: #ffffff;
+
+    font-size: 14px;
+
+    font-weight: 800;
+
+}
+
+
+.jg-footer-column a {
+
+    width: fit-content;
+
+    color: #999999;
+
+    text-decoration: none;
+
+    font-size: 12px;
+
+    transition:
+        0.2s ease;
+
+}
+
+
+.jg-footer-column a:hover {
+
+    color: #ff5a1f;
+
+    transform:
+        translateX(3px);
+
+}
+
+
+/* =====================================================
+   BOTTOM
+===================================================== */
+
+.jg-footer-bottom {
+
+    width: 100%;
+
+    border-top:
+        1px solid #2b2b2b;
+
+}
+
+
+.jg-footer-bottom-inner {
+
+    width: min(1200px, 92%);
+
+    min-height: 60px;
+
+    margin: 0 auto;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 20px;
+
+}
+
+
+.jg-footer-bottom p {
+
+    margin: 0;
+
+    color: #777777;
+
+    font-size: 11px;
+
+}
+
+
+.jg-footer-bottom-inner > span {
+
+    color: #777777;
+
+    font-size: 11px;
+
+    text-align: right;
+
+}
+
+
+.jg-heart {
+
+    display: inline-block;
+
+    margin:
+        0 2px;
+
+}
+
+
+/* =====================================================
+   TABLET
+===================================================== */
+
+@media (max-width: 900px) {
+
+    .jg-footer-container {
+
+        grid-template-columns:
+            1.5fr
+            1fr
+            1fr;
+
+        gap: 35px;
+
+    }
+
+
+    .jg-footer-brand {
+
+        grid-column:
+            1 / -1;
+
+    }
+
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 650px) {
+
+    .jg-footer {
+
+        margin-top: 50px;
+
+    }
+
+
+    .jg-footer-container {
+
+        width: 90%;
+
+        padding:
+            42px 0
+            35px;
+
+        grid-template-columns:
+            1fr 1fr;
+
+        gap:
+            32px 25px;
+
+    }
+
+
+    .jg-footer-brand {
+
+        grid-column:
+            1 / -1;
+
+    }
+
+
+    .jg-footer-logo {
+
+        font-size: 21px;
+
+    }
+
+
+    .jg-footer-description {
+
+        font-size: 12px;
+
+    }
+
+
+    .jg-footer-column h3 {
+
+        font-size: 13px;
+
+    }
+
+
+    .jg-footer-column a {
+
+        font-size: 11px;
+
+    }
+
+
+    .jg-footer-bottom-inner {
+
+        min-height: auto;
+
+        padding:
+            16px 0;
+
+        flex-direction: column;
+
+        justify-content: center;
+
+        gap: 7px;
+
+    }
+
+
+    .jg-footer-bottom-inner > span {
+
+        text-align: center;
+
+    }
+
+}
+
+
+/* =====================================================
+   SMALL MOBILE
+===================================================== */
+
+@media (max-width: 380px) {
+
+    .jg-footer-container {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+    .jg-footer-brand {
+
+        grid-column: auto;
+
+    }
+
+}

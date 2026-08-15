@@ -1,0 +1,1220 @@
+/* =====================================================
+   JIGATO NAVBAR
+===================================================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+.jg-navbar{
+
+    width:100%;
+    height:86px;
+
+    position:relative;
+    z-index:9999;
+
+    background:#fff;
+
+    border-bottom:1px solid #eeeeee;
+
+    font-family:
+        "Poppins",
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    box-shadow:
+        0 3px 18px rgba(0,0,0,.035);
+}
+
+
+.jg-navbar-inner{
+
+    width:min(1380px,94%);
+    height:100%;
+
+    margin:auto;
+
+    display:flex;
+    align-items:center;
+
+    gap:24px;
+}
+
+
+/* =====================================================
+   LOGO
+===================================================== */
+
+.jg-logo{
+
+    display:flex;
+    align-items:center;
+
+    gap:10px;
+
+    flex-shrink:0;
+
+    color:#222;
+
+    text-decoration:none;
+}
+
+
+.jg-logo-icon{
+
+    width:48px;
+    height:48px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:#fff1ea;
+
+    border:1px solid #ffe2d6;
+
+    border-radius:14px;
+
+    font-size:24px;
+
+    box-shadow:
+        0 5px 15px rgba(255,91,39,.08);
+
+    transition:.2s ease;
+}
+
+
+.jg-logo:hover .jg-logo-icon{
+
+    transform:
+        rotate(-4deg)
+        scale(1.03);
+
+    background:#ffede5;
+}
+
+
+.jg-logo-text{
+
+    display:flex;
+    flex-direction:column;
+
+    line-height:1;
+}
+
+
+.jg-logo-text strong{
+
+    color:#181818;
+
+    font-size:23px;
+    font-weight:800;
+
+    letter-spacing:-.6px;
+}
+
+
+.jg-logo-text small{
+
+    margin-top:5px;
+
+    color:#999;
+
+    font-size:9px;
+    font-weight:500;
+
+    letter-spacing:.1px;
+}
+
+
+/* =====================================================
+   LOCATION
+===================================================== */
+
+.jg-location{
+
+    min-width:190px;
+    height:56px;
+
+    display:flex;
+    align-items:center;
+
+    gap:10px;
+
+    padding:6px 11px;
+
+    background:#fffaf7;
+
+    border:1px solid #ffe0d4;
+
+    border-radius:14px;
+
+    transition:
+        background .2s ease,
+        border-color .2s ease,
+        transform .2s ease;
+}
+
+
+.jg-location:hover{
+
+    background:#fff7f3;
+
+    border-color:#ffd0c0;
+
+    transform:
+        translateY(-1px);
+}
+
+
+.jg-location-icon{
+
+    width:40px;
+    height:40px;
+
+    flex-shrink:0;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:#ff5b27;
+
+    color:#fff;
+
+    border-radius:11px;
+
+    font-size:15px;
+
+    box-shadow:
+        0 5px 12px rgba(255,91,39,.18);
+}
+
+
+.jg-location-info{
+
+    min-width:0;
+
+    display:flex;
+    flex-direction:column;
+
+    gap:3px;
+}
+
+
+.jg-location-info small{
+
+    color:#999;
+
+    font-size:9px;
+
+    line-height:1.1;
+}
+
+
+.jg-location-info strong{
+
+    max-width:120px;
+
+    color:#292929;
+
+    font-size:12px;
+    font-weight:700;
+
+    white-space:nowrap;
+
+    overflow:hidden;
+
+    text-overflow:ellipsis;
+}
+
+
+/* =====================================================
+   NAVIGATION
+===================================================== */
+
+.jg-nav-links{
+
+    margin-left:auto;
+
+    display:flex;
+    align-items:center;
+
+    gap:4px;
+}
+
+
+.jg-nav-links a{
+
+    height:42px;
+
+    display:flex;
+    align-items:center;
+
+    gap:7px;
+
+    padding:0 13px;
+
+    color:#555;
+
+    border-radius:10px;
+
+    text-decoration:none;
+
+    font-size:13px;
+    font-weight:600;
+
+    transition:
+        color .2s ease,
+        background .2s ease,
+        transform .2s ease;
+}
+
+
+.jg-nav-links a i{
+
+    font-size:13px;
+}
+
+
+.jg-nav-links a:hover{
+
+    color:#ff5b27;
+
+    background:#fff5f0;
+
+    transform:
+        translateY(-1px);
+}
+
+
+.jg-nav-links a.active{
+
+    color:#ff5b27;
+
+    background:#fff3ed;
+
+    font-weight:700;
+}
+
+
+/* =====================================================
+   CART
+===================================================== */
+
+.jg-cart-link{
+
+    position:relative;
+}
+
+
+.jg-cart-link b{
+
+    min-width:18px;
+    height:18px;
+
+    padding:0 4px;
+
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+
+    background:#ff5b27;
+
+    color:#fff;
+
+    border:2px solid #fff;
+
+    border-radius:50%;
+
+    font-size:8px;
+    font-weight:800;
+
+    line-height:1;
+}
+
+
+/* =====================================================
+   AUTH
+===================================================== */
+
+.jg-auth{
+
+    display:flex;
+    align-items:center;
+
+    gap:7px;
+
+    flex-shrink:0;
+}
+
+
+.jg-login{
+
+    min-height:40px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    padding:0 13px;
+
+    color:#333;
+
+    border-radius:10px;
+
+    text-decoration:none;
+
+    font-size:13px;
+    font-weight:600;
+
+    transition:.2s ease;
+}
+
+
+.jg-login:hover{
+
+    color:#ff5b27;
+
+    background:#fff5f0;
+}
+
+
+.jg-register{
+
+    min-width:92px;
+    height:40px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:#ff5b27;
+
+    color:#fff;
+
+    border-radius:11px;
+
+    text-decoration:none;
+
+    font-size:13px;
+    font-weight:700;
+
+    box-shadow:
+        0 6px 16px rgba(255,91,39,.18);
+
+    transition:
+        background .2s ease,
+        transform .2s ease,
+        box-shadow .2s ease;
+}
+
+
+.jg-register:hover{
+
+    background:#eb4e1d;
+
+    transform:
+        translateY(-1px);
+
+    box-shadow:
+        0 8px 20px rgba(255,91,39,.24);
+}
+
+
+/* =====================================================
+   PROFILE
+===================================================== */
+
+.jg-profile{
+
+    height:48px;
+
+    display:flex;
+    align-items:center;
+
+    gap:9px;
+
+    padding:4px 11px 4px 5px;
+
+    color:#222;
+
+    background:#fafafa;
+
+    border:1px solid #eeeeee;
+
+    border-radius:13px;
+
+    text-decoration:none;
+
+    transition:
+        background .2s ease,
+        border-color .2s ease,
+        transform .2s ease;
+}
+
+
+.jg-profile:hover{
+
+    background:#fff6f1;
+
+    border-color:#ffd5c6;
+
+    transform:
+        translateY(-1px);
+}
+
+
+.jg-profile-icon{
+
+    width:38px;
+    height:38px;
+
+    flex-shrink:0;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:#fff0e8;
+
+    color:#ff5b27;
+
+    border-radius:10px;
+
+    font-size:14px;
+}
+
+
+.jg-profile-text{
+
+    min-width:0;
+
+    display:flex;
+    flex-direction:column;
+
+    gap:3px;
+
+    line-height:1;
+}
+
+
+.jg-profile-text small{
+
+    color:#999;
+
+    font-size:8px;
+}
+
+
+.jg-profile-text strong{
+
+    max-width:90px;
+
+    color:#333;
+
+    font-size:12px;
+    font-weight:700;
+
+    white-space:nowrap;
+
+    overflow:hidden;
+
+    text-overflow:ellipsis;
+}
+
+
+/* =====================================================
+   LOGOUT
+===================================================== */
+
+.jg-logout{
+
+    width:40px;
+    height:40px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border:1px solid #ffd5c8;
+
+    border-radius:10px;
+
+    background:#fff7f4;
+
+    color:#ef5426;
+
+    cursor:pointer;
+
+    font-size:14px;
+
+    transition:
+        background .2s ease,
+        border-color .2s ease,
+        color .2s ease,
+        transform .2s ease;
+}
+
+
+.jg-logout:hover{
+
+    background:#ff5b27;
+
+    border-color:#ff5b27;
+
+    color:#fff;
+
+    transform:
+        translateY(-1px);
+}
+
+
+/* =====================================================
+   MOBILE MENU BUTTON
+===================================================== */
+
+.jg-menu-btn{
+
+    display:none;
+
+    width:42px;
+    height:42px;
+
+    align-items:center;
+    justify-content:center;
+
+    margin-left:auto;
+
+    border:1px solid #eeeeee;
+
+    border-radius:11px;
+
+    background:#fff;
+
+    color:#333;
+
+    cursor:pointer;
+
+    font-size:17px;
+
+    transition:.2s ease;
+}
+
+
+.jg-menu-btn:hover{
+
+    color:#ff5b27;
+
+    background:#fff5f0;
+
+    border-color:#ffd7ca;
+}
+
+
+/* =====================================================
+   MOBILE MENU
+===================================================== */
+
+.jg-mobile-menu{
+
+    display:none;
+}
+
+
+/* =====================================================
+   TABLET
+===================================================== */
+
+@media(max-width:1150px){
+
+    .jg-navbar-inner{
+
+        width:94%;
+
+        gap:14px;
+    }
+
+
+    .jg-location{
+
+        min-width:165px;
+    }
+
+
+    .jg-nav-links{
+
+        gap:1px;
+    }
+
+
+    .jg-nav-links a{
+
+        padding:0 9px;
+    }
+
+
+    .jg-nav-links a span{
+
+        font-size:12px;
+    }
+
+
+    .jg-login{
+
+        padding:0 9px;
+    }
+
+
+    .jg-register{
+
+        min-width:82px;
+    }
+
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media(max-width:850px){
+
+    .jg-navbar{
+
+        height:72px;
+    }
+
+
+    .jg-navbar-inner{
+
+        width:92%;
+
+        gap:10px;
+    }
+
+
+    /* HIDE DESKTOP */
+
+    .jg-location,
+    .jg-nav-links,
+    .jg-auth{
+
+        display:none;
+    }
+
+
+    /* LOGO */
+
+    .jg-logo-icon{
+
+        width:42px;
+        height:42px;
+
+        border-radius:12px;
+
+        font-size:21px;
+    }
+
+
+    .jg-logo-text strong{
+
+        font-size:20px;
+    }
+
+
+    .jg-logo-text small{
+
+        font-size:8px;
+    }
+
+
+    /* MENU */
+
+    .jg-menu-btn{
+
+        display:flex;
+    }
+
+
+    /* =================================================
+       MOBILE PANEL
+    ================================================= */
+
+    .jg-mobile-menu{
+
+        display:block;
+
+        position:fixed;
+
+        top:0;
+        right:-100%;
+
+        width:min(360px,90vw);
+        height:100vh;
+
+        padding:20px;
+
+        background:#fff;
+
+        box-shadow:
+            -15px 0 45px
+            rgba(0,0,0,.12);
+
+        overflow-y:auto;
+
+        transition:
+            right .3s ease;
+
+        z-index:10000;
+    }
+
+
+    .jg-mobile-menu.show{
+
+        right:0;
+    }
+
+
+    /* =================================================
+       MOBILE TOP
+    ================================================= */
+
+    .jg-mobile-top{
+
+        display:flex;
+
+        align-items:center;
+
+        justify-content:space-between;
+
+        padding-bottom:18px;
+
+        border-bottom:1px solid #eee;
+    }
+
+
+    .jg-mobile-top button{
+
+        width:40px;
+        height:40px;
+
+        display:flex;
+        align-items:center;
+        justify-content:center;
+
+        border:0;
+
+        border-radius:10px;
+
+        background:#fff1ea;
+
+        color:#ff5b27;
+
+        cursor:pointer;
+
+        font-size:17px;
+
+        transition:.2s ease;
+    }
+
+
+    .jg-mobile-top button:hover{
+
+        background:#ffdfd3;
+
+        transform:
+            rotate(3deg);
+    }
+
+
+    /* =================================================
+       MOBILE LOCATION
+    ================================================= */
+
+    .jg-mobile-location{
+
+        margin-top:18px;
+
+        display:flex;
+        align-items:center;
+
+        gap:11px;
+
+        padding:12px;
+
+        background:#fffaf7;
+
+        border:1px solid #ffe0d4;
+
+        border-radius:13px;
+    }
+
+
+    .jg-mobile-location .jg-location-icon{
+
+        width:38px;
+        height:38px;
+
+        border-radius:10px;
+
+        font-size:14px;
+    }
+
+
+    .jg-mobile-location > div:last-child{
+
+        min-width:0;
+
+        display:flex;
+        flex-direction:column;
+
+        gap:3px;
+    }
+
+
+    .jg-mobile-location small{
+
+        color:#999;
+
+        font-size:9px;
+    }
+
+
+    .jg-mobile-location strong{
+
+        max-width:230px;
+
+        color:#333;
+
+        font-size:13px;
+
+        white-space:nowrap;
+
+        overflow:hidden;
+
+        text-overflow:ellipsis;
+    }
+
+
+    /* =================================================
+       MOBILE PROFILE
+    ================================================= */
+
+    .jg-mobile-profile{
+
+        margin-top:12px;
+
+        display:flex;
+        align-items:center;
+
+        gap:11px;
+
+        padding:12px;
+
+        background:#fafafa;
+
+        border:1px solid #eee;
+
+        border-radius:13px;
+
+        color:#222;
+
+        text-decoration:none;
+
+        transition:.2s ease;
+    }
+
+
+    .jg-mobile-profile:hover{
+
+        background:#fff6f1;
+
+        border-color:#ffd5c6;
+    }
+
+
+    .jg-mobile-profile .jg-profile-icon{
+
+        width:38px;
+        height:38px;
+    }
+
+
+    .jg-mobile-profile > div{
+
+        min-width:0;
+
+        display:flex;
+        flex-direction:column;
+
+        gap:3px;
+    }
+
+
+    .jg-mobile-profile small{
+
+        color:#999;
+
+        font-size:9px;
+    }
+
+
+    .jg-mobile-profile strong{
+
+        max-width:220px;
+
+        color:#333;
+
+        font-size:13px;
+
+        white-space:nowrap;
+
+        overflow:hidden;
+
+        text-overflow:ellipsis;
+    }
+
+
+    /* =================================================
+       MOBILE LINKS
+    ================================================= */
+
+    .jg-mobile-links{
+
+        margin-top:18px;
+
+        display:flex;
+
+        flex-direction:column;
+
+        gap:4px;
+    }
+
+
+    .jg-mobile-links a{
+
+        min-height:48px;
+
+        display:flex;
+        align-items:center;
+
+        gap:12px;
+
+        padding:0 13px;
+
+        color:#333;
+
+        border-radius:11px;
+
+        text-decoration:none;
+
+        font-size:13px;
+        font-weight:600;
+
+        transition:.2s ease;
+    }
+
+
+    .jg-mobile-links a:hover{
+
+        background:#fff3ed;
+
+        color:#ff5b27;
+
+        padding-left:16px;
+    }
+
+
+    .jg-mobile-links a i{
+
+        width:20px;
+
+        color:currentColor;
+
+        text-align:center;
+    }
+
+
+    .jg-mobile-links a b{
+
+        min-width:20px;
+        height:20px;
+
+        margin-left:auto;
+
+        display:flex;
+        align-items:center;
+        justify-content:center;
+
+        background:#ff5b27;
+
+        color:#fff;
+
+        border-radius:50%;
+
+        font-size:9px;
+    }
+
+
+    /* =================================================
+       MOBILE AUTH
+    ================================================= */
+
+    .jg-mobile-auth{
+
+        margin-top:18px;
+
+        padding-top:15px;
+
+        display:flex;
+
+        flex-direction:column;
+
+        gap:7px;
+
+        border-top:1px solid #eee;
+    }
+
+
+    .jg-mobile-auth a,
+    .jg-mobile-auth button{
+
+        width:100%;
+        min-height:45px;
+
+        display:flex;
+        align-items:center;
+        justify-content:center;
+
+        gap:9px;
+
+        border-radius:11px;
+
+        font-family:inherit;
+
+        font-size:13px;
+        font-weight:600;
+
+        cursor:pointer;
+    }
+
+
+    .jg-mobile-auth a{
+
+        color:#333;
+
+        background:#fff;
+
+        border:1px solid #eee;
+
+        text-decoration:none;
+
+        transition:.2s ease;
+    }
+
+
+    .jg-mobile-auth a:hover{
+
+        color:#ff5b27;
+
+        background:#fff5f0;
+
+        border-color:#ffd5c6;
+    }
+
+
+    .jg-mobile-auth button{
+
+        border:0;
+
+        background:#ff5b27;
+
+        color:#fff;
+
+        transition:.2s ease;
+    }
+
+
+    .jg-mobile-auth button:hover{
+
+        background:#e94b14;
+
+        transform:
+            translateY(-1px);
+    }
+
+}
+
+
+/* =====================================================
+   SMALL MOBILE
+===================================================== */
+
+@media(max-width:450px){
+
+    .jg-navbar{
+
+        height:68px;
+    }
+
+
+    .jg-navbar-inner{
+
+        width:92%;
+    }
+
+
+    .jg-logo-icon{
+
+        width:40px;
+        height:40px;
+
+        font-size:20px;
+    }
+
+
+    .jg-logo-text strong{
+
+        font-size:18px;
+    }
+
+
+    .jg-logo-text small{
+
+        display:none;
+    }
+
+
+    .jg-mobile-menu{
+
+        width:92vw;
+    }
+
+}
+
+
+/* =====================================================
+   EXTRA SMALL
+===================================================== */
+
+@media(max-width:360px){
+
+    .jg-logo-text strong{
+
+        font-size:17px;
+    }
+
+
+    .jg-mobile-menu{
+
+        width:94vw;
+
+        padding:17px;
+    }
+
+}

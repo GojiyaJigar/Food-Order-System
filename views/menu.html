@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Restaurant Menu | Jigato</title>
+
+
+    <!-- =====================================================
+         NAVBAR CSS
+    ====================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="/header/navbar.css"
+    >
+    <link
+    rel="stylesheet"
+    href="/footer/footer.css"
+>
+
+
+    <!-- =====================================================
+         MENU CSS
+    ====================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="/css/menu.css"
+    >
+
+
+    <!-- =====================================================
+         FONT AWESOME
+    ====================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    >
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     NAVBAR
+===================================================== -->
+
+<div id="navbar"></div>
+
+
+
+<!-- =====================================================
+     RESTAURANT HERO
+===================================================== -->
+
+<section class="restaurant-hero">
+
+
+    <!-- RESTAURANT IMAGE -->
+
+    <div class="restaurant-image">
+
+        <img
+            id="restaurantImage"
+            src="/images/restaurants/mc.jpg"
+            alt="Restaurant"
+        >
+
+    </div>
+
+
+
+    <!-- RESTAURANT INFORMATION -->
+
+    <div class="restaurant-info">
+
+
+        <span class="restaurant-label">
+            RESTAURANT
+        </span>
+
+
+        <h1 id="restaurantName">
+            Loading restaurant...
+        </h1>
+
+
+        <p id="restaurantCategory">
+            🍽️ Loading...
+        </p>
+
+
+
+        <div class="restaurant-details">
+
+
+            <span id="restaurantRating">
+                ⭐ -
+            </span>
+
+
+            <span id="restaurantTime">
+                🚚 -
+            </span>
+
+
+            <span id="restaurantCity">
+                📍 Loading...
+            </span>
+
+
+        </div>
+
+
+    </div>
+
+
+</section>
+
+
+
+<!-- =====================================================
+     FOOD SEARCH
+===================================================== -->
+
+<section class="search-section">
+
+
+    <div class="search-box">
+
+
+        <i class="fa-solid fa-magnifying-glass"></i>
+
+
+        <input
+            type="text"
+            id="searchFood"
+            placeholder="Search your favourite food..."
+            autocomplete="off"
+        >
+
+
+    </div>
+
+
+</section>
+
+
+
+<!-- =====================================================
+     FOOD CATEGORIES
+===================================================== -->
+
+<section class="category-section">
+
+
+    <button
+        class="category-btn active"
+        data-category="All"
+        type="button"
+    >
+        All
+    </button>
+
+
+    <button
+        class="category-btn"
+        data-category="Burger"
+        type="button"
+    >
+        🍔 Burger
+    </button>
+
+
+    <button
+        class="category-btn"
+        data-category="Pizza"
+        type="button"
+    >
+        🍕 Pizza
+    </button>
+
+
+    <button
+        class="category-btn"
+        data-category="Snacks"
+        type="button"
+    >
+        🍟 Snacks
+    </button>
+
+
+    <button
+        class="category-btn"
+        data-category="Drinks"
+        type="button"
+    >
+        🥤 Drinks
+    </button>
+
+
+</section>
+
+
+
+<!-- =====================================================
+     FOOD SECTION
+===================================================== -->
+
+<section class="food-section">
+
+
+    <!-- FOOD HEADING -->
+
+    <div class="food-heading">
+
+
+        <div>
+
+
+            <span class="section-label">
+                MENU
+            </span>
+
+
+            <h2>
+                Popular Dishes 🍽️
+            </h2>
+
+
+            <p>
+                Delicious food from this restaurant.
+            </p>
+
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- =================================================
+         FOOD CONTAINER
+    ================================================== -->
+
+    <div
+        class="food-container"
+        id="foodContainer"
+    >
+
+
+        <div class="food-loading">
+            Loading delicious food...
+        </div>
+
+
+    </div>
+
+
+
+    <!-- =================================================
+         EMPTY FOOD
+    ================================================== -->
+
+    <div
+        class="empty-food"
+        id="emptyFood"
+        style="display:none;"
+    >
+
+
+        <div class="empty-food-icon">
+            🍽️
+        </div>
+
+
+        <h3>
+            No food found
+        </h3>
+
+
+        <p>
+            Try another food or category.
+        </p>
+
+
+    </div>
+
+
+</section>
+<div id="footer"></div>
+
+
+
+<!-- =====================================================
+     SWEET ALERT
+===================================================== -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/sweetalert2@11">
+</script>
+
+
+
+<!-- =====================================================
+     NAVBAR JS
+===================================================== -->
+
+<script src="/header/navbar.js"></script>
+
+
+
+<!-- =====================================================
+     MENU JS
+===================================================== -->
+
+<script src="/js/menu.js"></script>
+<script src="/footer/footer.js"></script>
+
+
+</body>
+
+</html>

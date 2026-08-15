@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Jigato | Login</title>
+
+
+    <link
+        rel="stylesheet"
+        href="/css/login.css"
+    >
+
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
+</head>
+
+
+<body>
+
+
+    <!-- ==================================================
+         BACKGROUND
+    ================================================== -->
+
+    <div class="background-blur"></div>
+
+
+
+    <!-- ==================================================
+         NAVBAR
+    ================================================== -->
+
+    <header class="login-header">
+
+        <nav class="login-navbar">
+
+
+            <!-- LEFT -->
+
+            <div class="nav-left">
+
+
+                <!-- BACK BUTTON -->
+
+                <button
+                    type="button"
+                    class="back-button"
+                    id="backButton"
+                    aria-label="Go back"
+                >
+
+                    <i class="fa-solid fa-arrow-left"></i>
+
+                </button>
+
+
+
+                <!-- LOGO -->
+
+                <a
+                    href="/"
+                    class="login-logo"
+                >
+
+                    <span class="logo-icon">
+                        🍔
+                    </span>
+
+                    <span class="logo-text">
+                        Jigato
+                    </span>
+
+                </a>
+
+
+            </div>
+
+
+
+            <!-- RIGHT -->
+
+            <div class="nav-right">
+
+                <span>
+                    New to Jigato?
+                </span>
+
+
+                <a href="/register">
+
+                    Create Account
+
+                </a>
+
+            </div>
+
+
+        </nav>
+
+    </header>
+
+
+
+    <!-- ==================================================
+         MAIN
+    ================================================== -->
+
+    <main class="login-page">
+
+
+        <!-- ==================================================
+             LEFT PANEL
+        ================================================== -->
+
+        <section class="left-panel">
+
+
+            <div class="brand-label">
+
+                <span class="brand-dot"></span>
+
+                FOOD DELIVERY MADE SMART
+
+            </div>
+
+
+
+            <h1>
+
+                Good food.
+
+                <br>
+
+                <span>
+                    Good mood.
+                </span>
+
+            </h1>
+
+
+
+            <p class="hero-text">
+
+                Your favourite meals from the best
+                restaurants are just a few clicks away.
+
+                <br><br>
+
+                Login and let Jigato bring happiness
+                straight to your doorstep.
+
+            </p>
+
+
+
+            <!-- FEATURES -->
+
+            <div class="feature-list">
+
+
+                <div class="feature-item">
+
+                    <div class="feature-icon">
+
+                        <i
+                            class="fa-solid fa-burger"
+                        ></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <strong>
+                            Fresh & Delicious
+                        </strong>
+
+                        <p>
+                            Quality food from trusted
+                            restaurants.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="feature-item">
+
+                    <div class="feature-icon">
+
+                        <i
+                            class="fa-solid fa-bolt"
+                        ></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <strong>
+                            Lightning Fast
+                        </strong>
+
+                        <p>
+                            Fast delivery right to
+                            your doorstep.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="feature-item">
+
+                    <div class="feature-icon">
+
+                        <i
+                            class="fa-solid fa-heart"
+                        ></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <strong>
+                            Made For Food Lovers
+                        </strong>
+
+                        <p>
+                            Discover meals you'll love.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- ==================================================
+             RIGHT PANEL
+        ================================================== -->
+
+        <section class="right-panel">
+
+
+            <div class="form-card">
+
+
+                <!-- FORM HEADER -->
+
+                <div class="form-header">
+
+
+                    <div class="login-icon">
+
+                        <i
+                            class="fa-solid fa-user"
+                        ></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <span class="small-title">
+                            WELCOME BACK
+                        </span>
+
+
+                        <h2>
+                            Login to Jigato
+                        </h2>
+
+                    </div>
+
+
+                </div>
+
+
+
+                <p class="form-description">
+
+                    Enter your details to continue
+                    your food journey.
+
+                </p>
+
+
+
+                <!-- ==================================================
+                     MESSAGE
+                ================================================== -->
+
+                <div
+                    id="loginMessage"
+                    class="login-message"
+                ></div>
+
+
+
+                <!-- ==================================================
+                     LOGIN FORM
+                ================================================== -->
+
+                <form id="loginForm">
+
+
+                    <!-- EMAIL -->
+
+                    <div class="input-box">
+
+                        <label for="email">
+                            Email Address
+                        </label>
+
+
+                        <div class="input-field">
+
+
+                            <span class="field-icon">
+
+                                <i
+                                    class="fa-solid fa-envelope"
+                                ></i>
+
+                            </span>
+
+
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                placeholder="you@example.com"
+                                autocomplete="email"
+                                required
+                            >
+
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- PASSWORD -->
+
+                    <div class="input-box">
+
+
+                        <div class="label-row">
+
+                            <label for="password">
+
+                                Password
+
+                            </label>
+
+
+                            <a
+                                href="/forgot-password"
+                            >
+
+                                Forgot password?
+
+                            </a>
+
+                        </div>
+
+
+
+                        <div class="input-field">
+
+
+                            <span class="field-icon">
+
+                                <i
+                                    class="fa-solid fa-lock"
+                                ></i>
+
+                            </span>
+
+
+
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                placeholder="Enter your password"
+                                autocomplete="current-password"
+                                required
+                            >
+
+
+
+                            <button
+                                type="button"
+                                class="password-toggle"
+                                id="togglePassword"
+                                aria-label="Show password"
+                            >
+
+                                <i
+                                    class="fa-solid fa-eye"
+                                ></i>
+
+                            </button>
+
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- REMEMBER -->
+
+                    <div class="remember-row">
+
+                        <label>
+
+                            <input
+                                type="checkbox"
+                                id="rememberMe"
+                            >
+
+                            <span>
+                                Remember me
+                            </span>
+
+                        </label>
+
+                    </div>
+
+
+
+                    <!-- LOGIN BUTTON -->
+
+                    <button
+                        type="submit"
+                        class="login-btn"
+                        id="loginSubmit"
+                    >
+
+                        <span>
+                            Login
+                        </span>
+
+
+                        <i
+                            class="fa-solid fa-arrow-right"
+                        ></i>
+
+                    </button>
+
+
+                </form>
+
+
+
+                <!-- ==================================================
+                     DIVIDER
+                ================================================== -->
+
+                <div class="divider">
+
+                    <span></span>
+
+                    <b>
+                        OR
+                    </b>
+
+                    <span></span>
+
+                </div>
+
+
+
+                <!-- ==================================================
+                     GOOGLE
+                ================================================== -->
+
+                <button
+                    type="button"
+                    class="google-btn"
+                    id="googleLogin"
+                >
+
+                    <span class="google-icon">
+                        G
+                    </span>
+
+
+                    <span>
+                        Continue with Google
+                    </span>
+
+                </button>
+
+
+
+                <!-- ==================================================
+                     REGISTER
+                ================================================== -->
+
+                <div class="register-link">
+
+                    <span>
+                        Don't have an account?
+                    </span>
+
+
+                    <a href="/register">
+                        Create one
+                    </a>
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+
+    <!-- ==================================================
+         JS
+    ================================================== -->
+
+    <script src="/js/login.js"></script>
+
+</body>
+
+</html>

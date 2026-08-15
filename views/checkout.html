@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Checkout | Jigato</title>
+
+    <link rel="stylesheet" href="/header/navbar.css">
+    <link rel="stylesheet" href="/css/checkout.css">
+    <link
+    rel="stylesheet"
+    href="/footer/footer.css"
+>
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+
+<div id="navbar"></div>
+
+<main class="checkout-section">
+
+    <div class="checkout-heading">
+        <span>CHECKOUT</span>
+        <h1>Complete Your Order 🛍️</h1>
+        <p>Review your order and select your delivery address.</p>
+    </div>
+
+    <div class="checkout-container">
+
+        <!-- LEFT -->
+        <div class="checkout-left">
+
+            <!-- ADDRESS -->
+            <div class="checkout-card">
+
+                <div class="card-title">
+                    <i class="fa-solid fa-location-dot"></i>
+
+                    <div>
+                        <h2>Delivery Address</h2>
+                        <p>Select where you want your order delivered.</p>
+                    </div>
+                </div>
+
+                <div id="addressList">
+                    <div class="loading">
+                        Loading saved addresses...
+                    </div>
+                </div>
+
+                <a href="/profile" class="add-address">
+                    <i class="fa-solid fa-plus"></i>
+                    Add New Address
+                </a>
+
+            </div>
+
+
+            <!-- ORDER ITEMS -->
+            <div class="checkout-card">
+
+                <div class="card-title">
+                    <i class="fa-solid fa-bag-shopping"></i>
+
+                    <div>
+                        <h2>Your Order</h2>
+                        <p>Items added to your cart.</p>
+                    </div>
+                </div>
+
+                <div id="checkoutItems"></div>
+
+            </div>
+
+
+            <!-- PAYMENT -->
+            <div class="checkout-card">
+
+                <div class="card-title">
+                    <i class="fa-solid fa-credit-card"></i>
+
+                    <div>
+                        <h2>Payment Method</h2>
+                        <p>Choose your preferred payment method.</p>
+                    </div>
+                </div>
+
+                <div class="payment-methods">
+
+                    <label class="payment-option active">
+                        <input type="radio"
+                               name="payment"
+                               value="COD"
+                               checked>
+
+                        <i class="fa-solid fa-money-bill-wave"></i>
+
+                        <div>
+                            <strong>Cash On Delivery</strong>
+                            <small>Pay when your order arrives.</small>
+                        </div>
+                    </label>
+
+                    <label class="payment-option">
+                        <input type="radio"
+                               name="payment"
+                               value="UPI">
+
+                        <i class="fa-brands fa-google-pay"></i>
+
+                        <div>
+                            <strong>UPI Payment</strong>
+                            <small>Google Pay / PhonePe / Paytm.</small>
+                        </div>
+                    </label>
+
+                    <label class="payment-option">
+                        <input type="radio"
+                               name="payment"
+                               value="CARD">
+
+                        <i class="fa-regular fa-credit-card"></i>
+
+                        <div>
+                            <strong>Debit / Credit Card</strong>
+                            <small>Visa / MasterCard / RuPay.</small>
+                        </div>
+                    </label>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- RIGHT -->
+        <aside class="checkout-right">
+
+            <div class="summary-card">
+
+                <h2>Order Summary</h2>
+
+
+                <!-- =================================================
+                     COUPON / OFFERS
+                ================================================= -->
+
+                <div class="checkout-coupon">
+
+                    <div class="coupon-heading">
+
+                        <div class="coupon-icon">
+                            <i class="fa-solid fa-ticket"></i>
+                        </div>
+
+                        <div>
+                            <strong>Have a Coupon?</strong>
+
+                            <small>
+                                Apply an offer and save on your order.
+                            </small>
+                        </div>
+
+                    </div>
+
+
+                    <div class="coupon-input-row">
+
+                        <input
+                            type="text"
+                            id="couponCode"
+                            placeholder="Enter coupon code"
+                            autocomplete="off"
+                            maxlength="50"
+                        >
+
+                        <button
+                            type="button"
+                            id="applyCouponBtn"
+                        >
+                            Apply
+                        </button>
+
+                    </div>
+
+
+                    <!-- Coupon status -->
+
+                    <div
+                        id="couponMessage"
+                        class="coupon-message"
+                    ></div>
+
+
+                    <!-- Applied coupon -->
+
+                    <div
+                        id="appliedCoupon"
+                        class="applied-coupon"
+                        style="display:none;"
+                    >
+
+                        <div>
+
+                            <i class="fa-solid fa-circle-check"></i>
+
+                            <span>
+                                Coupon Applied
+                            </span>
+
+                        </div>
+
+                        <button
+                            type="button"
+                            id="removeCouponBtn"
+                        >
+                            Remove
+                        </button>
+
+                    </div>
+
+
+                    <!-- Offers page link -->
+
+                    <a
+                        href="/offers"
+                        class="view-offers"
+                    >
+
+                        <i class="fa-solid fa-tag"></i>
+
+                        View Available Offers
+
+                        <i class="fa-solid fa-arrow-right"></i>
+
+                    </a>
+
+                </div>
+
+
+                <!-- =================================================
+                     SUMMARY
+                ================================================= -->
+
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <strong id="subtotal">₹0.00</strong>
+                </div>
+
+
+                <div class="summary-row">
+                    <span>Delivery Fee</span>
+                    <strong id="delivery">₹40.00</strong>
+                </div>
+
+
+                <div class="summary-row">
+                    <span>GST (5%)</span>
+                    <strong id="gst">₹0.00</strong>
+                </div>
+
+
+                <div class="summary-row discount">
+                    <span>Discount</span>
+                    <strong id="discount">- ₹0.00</strong>
+                </div>
+
+
+                <hr>
+
+
+                <div class="summary-row total">
+                    <span>Total</span>
+                    <strong id="grandTotal">₹0.00</strong>
+                </div>
+
+
+                <div class="delivery-box">
+
+                    <i class="fa-solid fa-motorcycle"></i>
+
+                    <div>
+                        <strong>Estimated Delivery</strong>
+                        <small>25 - 30 Minutes</small>
+                    </div>
+
+                </div>
+
+
+                <div class="secure">
+
+                    <i class="fa-solid fa-shield-halved"></i>
+
+                    Safe & Secure Checkout
+
+                </div>
+
+
+                <button id="placeOrderBtn">
+
+                    <i class="fa-solid fa-circle-check"></i>
+
+                    Place Order
+
+                </button>
+
+            </div>
+
+        </aside>
+
+    </div>
+
+</main>
+<div id="footer"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script src="/header/navbar.js"></script>
+
+<script src="/js/checkout.js"></script>
+<script src="/footer/footer.js"></script>
+
+</body>
+</html>

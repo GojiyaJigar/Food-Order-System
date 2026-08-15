@@ -1,0 +1,496 @@
+<nav class="jg-navbar">
+
+    <div class="jg-navbar-inner">
+
+
+        <!-- =================================================
+             LOGO
+        ================================================== -->
+
+        <a href="/" class="jg-logo">
+
+            <span class="jg-logo-icon">
+                🍔
+            </span>
+
+            <span class="jg-logo-text">
+
+                <strong>
+                    Jigato
+                </strong>
+
+                <small>
+                    Food Delivery
+                </small>
+
+            </span>
+
+        </a>
+
+
+
+        <!-- =================================================
+             LOCATION
+        ================================================== -->
+
+        <div class="jg-location">
+
+            <div class="jg-location-icon">
+
+                <i class="fa-solid fa-location-dot"></i>
+
+            </div>
+
+
+            <div class="jg-location-info">
+
+                <small>
+                    Delivering to
+                </small>
+
+                <strong id="headerCity">
+                    Your City
+                </strong>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             NAVIGATION
+        ================================================== -->
+
+        <nav class="jg-nav-links">
+
+            <a
+                href="/"
+                class="active"
+            >
+
+                <i class="fa-solid fa-house"></i>
+
+                <span>
+                    Home
+                </span>
+
+            </a>
+
+
+            <a href="/restaurant">
+
+                <i class="fa-solid fa-utensils"></i>
+
+                <span>
+                    Restaurants
+                </span>
+
+            </a>
+
+
+            <a href="/offers">
+
+                <i class="fa-solid fa-tag"></i>
+
+                <span>
+                    Offers
+                </span>
+
+            </a>
+
+
+            <a
+                href="/cart-page"
+                class="jg-cart-link"
+            >
+
+                <i class="fa-solid fa-cart-shopping"></i>
+
+                <span>
+                    Cart
+                </span>
+
+                <b id="headerCartCount">
+                    0
+                </b>
+
+            </a>
+
+        </nav>
+
+
+
+        <!-- =================================================
+             DESKTOP AUTH
+        ================================================== -->
+
+        <div class="jg-auth">
+
+
+            <!-- LOGIN -->
+
+            <a
+                href="/login"
+                id="headerLogin"
+                class="jg-login"
+            >
+                Login
+            </a>
+
+
+
+            <!-- REGISTER -->
+
+            <a
+                href="/register"
+                id="headerRegister"
+                class="jg-register"
+            >
+                Register
+            </a>
+
+
+
+            <!-- PROFILE -->
+
+            <a
+                href="/profile"
+                id="headerProfile"
+                class="jg-profile"
+                style="display:none;"
+            >
+
+                <span class="jg-profile-icon">
+
+                    <i class="fa-solid fa-user"></i>
+
+                </span>
+
+
+                <span class="jg-profile-text">
+
+                    <small>
+                        Hello
+                    </small>
+
+                    <strong id="headerUserName">
+                        Profile
+                    </strong>
+
+                </span>
+
+            </a>
+
+
+
+            <!-- LOGOUT -->
+
+            <button
+                type="button"
+                id="headerLogout"
+                class="jg-logout"
+                style="display:none;"
+                aria-label="Logout"
+                title="Logout"
+            >
+
+                <i
+                    class="fa-solid fa-right-from-bracket"
+                ></i>
+
+            </button>
+
+
+        </div>
+
+
+
+        <!-- =================================================
+             MOBILE MENU BUTTON
+        ================================================== -->
+
+        <button
+            type="button"
+            id="headerMenuBtn"
+            class="jg-menu-btn"
+            aria-label="Open menu"
+        >
+
+            <i class="fa-solid fa-bars"></i>
+
+        </button>
+
+
+    </div>
+
+
+
+    <!-- =====================================================
+         MOBILE MENU
+    ====================================================== -->
+
+    <div
+        id="headerMobileMenu"
+        class="jg-mobile-menu"
+    >
+
+
+        <!-- MOBILE HEADER -->
+
+        <div class="jg-mobile-top">
+
+
+            <a
+                href="/"
+                class="jg-logo"
+            >
+
+                <span class="jg-logo-icon">
+                    🍔
+                </span>
+
+
+                <span class="jg-logo-text">
+
+                    <strong>
+                        Jigato
+                    </strong>
+
+                    <small>
+                        Food Delivery
+                    </small>
+
+                </span>
+
+            </a>
+
+
+            <button
+                type="button"
+                id="headerCloseMenu"
+                aria-label="Close menu"
+            >
+
+                <i
+                    class="fa-solid fa-xmark"
+                ></i>
+
+            </button>
+
+
+        </div>
+
+
+
+        <!-- =================================================
+             MOBILE LOCATION
+        ================================================== -->
+
+        <div class="jg-mobile-location">
+
+
+            <div class="jg-location-icon">
+
+                <i
+                    class="fa-solid fa-location-dot"
+                ></i>
+
+            </div>
+
+
+            <div>
+
+                <small>
+                    Delivering to
+                </small>
+
+                <strong id="mobileHeaderCity">
+                    Your City
+                </strong>
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- =================================================
+             MOBILE PROFILE
+        ================================================== -->
+
+        <a
+            href="/profile"
+            id="mobileHeaderProfile"
+            class="jg-mobile-profile"
+            style="display:none;"
+        >
+
+
+            <span class="jg-profile-icon">
+
+                <i
+                    class="fa-solid fa-user"
+                ></i>
+
+            </span>
+
+
+            <div>
+
+                <small>
+                    Welcome
+                </small>
+
+                <strong id="mobileHeaderName">
+                    Profile
+                </strong>
+
+            </div>
+
+
+        </a>
+
+
+
+        <!-- =================================================
+             MOBILE LINKS
+        ================================================== -->
+
+        <div class="jg-mobile-links">
+
+
+            <a href="/">
+
+                <i
+                    class="fa-solid fa-house"
+                ></i>
+
+                <span>
+                    Home
+                </span>
+
+            </a>
+
+
+            <a href="/restaurant">
+
+                <i
+                    class="fa-solid fa-utensils"
+                ></i>
+
+                <span>
+                    Restaurants
+                </span>
+
+            </a>
+
+
+            <a href="/offers">
+
+                <i
+                    class="fa-solid fa-tag"
+                ></i>
+
+                <span>
+                    Offers
+                </span>
+
+            </a>
+
+
+            <a
+                href="/cart-page"
+                class="jg-mobile-cart"
+            >
+
+                <i
+                    class="fa-solid fa-cart-shopping"
+                ></i>
+
+                <span>
+                    Cart
+                </span>
+
+                <b id="mobileCartCount">
+                    0
+                </b>
+
+            </a>
+
+
+        </div>
+
+
+
+        <!-- =================================================
+             MOBILE AUTH
+        ================================================== -->
+
+        <div class="jg-mobile-auth">
+
+
+            <!-- LOGIN -->
+
+            <a
+                href="/login"
+                id="mobileHeaderLogin"
+            >
+
+                <i
+                    class="fa-solid fa-right-to-bracket"
+                ></i>
+
+                <span>
+                    Login
+                </span>
+
+            </a>
+
+
+
+            <!-- REGISTER -->
+
+            <a
+                href="/register"
+                id="mobileHeaderRegister"
+            >
+
+                <i
+                    class="fa-solid fa-user-plus"
+                ></i>
+
+                <span>
+                    Register
+                </span>
+
+            </a>
+
+
+
+            <!-- LOGOUT -->
+
+            <button
+                type="button"
+                id="mobileHeaderLogout"
+                style="display:none;"
+            >
+
+                <i
+                    class="fa-solid fa-right-from-bracket"
+                ></i>
+
+                <span>
+                    Logout
+                </span>
+
+            </button>
+
+
+        </div>
+
+
+    </div>
+
+</nav>

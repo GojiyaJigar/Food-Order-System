@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Jigato | Restaurants</title>
+
+
+    <link rel="stylesheet" href="/css/restaurant.css">
+ <link
+        rel="stylesheet"
+        href="/header/navbar.css"
+    >
+    <link
+    rel="stylesheet"
+    href="/footer/footer.css"
+>
+
+    <!-- ICONS -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    >
+
+</head>
+
+
+<body>
+
+
+    <!-- ================= COMMON HEADER ================= -->
+
+  <div id="navbar"></div>
+
+
+    <!-- ================= HERO ================= -->
+
+    <section class="restaurant-hero">
+
+        <div class="hero-content">
+
+            <span class="hero-label">
+                🍽️ DISCOVER GREAT FOOD
+            </span>
+
+            <h1>
+                Find food you'll
+                <span>love.</span>
+            </h1>
+
+            <p>
+                Explore the best restaurants around you,
+                discover delicious dishes and order your
+                favourites from Jigato.
+            </p>
+
+
+            <!-- SEARCH -->
+
+            <div class="main-search">
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                <input
+                    type="text"
+                    id="searchRestaurant"
+                    placeholder="Search restaurant, cuisine or food..."
+                    autocomplete="off"
+                >
+
+                <button
+                    type="button"
+                    id="searchBtn"
+                >
+                    Search
+                </button>
+
+            </div>
+
+
+            <!-- FILTERS -->
+
+            <div class="quick-filters">
+
+                <button
+                    type="button"
+                    class="quick-filter active"
+                    data-filter="all"
+                >
+                    All
+                </button>
+
+                <button
+                    type="button"
+                    class="quick-filter"
+                    data-filter="pizza"
+                >
+                    🍕 Pizza
+                </button>
+
+                <button
+                    type="button"
+                    class="quick-filter"
+                    data-filter="burger"
+                >
+                    🍔 Burger
+                </button>
+
+                <button
+                    type="button"
+                    class="quick-filter"
+                    data-filter="biryani"
+                >
+                    🍛 Biryani
+                </button>
+
+                <button
+                    type="button"
+                    class="quick-filter"
+                    data-filter="chinese"
+                >
+                    🍜 Chinese
+                </button>
+
+                <button
+                    type="button"
+                    class="quick-filter"
+                    data-filter="cafe"
+                >
+                    ☕ Cafe
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- HERO VISUAL -->
+
+        <div class="hero-visual">
+
+            <div class="hero-orbit"></div>
+
+            <div class="hero-food">
+                🍕
+                🍔
+                🍜
+            </div>
+
+            <div class="floating-rating">
+
+                <strong>
+                    ⭐ 4.9
+                </strong>
+
+                <small>
+                    Top rated
+                </small>
+
+            </div>
+
+            <div class="floating-delivery">
+
+                <strong>
+                    🚴 25 min
+                </strong>
+
+                <small>
+                    Fast delivery
+                </small>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= RESTAURANTS ================= -->
+
+    <main class="restaurant-main">
+
+
+        <div class="restaurant-topbar">
+
+            <div>
+
+                <span class="section-label">
+                    RESTAURANTS
+                </span>
+
+                <h2>
+                    Popular near you
+                </h2>
+
+                <p id="resultText">
+                    Discover restaurants available on Jigato.
+                </p>
+
+            </div>
+
+
+            <!-- SORT -->
+
+            <div class="sort-box">
+
+                <label for="sortRestaurant">
+                    Sort by
+                </label>
+
+                <select id="sortRestaurant">
+
+                    <option value="popular">
+                        Most Popular
+                    </option>
+
+                    <option value="rating">
+                        Highest Rated
+                    </option>
+
+                    <option value="delivery">
+                        Fastest Delivery
+                    </option>
+
+                    <option value="name">
+                        Name A-Z
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+
+        <!-- RESTAURANT CARDS -->
+
+        <div
+            class="restaurant-container"
+            id="restaurantContainer"
+        ></div>
+
+
+        <!-- EMPTY -->
+
+        <div
+            class="empty-state"
+            id="emptyState"
+            style="display:none;"
+        >
+
+            <div class="empty-icon">
+                🍽️
+            </div>
+
+            <h3>
+                No restaurants found
+            </h3>
+
+            <p>
+                Try another restaurant, cuisine or food name.
+            </p>
+
+            <button
+                type="button"
+                id="clearSearch"
+            >
+                Clear Search
+            </button>
+
+        </div>
+
+    </main>
+
+
+    <!-- ================= FOOTER ================= -->
+
+    <div id="footer"></div>
+
+
+    <!-- ================= JS ================= -->
+
+    <script src="/header/navbar.js"></script>
+
+    <script src="/js/restaurant.js"></script>
+    <script src="/footer/footer.js"></script>
+
+
+</body>
+
+</html>

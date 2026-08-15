@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Jigato - Food Delivered With Love</title>
+
+
+    <!-- ================= INDEX CSS ================= -->
+
+    <link
+        rel="stylesheet"
+        href="/css/style.css"
+    >
+
+
+    <!-- ================= NAVBAR CSS ================= -->
+
+    <link
+        rel="stylesheet"
+        href="/header/navbar.css"
+    >
+<link
+    rel="stylesheet"
+    href="/footer/footer.css"
+>
+
+    <!-- ================= FONT AWESOME ================= -->
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    >
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     NAVBAR
+===================================================== -->
+
+<div id="navbar"></div>
+
+
+
+<!-- =====================================================
+     MAIN
+===================================================== -->
+
+<main>
+
+
+<!-- =====================================================
+     HERO
+===================================================== -->
+
+<section class="hero">
+
+
+    <div class="hero-content">
+
+
+        <div class="hero-badge">
+
+            🔥 India's Favourite Food Delivery
+
+        </div>
+
+
+        <h1>
+
+            Cravings Meet
+
+            <span>
+                Happiness.
+            </span>
+
+        </h1>
+
+
+        <p>
+
+            Discover delicious food from the best restaurants
+            around you and get it delivered straight to your door.
+
+        </p>
+
+
+        <!-- ================= SEARCH ================= -->
+
+        <div class="hero-search">
+
+
+            <span class="search-icon">
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+            </span>
+
+
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Search restaurants, dishes, categories..."
+                autocomplete="off"
+            >
+
+
+            <button
+                type="button"
+                id="searchBtn"
+            >
+
+                Search
+
+            </button>
+
+
+        </div>
+
+
+
+        <!-- ================= QUICK SEARCH ================= -->
+
+        <div class="quick-search">
+
+
+            <span>
+                Popular:
+            </span>
+
+
+            <button
+                type="button"
+                data-search="Pizza"
+            >
+
+                🍕 Pizza
+
+            </button>
+
+
+            <button
+                type="button"
+                data-search="Burger"
+            >
+
+                🍔 Burger
+
+            </button>
+
+
+            <button
+                type="button"
+                data-search="Biryani"
+            >
+
+                🍛 Biryani
+
+            </button>
+
+
+            <button
+                type="button"
+                data-search="Chinese"
+            >
+
+                🍜 Chinese
+
+            </button>
+
+
+        </div>
+
+
+
+        <!-- ================= STATS ================= -->
+
+        <div class="hero-stats">
+
+
+            <div>
+
+                <strong id="restaurantCount">
+                    0
+                </strong>
+
+                <span>
+                    Restaurants
+                </span>
+
+            </div>
+
+
+            <div>
+
+                <strong id="foodCount">
+                    0
+                </strong>
+
+                <span>
+                    Food Items
+                </span>
+
+            </div>
+
+
+            <div>
+
+                <strong>
+                    Fast
+                </strong>
+
+                <span>
+                    Delivery
+                </span>
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- =================================================
+         HERO IMAGE
+    ================================================= -->
+
+    <div class="hero-image">
+
+
+        <div class="hero-circle"></div>
+
+
+        <img
+            src="/images/hero-food.png"
+            alt="Delicious Food"
+            onerror="this.style.display='none';"
+        >
+
+
+        <!-- RATING -->
+
+        <div class="floating-card rating-card">
+
+
+            <span>
+                ⭐
+            </span>
+
+
+            <div>
+
+                <strong>
+                    Top Rated
+                </strong>
+
+                <small>
+                    Customer favourites
+                </small>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- DELIVERY -->
+
+        <div class="floating-card delivery-card">
+
+
+            <span>
+                🚴
+            </span>
+
+
+            <div>
+
+                <strong>
+                    Fast Delivery
+                </strong>
+
+                <small>
+                    Fresh & fast
+                </small>
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+</section>
+
+
+
+<!-- =====================================================
+     SEARCH RESULTS
+===================================================== -->
+
+<section
+    class="section search-results-section"
+    id="searchResultsSection"
+    style="display:none;"
+>
+
+
+    <div class="section-title">
+
+
+        <div>
+
+
+            <span class="section-label">
+                SEARCH RESULTS
+            </span>
+
+
+            <h2 id="searchResultsTitle">
+                Search Results
+            </h2>
+
+
+            <p id="searchResultsSubtitle">
+                Food and restaurants matching your search.
+            </p>
+
+
+        </div>
+
+
+
+        <button
+            type="button"
+            id="clearSearchBtn"
+            class="order-btn"
+        >
+
+            Clear Search
+
+        </button>
+
+
+    </div>
+
+
+
+    <!-- ================= RESTAURANTS ================= -->
+
+    <div id="searchRestaurantArea">
+
+
+        <h3 class="search-subtitle">
+            🍽️ Restaurants
+        </h3>
+
+
+        <div
+            class="restaurant-grid"
+            id="searchRestaurantContainer"
+        ></div>
+
+
+    </div>
+
+
+
+    <!-- ================= FOOD ================= -->
+
+    <div
+        id="searchFoodArea"
+        style="margin-top:35px;"
+    >
+
+
+        <h3 class="search-subtitle">
+            🍔 Food
+        </h3>
+
+
+        <div
+            class="deal-container"
+            id="searchFoodContainer"
+        ></div>
+
+
+    </div>
+
+
+</section>
+
+
+
+<!-- =====================================================
+     CATEGORIES
+===================================================== -->
+
+<section class="section categories">
+
+
+    <div class="section-title">
+
+
+        <div>
+
+
+            <span class="section-label">
+                EXPLORE
+            </span>
+
+
+            <h2>
+                🍽️ Explore Categories
+            </h2>
+
+
+            <p>
+                Find your favourite food category.
+            </p>
+
+
+        </div>
+
+
+    </div>
+
+
+
+    <div
+        class="category-container"
+        id="categoryContainer"
+    ></div>
+
+
+</section>
+
+
+
+<!-- =====================================================
+     POPULAR FOOD
+===================================================== -->
+
+<section
+    class="section deals-section"
+>
+
+
+    <div class="section-title">
+
+
+        <div>
+
+
+            <span class="section-label red">
+                POPULAR FOOD
+            </span>
+
+
+            <h2>
+                🍽️ Popular Food Near You
+            </h2>
+
+
+            <p>
+                Delicious food available from restaurants on Jigato.
+            </p>
+
+
+        </div>
+
+
+
+        <a href="/restaurant">
+            View All →
+        </a>
+
+
+    </div>
+
+
+
+    <div
+        class="deal-container"
+        id="foodContainer"
+    ></div>
+
+
+</section>
+
+
+
+<!-- =====================================================
+     WHY JIGATO
+===================================================== -->
+
+<section class="why-jigato">
+
+
+    <div class="section-title centered">
+
+
+        <span class="section-label">
+            WHY JIGATO?
+        </span>
+
+
+        <h2>
+            Food delivery made simple
+        </h2>
+
+
+        <p>
+            Everything you need for a perfect food ordering experience.
+        </p>
+
+
+    </div>
+
+
+
+    <div class="features-grid">
+
+
+        <!-- FEATURE 1 -->
+
+        <div class="feature-card">
+
+
+            <div class="feature-icon">
+                🚀
+            </div>
+
+
+            <h3>
+                Lightning Fast
+            </h3>
+
+
+            <p>
+                Get your favourite meals delivered quickly and fresh.
+            </p>
+
+
+        </div>
+
+
+
+        <!-- FEATURE 2 -->
+
+        <div class="feature-card">
+
+
+            <div class="feature-icon">
+                🏷️
+            </div>
+
+
+            <h3>
+                Best Prices
+            </h3>
+
+
+            <p>
+                Enjoy great food at affordable prices.
+            </p>
+
+
+        </div>
+
+
+
+        <!-- FEATURE 3 -->
+
+        <div class="feature-card">
+
+
+            <div class="feature-icon">
+                🛡️
+            </div>
+
+
+            <h3>
+                Safe & Reliable
+            </h3>
+
+
+            <p>
+                Trusted restaurants and secure ordering experience.
+            </p>
+
+
+        </div>
+
+
+
+        <!-- FEATURE 4 -->
+
+        <div class="feature-card">
+
+
+            <div class="feature-icon">
+                ❤️
+            </div>
+
+
+            <h3>
+                Made For You
+            </h3>
+
+
+            <p>
+                Discover food and restaurants you will love.
+            </p>
+
+
+        </div>
+
+
+    </div>
+
+
+</section>
+
+
+
+<!-- =====================================================
+     TOP RATED RESTAURANTS
+===================================================== -->
+
+<section class="section">
+
+
+    <div class="section-title">
+
+
+        <div>
+
+
+            <span class="section-label">
+                CUSTOMER FAVOURITES
+            </span>
+
+
+            <h2>
+                ⭐ Top Rated Restaurants
+            </h2>
+
+
+            <p>
+                Restaurants loved by our customers.
+            </p>
+
+
+        </div>
+
+
+
+        <a href="/restaurant">
+            Explore Restaurants →
+        </a>
+
+
+    </div>
+
+
+
+    <div
+        class="restaurant-grid"
+        id="topRatedContainer"
+    ></div>
+
+
+</section>
+
+
+
+<!-- =====================================================
+     RECENTLY ADDED
+===================================================== -->
+
+<section class="section recent-section">
+
+
+    <div class="section-title">
+
+
+        <div>
+
+
+            <span class="section-label">
+                NEW ON JIGATO
+            </span>
+
+
+            <h2>
+                🆕 Recently Added Restaurants
+            </h2>
+
+
+            <p>
+                Discover restaurants recently added to Jigato.
+            </p>
+
+
+        </div>
+
+
+    </div>
+
+
+
+    <div
+        class="new-restaurants"
+        id="recentContainer"
+    ></div>
+
+
+</section>
+
+
+
+<!-- =====================================================
+     REVIEWS
+===================================================== -->
+
+<section class="section reviews-section">
+
+
+    <div class="section-title centered">
+
+
+        <span class="section-label">
+            REAL REVIEWS
+        </span>
+
+
+        <h2>
+            ❤️ What our customers say
+        </h2>
+
+
+        <p>
+            Thousands of customers trust Jigato every day.
+        </p>
+
+
+    </div>
+
+
+
+    <div class="review-container">
+
+
+        <!-- REVIEW 1 -->
+
+        <div class="review-card">
+
+
+            <div class="review-stars">
+                ⭐⭐⭐⭐⭐
+            </div>
+
+
+            <p>
+                Great food and a very smooth ordering experience!
+            </p>
+
+
+            <div class="review-user">
+
+
+                <div class="user-avatar">
+                    J
+                </div>
+
+
+                <div>
+
+
+                    <h4>
+                        Jigato Customer
+                    </h4>
+
+
+                    <span>
+                        Food Lover
+                    </span>
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- REVIEW 2 -->
+
+        <div class="review-card">
+
+
+            <div class="review-stars">
+                ⭐⭐⭐⭐⭐
+            </div>
+
+
+            <p>
+                Easy to discover restaurants and order delicious food.
+            </p>
+
+
+            <div class="review-user">
+
+
+                <div class="user-avatar">
+                    F
+                </div>
+
+
+                <div>
+
+
+                    <h4>
+                        Food Lover
+                    </h4>
+
+
+                    <span>
+                        Regular Customer
+                    </span>
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- REVIEW 3 -->
+
+        <div class="review-card">
+
+
+            <div class="review-stars">
+                ⭐⭐⭐⭐⭐
+            </div>
+
+
+            <p>
+                Good prices, fresh food and fast delivery.
+            </p>
+
+
+            <div class="review-user">
+
+
+                <div class="user-avatar">
+                    C
+                </div>
+
+
+                <div>
+
+
+                    <h4>
+                        Happy Customer
+                    </h4>
+
+
+                    <span>
+                        Jigato User
+                    </span>
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+</section>
+
+
+
+<!-- =====================================================
+     CTA
+===================================================== -->
+
+<section class="cta-section">
+
+
+    <div>
+
+
+        <span>
+            🍔 READY TO ORDER?
+        </span>
+
+
+        <h2>
+            Your next favourite meal
+            is just one click away.
+        </h2>
+
+
+        <p>
+            Explore restaurants and discover something delicious today.
+        </p>
+
+
+        <a href="/restaurant">
+            Start Ordering →
+        </a>
+
+
+    </div>
+
+
+</section>
+
+
+</main>
+
+
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+<div id="footer"></div>
+
+
+
+<!-- =====================================================
+     FLOATING CART
+===================================================== -->
+
+<a
+    href="/cart-page"
+    class="floating-cart"
+>
+
+
+    <span>
+        🛒
+    </span>
+
+
+    <div>
+
+
+        <strong id="cartCount">
+            0 items
+        </strong>
+
+
+        <small>
+            View Cart →
+        </small>
+
+
+    </div>
+
+
+</a>
+
+
+
+<!-- =====================================================
+     NAVBAR JS
+===================================================== -->
+
+<script src="/header/navbar.js"></script>
+
+
+
+<!-- =====================================================
+     INDEX JS
+===================================================== -->
+
+<script src="/js/index.js"></script>
+<script src="/footer/footer.js"></script>
+
+
+</body>
+
+</html>

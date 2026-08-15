@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>My Profile | Jigato</title>
+
+    <!-- NAVBAR -->
+    <link
+        rel="stylesheet"
+        href="/header/navbar.css"
+    >
+
+    <!-- PROFILE -->
+    <link
+        rel="stylesheet"
+        href="/css/profile.css"
+    >
+    <link
+    rel="stylesheet"
+    href="/footer/footer.css"
+>
+
+    <!-- FONT AWESOME -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    >
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     NAVBAR
+===================================================== -->
+
+<div id="navbar"></div>
+
+
+
+<!-- =====================================================
+     PROFILE PAGE
+===================================================== -->
+
+<main class="profile-page">
+
+
+    <!-- PAGE HEADING -->
+
+    <div class="profile-heading">
+
+        <span>ACCOUNT</span>
+
+        <h1>My Profile</h1>
+
+        <p>
+            Manage your personal information,
+            addresses and activity.
+        </p>
+
+    </div>
+
+
+
+    <!-- =================================================
+         PROFILE GRID
+    ================================================= -->
+
+    <div class="profile-grid">
+
+
+        <!-- =============================================
+             PERSONAL INFORMATION
+        ============================================== -->
+
+        <section class="profile-card">
+
+
+            <div class="card-heading">
+
+                <div class="heading-icon">
+
+                    <i class="fa-solid fa-user"></i>
+
+                </div>
+
+
+                <div>
+
+                    <h2>
+                        Personal Information
+                    </h2>
+
+                    <p>
+                        Your account details
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="profile-form">
+
+
+                <!-- FULL NAME -->
+
+                <div class="form-group">
+
+                    <label for="profileName">
+                        Full Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="profileName"
+                        placeholder="Your full name"
+                    >
+
+                </div>
+
+
+
+                <!-- EMAIL -->
+
+                <div class="form-group">
+
+                    <label for="profileEmail">
+                        Email
+                    </label>
+
+                    <input
+                        type="email"
+                        id="profileEmail"
+                        placeholder="Your email"
+                        readonly
+                    >
+
+                </div>
+
+
+
+                <!-- PHONE -->
+
+                <div class="form-group">
+
+                    <label for="profilePhone">
+                        Phone
+                    </label>
+
+                    <input
+                        type="text"
+                        id="profilePhone"
+                        maxlength="10"
+                        placeholder="10 digit phone"
+                    >
+
+                </div>
+
+
+
+                <!-- CITY -->
+
+                <div class="form-group">
+
+                    <label for="profileCity">
+                        City
+                    </label>
+
+                    <input
+                        type="text"
+                        id="profileCity"
+                        placeholder="Your city"
+                    >
+
+                </div>
+
+
+
+                <!-- DATE OF BIRTH -->
+
+                <div class="form-group">
+
+                    <label for="profileDOB">
+                        Date of Birth
+                    </label>
+
+                    <input
+                        type="date"
+                        id="profileDOB"
+                    >
+
+                </div>
+
+
+
+                <!-- GENDER -->
+
+                <div class="form-group">
+
+                    <label for="profileGender">
+                        Gender
+                    </label>
+
+                    <select id="profileGender">
+
+                        <option value="">
+                            Select Gender
+                        </option>
+
+                        <option value="Male">
+                            Male
+                        </option>
+
+                        <option value="Female">
+                            Female
+                        </option>
+
+                        <option value="Other">
+                            Other
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+
+                <!-- SAVE -->
+
+                <button
+                    type="button"
+                    class="save-btn"
+                    id="saveProfile"
+                >
+
+                    <i class="fa-solid fa-check"></i>
+
+                    Save Changes
+
+                </button>
+
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =============================================
+             SAVED ADDRESSES
+        ============================================== -->
+
+        <section class="profile-card">
+
+
+            <div class="card-heading address-heading">
+
+
+                <div class="heading-icon">
+
+                    <i
+                        class="fa-solid fa-location-dot"
+                    ></i>
+
+                </div>
+
+
+                <div>
+
+                    <h2>
+                        Saved Addresses
+                    </h2>
+
+                    <p>
+                        Select an address during checkout
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    id="addAddressBtn"
+                    class="add-address-btn"
+                >
+
+                    <i class="fa-solid fa-plus"></i>
+
+                    Add
+
+                </button>
+
+
+            </div>
+
+
+
+            <!-- ADDRESS LIST -->
+
+            <div
+                id="addressList"
+                class="address-list"
+            >
+
+                <div class="loading">
+
+                    Loading addresses...
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+    </div>
+
+
+
+    <!-- =================================================
+         ACTIVITY
+    ================================================= -->
+
+    <section class="activity-section">
+
+
+        <div class="activity-heading">
+
+            <span>YOUR ACTIVITY</span>
+
+            <h2>
+                Quick Access
+            </h2>
+
+        </div>
+
+
+
+        <div class="activity-grid">
+
+
+            <!-- ORDERS -->
+
+            <a
+                href="/orders"
+                class="activity-card"
+            >
+
+                <div class="activity-icon">
+
+                    <i
+                        class="fa-solid fa-bag-shopping"
+                    ></i>
+
+                </div>
+
+
+                <div>
+
+                    <h3>
+                        My Orders
+                    </h3>
+
+                    <p>
+                        View your previous orders
+                    </p>
+
+                </div>
+
+
+                <i
+                    class="fa-solid fa-chevron-right activity-arrow"
+                ></i>
+
+            </a>
+
+
+
+            <!-- CART -->
+
+            <a
+                href="/cart"
+                class="activity-card"
+            >
+
+                <div class="activity-icon">
+
+                    <i
+                        class="fa-solid fa-cart-shopping"
+                    ></i>
+
+                </div>
+
+
+                <div>
+
+                    <h3>
+                        My Cart
+                    </h3>
+
+                    <p>
+                        View items in your cart
+                    </p>
+
+                </div>
+
+
+                <i
+                    class="fa-solid fa-chevron-right activity-arrow"
+                ></i>
+
+            </a>
+
+
+
+            <!-- RESTAURANTS -->
+
+            <a
+                href="/"
+                class="activity-card"
+            >
+
+                <div class="activity-icon">
+
+                    <i
+                        class="fa-solid fa-utensils"
+                    ></i>
+
+                </div>
+
+
+                <div>
+
+                    <h3>
+                        Restaurants
+                    </h3>
+
+                    <p>
+                        Explore food and restaurants
+                    </p>
+
+                </div>
+
+
+                <i
+                    class="fa-solid fa-chevron-right activity-arrow"
+                ></i>
+
+            </a>
+
+
+        </div>
+
+
+    </section>
+
+
+</main>
+
+
+
+<!-- =====================================================
+     ADDRESS MODAL
+===================================================== -->
+
+<div
+    class="address-modal"
+    id="addressModal"
+>
+
+
+    <div class="modal-box">
+
+
+        <div class="modal-header">
+
+
+            <div>
+
+                <span>DELIVERY</span>
+
+                <h2 id="modalTitle">
+                    Add Address
+                </h2>
+
+            </div>
+
+
+            <button
+                type="button"
+                id="closeModal"
+            >
+
+                <i class="fa-solid fa-xmark"></i>
+
+            </button>
+
+
+        </div>
+
+
+
+        <form id="addressForm">
+
+
+            <input
+                type="hidden"
+                id="addressId"
+            >
+
+
+
+            <!-- ADDRESS LABEL -->
+
+            <div class="address-labels">
+
+
+                <button
+                    type="button"
+                    class="label-btn active"
+                    data-label="Home"
+                >
+                    🏠 Home
+                </button>
+
+
+                <button
+                    type="button"
+                    class="label-btn"
+                    data-label="Work"
+                >
+                    💼 Work
+                </button>
+
+
+                <button
+                    type="button"
+                    class="label-btn"
+                    data-label="Other"
+                >
+                    📍 Other
+                </button>
+
+
+            </div>
+
+
+
+            <input
+                type="hidden"
+                id="addressLabel"
+                value="Home"
+            >
+
+
+
+            <!-- NAME + PHONE -->
+
+            <div class="form-row">
+
+
+                <div class="form-group">
+
+                    <label for="addressName">
+                        Full Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="addressName"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="addressPhone">
+                        Phone
+                    </label>
+
+                    <input
+                        type="text"
+                        id="addressPhone"
+                        maxlength="10"
+                        required
+                    >
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- ADDRESS -->
+
+            <div class="form-group">
+
+                <label for="addressText">
+                    Address
+                </label>
+
+                <textarea
+                    id="addressText"
+                    rows="3"
+                    placeholder="House / Flat / Street / Area"
+                    required
+                ></textarea>
+
+            </div>
+
+
+
+            <!-- CITY + STATE -->
+
+            <div class="form-row">
+
+
+                <div class="form-group">
+
+                    <label for="addressCity">
+                        City
+                    </label>
+
+                    <input
+                        type="text"
+                        id="addressCity"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="addressState">
+                        State
+                    </label>
+
+                    <input
+                        type="text"
+                        id="addressState"
+                        required
+                    >
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- PINCODE -->
+
+            <div class="form-group">
+
+                <label for="addressPincode">
+                    Pincode
+                </label>
+
+                <input
+                    type="text"
+                    id="addressPincode"
+                    maxlength="6"
+                    required
+                >
+
+            </div>
+
+
+
+            <!-- DEFAULT -->
+
+            <label class="default-address">
+
+                <input
+                    type="checkbox"
+                    id="defaultAddress"
+                >
+
+                <span>
+                    Make this my default address
+                </span>
+
+            </label>
+
+
+
+            <!-- SAVE ADDRESS -->
+
+            <button
+                type="submit"
+                class="save-address-btn"
+            >
+
+                <i
+                    class="fa-solid fa-location-dot"
+                ></i>
+
+                Save Address
+
+            </button>
+
+
+        </form>
+
+
+    </div>
+
+
+</div>
+<div id="footer"></div>
+
+
+
+<!-- =====================================================
+     SCRIPTS
+===================================================== -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/sweetalert2@11"
+></script>
+
+<script
+    src="/header/navbar.js"
+></script>
+
+<script
+    src="/js/profile.js"
+></script>
+<script src="/footer/footer.js"></script>
+
+</body>
+
+</html>

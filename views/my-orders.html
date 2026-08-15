@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>My Orders | Jigato</title>
+
+
+    <!-- =================================================
+         MY ORDERS CSS
+    ================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="/css/my-orders.css"
+    >
+
+
+    <!-- =================================================
+         NAVBAR CSS
+    ================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="/header/navbar.css"
+    >
+
+
+    <!-- =================================================
+         FOOTER CSS
+    ================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="/footer/footer.css"
+    >
+
+
+    <!-- =================================================
+         FONT AWESOME
+    ================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    >
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     NAVBAR
+===================================================== -->
+
+<div id="navbar"></div>
+
+
+
+<!-- =====================================================
+     MY ORDERS PAGE
+===================================================== -->
+
+<main class="orders-page">
+
+
+    <!-- =================================================
+         PAGE HEADER
+    ================================================== -->
+
+    <section class="orders-hero">
+
+        <div class="orders-hero-content">
+
+            <span class="orders-label">
+                YOUR ORDERS
+            </span>
+
+
+            <h1>
+                My Orders
+            </h1>
+
+
+            <p>
+                Keep track of your delicious orders,
+                check their status and order your favourites again.
+            </p>
+
+
+            <div class="orders-hero-stats">
+
+                <div class="hero-stat">
+
+                    <div class="hero-stat-icon">
+                        <i class="fa-solid fa-bag-shopping"></i>
+                    </div>
+
+                    <div>
+
+                        <strong id="totalOrdersCount">
+                            0
+                        </strong>
+
+                        <span>
+                            Total Orders
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="hero-stat">
+
+                    <div class="hero-stat-icon">
+                        <i class="fa-solid fa-clock"></i>
+                    </div>
+
+                    <div>
+
+                        <strong id="activeOrdersCount">
+                            0
+                        </strong>
+
+                        <span>
+                            Active Orders
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="hero-stat">
+
+                    <div class="hero-stat-icon">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+
+                    <div>
+
+                        <strong id="deliveredOrdersCount">
+                            0
+                        </strong>
+
+                        <span>
+                            Delivered
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="orders-hero-art">
+
+            <div class="hero-art-circle"></div>
+
+
+            <div class="hero-order-icon">
+
+                <i class="fa-solid fa-bag-shopping"></i>
+
+            </div>
+
+
+            <div class="hero-floating-card">
+
+                <span>
+                    🍕
+                </span>
+
+                <div>
+
+                    <strong>
+                        Good Food
+                    </strong>
+
+                    <small>
+                        Good Mood
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =================================================
+         FILTER SECTION
+    ================================================== -->
+
+    <section class="orders-toolbar">
+
+
+        <div class="toolbar-left">
+
+            <span>
+                <i class="fa-solid fa-filter"></i>
+                Filter Orders
+            </span>
+
+        </div>
+
+
+        <div class="order-filters">
+
+            <button
+                type="button"
+                class="filter-btn active"
+                data-status="all"
+            >
+                All Orders
+            </button>
+
+
+            <button
+                type="button"
+                class="filter-btn"
+                data-status="Pending"
+            >
+                Pending
+            </button>
+
+
+            <button
+                type="button"
+                class="filter-btn"
+                data-status="Confirmed"
+            >
+                Confirmed
+            </button>
+
+
+            <button
+                type="button"
+                class="filter-btn"
+                data-status="Preparing"
+            >
+                Preparing
+            </button>
+
+
+            <button
+                type="button"
+                class="filter-btn"
+                data-status="Out For Delivery"
+            >
+                Out For Delivery
+            </button>
+
+
+            <button
+                type="button"
+                class="filter-btn"
+                data-status="Delivered"
+            >
+                Delivered
+            </button>
+
+
+            <button
+                type="button"
+                class="filter-btn"
+                data-status="Cancelled"
+            >
+                Cancelled
+            </button>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =================================================
+         ORDERS LIST
+    ================================================== -->
+
+    <section
+        id="ordersList"
+        class="orders-list"
+    >
+
+
+        <!-- LOADING -->
+
+        <div class="orders-loading">
+
+            <div class="loading-spinner"></div>
+
+            <p>
+                Loading your orders...
+            </p>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =================================================
+         EMPTY ORDERS
+    ================================================== -->
+
+    <section
+        id="emptyOrders"
+        class="empty-orders"
+        style="display:none;"
+    >
+
+        <div class="empty-orders-icon">
+
+            <i class="fa-solid fa-bag-shopping"></i>
+
+        </div>
+
+
+        <span class="empty-label">
+            NOTHING HERE YET
+        </span>
+
+
+        <h2>
+            No Orders Yet
+        </h2>
+
+
+        <p>
+            You haven't placed any orders yet.
+            Discover amazing restaurants and
+            start your first order.
+        </p>
+
+
+        <a href="/restaurant">
+
+            <i class="fa-solid fa-utensils"></i>
+
+            Explore Restaurants
+
+            <i class="fa-solid fa-arrow-right"></i>
+
+        </a>
+
+    </section>
+
+
+
+</main>
+
+
+
+<!-- =====================================================
+     ORDER DETAILS MODAL
+===================================================== -->
+
+<div
+    id="orderModal"
+    class="order-modal"
+>
+
+
+    <div class="order-modal-box">
+
+
+        <!-- =================================================
+             MODAL HEADER
+        ================================================== -->
+
+        <div class="order-modal-header">
+
+            <div>
+
+                <span>
+                    ORDER DETAILS
+                </span>
+
+
+                <h2 id="modalOrderTitle">
+                    Order #0
+                </h2>
+
+            </div>
+
+
+            <button
+                type="button"
+                id="closeOrderModal"
+                aria-label="Close"
+            >
+
+                <i class="fa-solid fa-xmark"></i>
+
+            </button>
+
+        </div>
+
+
+
+        <!-- =================================================
+             MODAL CONTENT
+        ================================================== -->
+
+        <div
+            id="orderModalContent"
+            class="order-modal-content"
+        >
+
+            <div class="orders-loading">
+
+                <div class="loading-spinner"></div>
+
+                <p>
+                    Loading order...
+                </p>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+<div id="footer"></div>
+
+
+
+<!-- =====================================================
+     SWEET ALERT
+===================================================== -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/sweetalert2@11"
+></script>
+
+
+
+<!-- =====================================================
+     NAVBAR JS
+===================================================== -->
+
+<script src="/header/navbar.js"></script>
+
+
+
+<!-- =====================================================
+     MY ORDERS JS
+===================================================== -->
+
+<script src="/js/my-orders.js"></script>
+
+
+
+<!-- =====================================================
+     FOOTER JS
+===================================================== -->
+
+<script src="/footer/footer.js"></script>
+
+
+
+</body>
+
+</html>

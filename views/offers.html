@@ -1,0 +1,534 @@
+    <!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Offers | Jigato</title>
+
+
+    <!-- NAVBAR CSS -->
+
+    <link
+        rel="stylesheet"
+        href="/header/navbar.css"
+    >
+
+
+    <!-- OFFERS CSS -->
+
+    <link
+        rel="stylesheet"
+        href="/css/offers.css"
+    >
+    <link
+    rel="stylesheet"
+    href="/footer/footer.css"
+>
+
+
+    <!-- FONT AWESOME -->
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    >
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     NAVBAR
+===================================================== -->
+
+<div id="navbar"></div>
+
+
+
+<!-- =====================================================
+     OFFERS PAGE
+===================================================== -->
+
+<main class="offers-page">
+
+
+    <!-- =================================================
+         HERO
+    ================================================= -->
+
+    <section class="offers-hero">
+
+        <div class="offers-hero-content">
+
+            <span class="offers-label">
+                JIGATO OFFERS
+            </span>
+
+
+            <h1>
+                Delicious Food,
+                <br>
+                <span>Better Deals.</span>
+            </h1>
+
+
+            <p>
+                Grab the latest discounts, coupon codes
+                and free delivery offers on Jigato.
+            </p>
+
+
+            <a
+                href="#allOffers"
+                class="hero-offer-btn"
+            >
+
+                <i class="fa-solid fa-ticket"></i>
+
+                Explore Offers
+
+            </a>
+
+        </div>
+
+
+        <div class="offers-hero-art">
+
+            <div class="hero-circle"></div>
+
+
+            <div class="hero-food">
+
+                🍔
+
+            </div>
+
+
+            <div class="floating-offer offer-one">
+
+                <i class="fa-solid fa-percent"></i>
+
+                <strong>
+                    50% OFF
+                </strong>
+
+            </div>
+
+
+            <div class="floating-offer offer-two">
+
+                <i class="fa-solid fa-truck"></i>
+
+                <strong>
+                    FREE DELIVERY
+                </strong>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =================================================
+         QUICK OFFER STATS
+    ================================================= -->
+
+    <section class="offer-stats">
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+
+                <i class="fa-solid fa-percent"></i>
+
+            </div>
+
+            <div>
+
+                <strong>
+                    Big Discounts
+                </strong>
+
+                <span>
+                    Save more on every order
+                </span>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+
+                <i class="fa-solid fa-ticket"></i>
+
+            </div>
+
+            <div>
+
+                <strong>
+                    Easy Coupons
+                </strong>
+
+                <span>
+                    Copy and apply instantly
+                </span>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+
+                <i class="fa-solid fa-truck-fast"></i>
+
+            </div>
+
+            <div>
+
+                <strong>
+                    Free Delivery
+                </strong>
+
+                <span>
+                    More savings on delivery
+                </span>
+
+            </div>
+
+        </div>
+
+
+
+    </section>
+
+
+
+    <!-- =================================================
+         PAGE HEADING
+    ================================================= -->
+
+    <section
+        class="offers-section"
+        id="allOffers"
+    >
+
+        <div class="section-heading">
+
+            <div>
+
+                <span>
+                    TODAY'S DEALS
+                </span>
+
+                <h2>
+                    Offers Just For You
+                </h2>
+
+                <p>
+                    Use these coupons on your next
+                    Jigato order.
+                </p>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             OFFER FILTERS
+        ================================================= -->
+
+        <div class="offer-filters">
+
+            <button
+                class="filter-btn active"
+                data-filter="all"
+            >
+
+                All Offers
+
+            </button>
+
+
+            <button
+                class="filter-btn"
+                data-filter="welcome"
+            >
+
+                New User
+
+            </button>
+
+
+            <button
+                class="filter-btn"
+                data-filter="general"
+            >
+
+                Discounts
+
+            </button>
+
+
+            <button
+                class="filter-btn"
+                data-filter="free_delivery"
+            >
+
+                Free Delivery
+
+            </button>
+
+
+            <button
+                class="filter-btn"
+                data-filter="restaurant"
+            >
+
+                Restaurants
+
+            </button>
+
+        </div>
+
+
+
+        <!-- =================================================
+             OFFERS GRID
+        ================================================= -->
+
+        <div
+            id="offersGrid"
+            class="offers-grid"
+        >
+
+
+            <!-- JS WILL LOAD OFFERS -->
+
+            <div class="offers-loading">
+
+                <div class="loading-spinner"></div>
+
+                <p>
+                    Finding the best offers for you...
+                </p>
+
+            </div>
+
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- =================================================
+         HOW TO USE
+    ================================================= -->
+
+    <section class="how-section">
+
+
+        <div class="section-heading center">
+
+            <span>
+                HOW IT WORKS
+            </span>
+
+            <h2>
+                Save In 3 Easy Steps
+            </h2>
+
+            <p>
+                Using a Jigato coupon is super easy.
+            </p>
+
+        </div>
+
+
+
+        <div class="steps-grid">
+
+
+            <div class="step-card">
+
+                <div class="step-number">
+                    01
+                </div>
+
+                <div class="step-icon">
+
+                    <i class="fa-solid fa-ticket"></i>
+
+                </div>
+
+                <h3>
+                    Pick An Offer
+                </h3>
+
+                <p>
+                    Find an offer that matches
+                    your order.
+                </p>
+
+            </div>
+
+
+
+            <div class="step-card">
+
+                <div class="step-number">
+                    02
+                </div>
+
+                <div class="step-icon">
+
+                    <i class="fa-regular fa-copy"></i>
+
+                </div>
+
+                <h3>
+                    Copy The Code
+                </h3>
+
+                <p>
+                    Copy the coupon code with
+                    one click.
+                </p>
+
+            </div>
+
+
+
+            <div class="step-card">
+
+                <div class="step-number">
+                    03
+                </div>
+
+                <div class="step-icon">
+
+                    <i class="fa-solid fa-cart-shopping"></i>
+
+                </div>
+
+                <h3>
+                    Apply At Checkout
+                </h3>
+
+                <p>
+                    Paste the code at checkout
+                    and enjoy your savings.
+                </p>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =================================================
+         BOTTOM CTA
+    ================================================= -->
+
+    <section class="offers-cta">
+
+        <div>
+
+            <span>
+                READY TO ORDER?
+            </span>
+
+            <h2>
+                Your Next Meal
+                <br>
+                Comes With A Deal.
+            </h2>
+
+            <p>
+                Browse restaurants and discover
+                something delicious.
+            </p>
+
+        </div>
+
+
+        <a
+            href="/restaurant"
+            class="cta-btn"
+        >
+
+            Explore Restaurants
+
+            <i class="fa-solid fa-arrow-right"></i>
+
+        </a>
+
+    </section>
+
+
+
+</main>
+<div id="footer"></div>
+
+
+
+<!-- =====================================================
+     SWEET ALERT
+===================================================== -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/sweetalert2@11"
+></script>
+
+
+
+<!-- =====================================================
+     NAVBAR JS
+===================================================== -->
+
+<script
+    src="/header/navbar.js"
+></script>
+
+
+
+<!-- =====================================================
+     OFFERS JS
+===================================================== -->
+
+<script
+    src="/js/offers.js"
+
+></script>
+<script src="/footer/footer.js"></script>
+
+
+</body>
+
+</html>
