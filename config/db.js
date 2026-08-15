@@ -1,18 +1,19 @@
 const mysql = require("mysql2");
 
 const db = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "",
-    database: "food_order_system"
-});
+    host: process.env.MYSQLHOST,
+        port: process.env.MYSQLPORT,
+            user: process.env.MYSQLUSER,
+                password: process.env.MYSQLPASSWORD,
+                    database: process.env.MYSQLDATABASE
+                    });
 
-db.connect((err) => {
-    if (err) {
-        console.log(err);
-    } else {
-        console.log("✅ MySQL Connected");
-    }
-});
+                    db.connect((err) => {
+                        if (err) {
+                                console.log("❌ MySQL Connection Error:", err);
+                                    } else {
+                                            console.log("✅ MySQL Connected");
+                                                }
+                                                });
 
-module.exports = db;
+                                                module.exports = db;
