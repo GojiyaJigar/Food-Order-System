@@ -8,45 +8,37 @@ const db = require("../config/db");
 const getAllOffers = (callback) => {
 
     const sql = `
-
         SELECT
-            o.id,
-            o.title,
-            o.description,
-            o.code,
-            o.discount_type,
-            o.discount_value,
-            o.max_discount,
-            o.min_order_amount,
-            o.offer_type,
-            o.restaurant_id,
-            o.start_date,
-            o.end_date,
-            o.usage_limit,
-            o.used_count,
-            o.is_active,
+            id,
+            title,
+            description,
+            code,
+            discount_type,
+            discount_value,
+            max_discount,
+            min_order_amount,
+            offer_type,
+            start_date,
+            end_date,
+            usage_limit,
+            used_count,
+            is_active,
+            created_at
 
-            r.name AS restaurant_name,
-            r.image AS restaurant_image
+        FROM offers
 
-        FROM offers o
+        WHERE is_active = 1
 
-        LEFT JOIN restaurants r
-            ON r.id = o.restaurant_id
+        AND NOW() >= start_date
 
-        WHERE o.is_active = 1
-
-        AND NOW() >= o.start_date
-
-        AND NOW() <= o.end_date
+        AND NOW() <= end_date
 
         AND (
-            o.usage_limit IS NULL
-            OR o.used_count < o.usage_limit
+            usage_limit IS NULL
+            OR used_count < usage_limit
         )
 
-        ORDER BY o.created_at DESC
-
+        ORDER BY created_at DESC
     `;
 
 
@@ -71,7 +63,7 @@ const getAllOffers = (callback) => {
 
             callback(
                 null,
-                results
+                results || []
             );
 
         }
@@ -90,35 +82,28 @@ const getOfferById = (
 ) => {
 
     const sql = `
-
         SELECT
-            o.id,
-            o.title,
-            o.description,
-            o.code,
-            o.discount_type,
-            o.discount_value,
-            o.max_discount,
-            o.min_order_amount,
-            o.offer_type,
-            o.restaurant_id,
-            o.start_date,
-            o.end_date,
-            o.usage_limit,
-            o.used_count,
-            o.is_active,
+            id,
+            title,
+            description,
+            code,
+            discount_type,
+            discount_value,
+            max_discount,
+            min_order_amount,
+            offer_type,
+            start_date,
+            end_date,
+            usage_limit,
+            used_count,
+            is_active,
+            created_at
 
-            r.name AS restaurant_name
+        FROM offers
 
-        FROM offers o
-
-        LEFT JOIN restaurants r
-            ON r.id = o.restaurant_id
-
-        WHERE o.id = ?
+        WHERE id = ?
 
         LIMIT 1
-
     `;
 
 
@@ -163,35 +148,28 @@ const getOfferByCode = (
 ) => {
 
     const sql = `
-
         SELECT
-            o.id,
-            o.title,
-            o.description,
-            o.code,
-            o.discount_type,
-            o.discount_value,
-            o.max_discount,
-            o.min_order_amount,
-            o.offer_type,
-            o.restaurant_id,
-            o.start_date,
-            o.end_date,
-            o.usage_limit,
-            o.used_count,
-            o.is_active,
+            id,
+            title,
+            description,
+            code,
+            discount_type,
+            discount_value,
+            max_discount,
+            min_order_amount,
+            offer_type,
+            start_date,
+            end_date,
+            usage_limit,
+            used_count,
+            is_active,
+            created_at
 
-            r.name AS restaurant_name
+        FROM offers
 
-        FROM offers o
-
-        LEFT JOIN restaurants r
-            ON r.id = o.restaurant_id
-
-        WHERE UPPER(o.code) = UPPER(?)
+        WHERE UPPER(code) = UPPER(?)
 
         LIMIT 1
-
     `;
 
 
@@ -236,7 +214,6 @@ const increaseUsedCount = (
 ) => {
 
     const sql = `
-
         UPDATE offers
 
         SET used_count =
@@ -250,7 +227,6 @@ const increaseUsedCount = (
             usage_limit IS NULL
             OR used_count < usage_limit
         )
-
     `;
 
 

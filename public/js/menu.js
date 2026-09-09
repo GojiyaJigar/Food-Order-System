@@ -1,51 +1,41 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-    const foodContainer = document.getElementById("foodContainer");
-    const emptyFood = document.getElementById("emptyFood");
-    const searchFood = document.getElementById("searchFood");
-    const categoryButtons = document.querySelectorAll(".category-btn");
+    const foodContainer =
+        document.getElementById("foodContainer");
 
-    // =====================================================
-    // RESTAURANT ID
-    // /restaurant/5
-    // =====================================================
+    const emptyFood =
+        document.getElementById("emptyFood");
 
-    const parts = location.pathname.split("/").filter(Boolean);
-    const restaurantIndex = parts.indexOf("restaurant");
+    const searchFood =
+        document.getElementById("searchFood");
 
-    const restaurantId =
-        restaurantIndex !== -1
-            ? parts[restaurantIndex + 1]
-            : null;
+    const categorySection =
+        document.getElementById("categorySection");
 
-    if (!restaurantId) {
-        foodContainer.innerHTML = `
-            <div class="food-loading">
-                Restaurant ID not found.
-            </div>
-        `;
-        return;
-    }
 
     let foods = [];
+
     let activeCategory = "All";
 
 
-    // =====================================================
-    // HELPERS
-    // =====================================================
+    /* =====================================================
+       HELPERS
+    ===================================================== */
 
     function safe(value) {
+
         return String(value ?? "")
             .replace(/&/g, "&amp;")
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;")
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
+
     }
 
 
     function getFoodId(food) {
+
         return (
             food.id ??
             food.food_id ??
@@ -53,15 +43,19 @@ document.addEventListener("DOMContentLoaded", () => {
             food.foodId ??
             food.foodID
         );
+
     }
 
 
     function getImage(image) {
 
-        if (!image)
+        if (!image) {
             return "/images/foods/default-food.jpg";
+        }
+
 
         image = String(image).trim();
+
 
         if (
             image.startsWith("http://") ||
@@ -70,19 +64,32 @@ document.addEventListener("DOMContentLoaded", () => {
             return image;
         }
 
-        if (image.startsWith("/images/foods/"))
+
+        if (
+            image.startsWith("/images/foods/")
+        ) {
             return image;
+        }
 
-        if (image.startsWith("images/foods/"))
+
+        if (
+            image.startsWith("images/foods/")
+        ) {
             return "/" + image;
+        }
 
-        return "/images/foods/" + image.split("/").pop();
+
+        return (
+            "/images/foods/" +
+            image.split("/").pop()
+        );
+
     }
 
 
-    // =====================================================
-    // LOAD MENU
-    // =====================================================
+    /* =====================================================
+       LOAD MENU
+    ===================================================== */
 
     async function loadMenu() {
 
@@ -92,58 +99,48 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
         `;
 
+
         try {
 
-            const response = await fetch(
-                `/restaurant/${restaurantId}/menu`,
-                {
-                    credentials: "include"
-                }
+            const response =
+                await fetch("/api/menu", {
+                    credentials: "include",
+                    cache: "no-store"
+                });
+
+
+            if (!response.ok) {
+                throw new Error(
+                    "Menu could not be loaded."
+                );
+            }
+
+
+            const data =
+                await response.json();
+
+
+            console.log(
+                "MENU API:",
+                data
             );
 
-            if (!response.ok)
-                throw new Error("Menu could not be loaded.");
 
-            const data = await response.json();
-
-            console.log("MENU API:", data);
-
-            // API ke different response formats support
-            if (Array.isArray(data)) {
-                foods = data;
-            }
-            else if (Array.isArray(data.foods)) {
-                foods = data.foods;
-            }
-            else if (Array.isArray(data.menu)) {
-                foods = data.menu;
-            }
-            else if (Array.isArray(data.items)) {
-                foods = data.items;
-            }
-            else if (Array.isArray(data.data)) {
-                foods = data.data;
-            }
-            else {
-                foods = [];
-            }
+            foods =
+                Array.isArray(data.foods)
+                    ? data.foods
+                    : [];
 
 
-            // Restaurant information
-            const restaurant =
-                data.restaurant ||
-                data.restaurantData;
-
-            if (restaurant) {
-                setRestaurantInfo(restaurant);
-            }
-
-
-            console.log("FOODS:", foods);
+            createCategories();
 
 
             if (!foods.length) {
-                showEmpty("No food available.");
+
+                showEmpty(
+                    "No food available."
+                );
+
                 return;
             }
 
@@ -153,223 +150,232 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         catch (error) {
 
-            console.error("MENU ERROR:", error);
+            console.error(
+                "MENU ERROR:",
+                error
+            );
+
 
             showEmpty(
-                "Unable to load restaurant menu."
+                "Unable to load menu."
             );
 
         }
+
     }
 
 
-    // =====================================================
-    // RESTAURANT INFORMATION
-    // =====================================================
+    /* =====================================================
+       CREATE CATEGORIES
+    ===================================================== */
 
-    function setRestaurantInfo(r) {
+    function createCategories() {
 
-        const name =
-            r.name ||
-            r.restaurant_name;
-
-        const category =
-            r.category ||
-            r.cuisine ||
-            "Multi Cuisine";
-
-        const rating =
-            r.rating ||
-            "4.5";
-
-        const time =
-            r.delivery_time ||
-            r.deliveryTime ||
-            "30 min";
-
-        const city =
-            r.city ||
-            "";
-
-        const image =
-            r.image ||
-            r.image_url ||
-            r.restaurant_image;
+        if (!categorySection)
+            return;
 
 
-        const nameEl =
-            document.getElementById("restaurantName");
-
-        const categoryEl =
-            document.getElementById("restaurantCategory");
-
-        const ratingEl =
-            document.getElementById("restaurantRating");
-
-        const timeEl =
-            document.getElementById("restaurantTime");
-
-        const cityEl =
-            document.getElementById("restaurantCity");
-
-        const imageEl =
-            document.getElementById("restaurantImage");
+        const categories =
+            [
+                ...new Set(
+                    foods
+                        .map(food =>
+                            String(
+                                food.category || ""
+                            ).trim()
+                        )
+                        .filter(Boolean)
+                )
+            ]
+            .sort();
 
 
-        if (nameEl)
-            nameEl.textContent = name;
+        categorySection.innerHTML = `
 
-        if (categoryEl)
-            categoryEl.textContent = category;
+            <button
+                class="category-btn active"
+                data-category="All"
+                type="button"
+            >
+                All
+            </button>
 
-        if (ratingEl)
-            ratingEl.textContent = "⭐ " + rating;
+        `;
 
-        if (timeEl)
-            timeEl.textContent = "🚚 " + time;
 
-        if (cityEl)
-            cityEl.textContent =
-                city ? "📍 " + city : "";
+        categories.forEach(category => {
 
-        if (imageEl && image)
-            imageEl.src = getImage(image);
+            const button =
+                document.createElement("button");
+
+
+            button.className =
+                "category-btn";
+
+
+            button.type = "button";
+
+
+            button.dataset.category =
+                category;
+
+
+            button.textContent =
+                category;
+
+
+            categorySection.appendChild(
+                button
+            );
+
+        });
+
+
+        bindCategoryButtons();
+
     }
 
 
-    // =====================================================
-    // RENDER FOOD
-    // =====================================================
+    /* =====================================================
+       RENDER FOODS
+    ===================================================== */
 
     function renderFoods() {
 
-        let list = [...foods];
+        let list =
+            [...foods];
+
 
         const query =
             searchFood
-                ? searchFood.value.trim().toLowerCase()
+                ? searchFood.value
+                    .trim()
+                    .toLowerCase()
                 : "";
 
 
-        // SEARCH
+        /* SEARCH */
+
         if (query) {
 
-            list = list.filter(food => {
+            list =
+                list.filter(food => {
 
-                const text = [
+                    const text = [
 
-                    food.name,
-                    food.food_name,
-                    food.item_name,
-                    food.description,
-                    food.food_description,
-                    food.category,
-                    food.food_category
+                        food.name,
 
-                ]
-                    .filter(Boolean)
-                    .join(" ")
-                    .toLowerCase();
+                        food.description,
 
-                return text.includes(query);
-            });
+                        food.category
+
+                    ]
+                        .filter(Boolean)
+                        .join(" ")
+                        .toLowerCase();
+
+
+                    return text.includes(
+                        query
+                    );
+
+                });
+
         }
 
 
-        // CATEGORY
-        if (activeCategory !== "All") {
+        /* CATEGORY */
 
-            list = list.filter(food => {
+        if (
+            activeCategory !==
+            "All"
+        ) {
 
-                const category = String(
-                    food.category ||
-                    food.food_category ||
-                    food.category_name ||
-                    ""
-                ).toLowerCase();
+            list =
+                list.filter(food => {
 
-                const name = String(
-                    food.name ||
-                    food.food_name ||
-                    ""
-                ).toLowerCase();
+                    const category =
+                        String(
+                            food.category || ""
+                        ).toLowerCase();
 
-                return (
-                    category.includes(
-                        activeCategory.toLowerCase()
-                    ) ||
-                    name.includes(
-                        activeCategory.toLowerCase()
-                    )
-                );
-            });
+
+                    return (
+                        category ===
+                        activeCategory
+                            .toLowerCase()
+                    );
+
+                });
+
         }
 
 
         if (!list.length) {
-            showEmpty("No food found.");
+
+            showEmpty(
+                "No food found."
+            );
+
             return;
         }
 
+
         hideEmpty();
 
+
         foodContainer.innerHTML =
-            list.map(createFoodCard).join("");
+            list
+                .map(createFoodCard)
+                .join("");
+
     }
 
 
-    // =====================================================
-    // FOOD CARD
-    // =====================================================
+    /* =====================================================
+       FOOD CARD
+    ===================================================== */
 
     function createFoodCard(food) {
 
-        const id = getFoodId(food);
+        const id =
+            getFoodId(food);
+
 
         const name =
             food.name ||
-            food.food_name ||
-            food.item_name ||
             "Food";
+
 
         const description =
             food.description ||
-            food.food_description ||
             "Delicious food";
 
+
         const price =
-            food.price ??
-            food.food_price ??
-            food.item_price ??
-            0;
+            food.price ?? 0;
+
 
         const image =
-            food.image ||
-            food.image_url ||
-            food.food_image ||
-            "";
-
-
-        // IMPORTANT DEBUG
-        console.log(
-            "FOOD:",
-            name,
-            "ID:",
-            id
-        );
+            food.image || "";
 
 
         return `
+
             <div class="food-card">
 
                 <img
-                    src="${safe(getImage(image))}"
+                    src="${safe(
+                        getImage(image)
+                    )}"
                     alt="${safe(name)}"
+
                     onerror="
                         this.onerror=null;
                         this.src='/images/foods/default-food.jpg';
                     "
                 >
+
 
                 <div class="food-content">
 
@@ -377,15 +383,18 @@ document.addEventListener("DOMContentLoaded", () => {
                         ${safe(name)}
                     </h3>
 
+
                     <p>
                         ${safe(description)}
                     </p>
+
 
                     <div class="food-footer">
 
                         <span class="price">
                             ₹${safe(price)}
                         </span>
+
 
                         <button
                             class="add-btn"
@@ -400,139 +409,207 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
 
             </div>
+
         `;
+
     }
 
 
-    // =====================================================
-    // ADD TO CART
-    // =====================================================
+    /* =====================================================
+       ADD TO CART
+    ===================================================== */
 
-    async function addToCart(foodId, button) {
+    async function addToCart(
+        foodId,
+        button
+    ) {
 
-    if (!foodId) {
-        Swal.fire({
-            icon: "error",
-            title: "Oops!",
-            text: "Food ID is required."
-        });
-        return;
-    }
+        if (!foodId) {
 
-    try {
+            Swal.fire({
 
-        button.disabled = true;
-        button.textContent = "Adding...";
+                icon: "error",
 
-        const response = await fetch("/cart/add", {
-            method: "POST",
+                title: "Oops!",
 
-            headers: {
-                "Content-Type": "application/json"
-            },
+                text: "Food ID is required."
 
-            credentials: "include",
-
-            body: JSON.stringify({
-                foodId: Number(foodId),
-                food_id: Number(foodId),
-
-                restaurantId: Number(restaurantId),
-                restaurant_id: Number(restaurantId),
-
-                quantity: 1
-            })
-        });
-
-        const data = await response.json();
-
-        console.log("ADD CART RESPONSE:", data);
-
-        if (response.status === 401 || response.status === 403) {
-
-            await Swal.fire({
-                icon: "info",
-                title: "Login Required",
-                text: "Please login first."
             });
 
-            location.href = "/login";
             return;
+
         }
 
-        if (!response.ok) {
-            throw new Error(
-                data.message || "Unable to add item to cart."
+
+        try {
+
+            button.disabled = true;
+
+            button.textContent =
+                "Adding...";
+
+
+            const response =
+                await fetch(
+                    "/cart/add",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        credentials: "include",
+
+                        body: JSON.stringify({
+
+                            foodId:
+                                Number(foodId),
+
+                            food_id:
+                                Number(foodId),
+
+                            quantity: 1
+
+                        })
+
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            console.log(
+                "ADD CART RESPONSE:",
+                data
             );
+
+
+            if (
+                response.status === 401 ||
+                response.status === 403
+            ) {
+
+                await Swal.fire({
+
+                    icon: "info",
+
+                    title: "Login Required",
+
+                    text: "Please login first."
+
+                });
+
+
+                location.href =
+                    "/login";
+
+
+                return;
+
+            }
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data.message ||
+                    "Unable to add item to cart."
+                );
+
+            }
+
+
+            Swal.fire({
+
+                toast: true,
+
+                position: "top-end",
+
+                icon: "success",
+
+                title:
+                    data.message ||
+                    "Added to cart",
+
+                showConfirmButton: false,
+
+                timer: 1500
+
+            });
+
+
+            loadCartCount();
+
+
         }
+        catch (error) {
 
-        Swal.fire({
-            toast: true,
-            position: "top-end",
-            icon: "success",
-            title: data.message || "Added to cart",
-            showConfirmButton: false,
-            timer: 1500
-        });
+            console.error(
+                "ADD CART ERROR:",
+                error
+            );
 
-        loadCartCount();
 
-    } catch (error) {
+            Swal.fire({
 
-        console.error("ADD CART ERROR:", error);
+                icon: "error",
 
-        Swal.fire({
-            icon: "error",
-            title: "Oops!",
-            text: error.message
-        });
+                title: "Oops!",
 
-    } finally {
+                text: error.message
 
-        button.disabled = false;
-        button.textContent = "Add To Cart";
+            });
+
+        }
+        finally {
+
+            button.disabled = false;
+
+            button.textContent =
+                "Add To Cart";
+
+        }
 
     }
-}
 
 
-
-    // =====================================================
-    // ADD BUTTON CLICK
-    // =====================================================
+    /* =====================================================
+       FOOD CLICK
+    ===================================================== */
 
     foodContainer.addEventListener(
         "click",
         event => {
 
             const button =
-                event.target.closest(".add-btn");
+                event.target.closest(
+                    ".add-btn"
+                );
+
 
             if (!button)
                 return;
 
 
-            const foodId =
-                button.dataset.foodId;
-
-
-            console.log(
-                "CLICKED FOOD ID:",
-                foodId
-            );
-
-
             addToCart(
-                foodId,
+
+                button.dataset.foodId,
+
                 button
+
             );
+
         }
     );
 
 
-    // =====================================================
-    // SEARCH
-    // =====================================================
+    /* =====================================================
+       SEARCH
+    ===================================================== */
 
     if (searchFood) {
 
@@ -540,125 +617,199 @@ document.addEventListener("DOMContentLoaded", () => {
             "input",
             renderFoods
         );
+
     }
 
 
-    // =====================================================
-    // CATEGORY
-    // =====================================================
+    /* =====================================================
+       CATEGORY BUTTONS
+    ===================================================== */
 
-    categoryButtons.forEach(button => {
+    function bindCategoryButtons() {
 
-        button.addEventListener(
-            "click",
-            () => {
-
-                categoryButtons.forEach(btn =>
-                    btn.classList.remove("active")
-                );
-
-                button.classList.add("active");
-
-                activeCategory =
-                    button.dataset.category ||
-                    "All";
-
-                renderFoods();
-            }
-        );
-
-    });
+        const buttons =
+            document.querySelectorAll(
+                ".category-btn"
+            );
 
 
-    // =====================================================
-    // EMPTY
-    // =====================================================
+        buttons.forEach(button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    buttons.forEach(
+                        btn =>
+                            btn.classList
+                                .remove(
+                                    "active"
+                                )
+                    );
+
+
+                    button.classList.add(
+                        "active"
+                    );
+
+
+                    activeCategory =
+                        button.dataset.category ||
+                        "All";
+
+
+                    renderFoods();
+
+                }
+            );
+
+        });
+
+    }
+
+
+    /* =====================================================
+       EMPTY STATE
+    ===================================================== */
 
     function showEmpty(message) {
 
         foodContainer.innerHTML = "";
 
+
         if (!emptyFood)
             return;
 
-        emptyFood.style.display = "block";
+
+        emptyFood.style.display =
+            "block";
+
 
         const p =
-            emptyFood.querySelector("p");
+            emptyFood.querySelector(
+                "p"
+            );
 
-        if (p)
-            p.textContent = message;
+
+        if (p) {
+            p.textContent =
+                message;
+        }
+
     }
 
 
     function hideEmpty() {
 
-        if (emptyFood)
-            emptyFood.style.display = "none";
+        if (emptyFood) {
+
+            emptyFood.style.display =
+                "none";
+
+        }
 
     }
 
 
-    // =====================================================
-    // CART COUNT
-    // =====================================================
+    /* =====================================================
+       CART COUNT
+    ===================================================== */
 
     function loadCartCount() {
 
-    fetch("/cart", {
-        credentials: "include"
-    })
-    .then(res => res.json())
-    .then(data => {
+        fetch(
+            "/cart",
+            {
+                credentials: "include",
+                cache: "no-store"
+            }
+        )
 
-        const cart = Array.isArray(data.cart)
-            ? data.cart
-            : [];
+        .then(res =>
+            res.json()
+        )
 
-        const uniqueItems = new Set();
+        .then(data => {
 
-        cart.forEach(item => {
+            const cart =
+                Array.isArray(data.cart)
+                    ? data.cart
+                    : [];
 
-            const id =
-                item.food_id ||
-                item.foodId ||
-                item.id;
 
-            if (id) {
-                uniqueItems.add(String(id));
+            const uniqueItems =
+                new Set();
+
+
+            cart.forEach(item => {
+
+                const id =
+                    item.food_id ||
+                    item.foodId ||
+                    item.id;
+
+
+                if (id) {
+
+                    uniqueItems.add(
+                        String(id)
+                    );
+
+                }
+
+            });
+
+
+            const count =
+                uniqueItems.size;
+
+
+            const el =
+                document.getElementById(
+                    "headerCartCount"
+                );
+
+
+            if (el) {
+
+                el.textContent =
+                    count;
+
+            }
+
+        })
+
+        .catch(() => {
+
+            const el =
+                document.getElementById(
+                    "headerCartCount"
+                );
+
+
+            if (el) {
+
+                el.textContent =
+                    "0";
+
             }
 
         });
 
-        const count = uniqueItems.size;
+    }
 
-        const el = document.getElementById("headerCartCount");
 
-        if (el) {
-            el.textContent = count;
-        }
-
-    })
-    .catch(() => {
-
-        const el = document.getElementById("headerCartCount");
-
-        if (el) {
-            el.textContent = "0";
-        }
-
-    });
-}
-    // =====================================================
-    // START
-    // =====================================================
+    /* =====================================================
+       START
+    ===================================================== */
 
     console.log(
-        "Jigato Menu:",
-        restaurantId
+        "Jigato Menu Started"
     );
 
+
     loadMenu();
+
     loadCartCount();
 
 });

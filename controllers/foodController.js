@@ -1,43 +1,37 @@
 const foodModel = require("../models/foodModel");
 
-const getRestaurantMenu = (req, res) => {
 
-    const restaurantId = req.params.id;
+/* =====================================================
+   GET MENU
+===================================================== */
 
-    console.log("Restaurant ID:", restaurantId);
+const getMenu = (req, res) => {
 
-    foodModel.getRestaurant(restaurantId, (err, restaurant) => {
+    foodModel.getAllFoods((err, foods) => {
 
         if (err) {
-            console.error(err);
+
+            console.error(
+                "Menu Error:",
+                err
+            );
+
             return res.status(500).json({
+
                 success: false,
-                message: "Database Error"
+
+                message: "Menu load nahi hua"
+
             });
+
         }
 
-        if (!restaurant || restaurant.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: "Restaurant Not Found"
-            });
-        }
 
-        foodModel.getFoodsByRestaurant(restaurantId, (err, foods) => {
+        return res.status(200).json({
 
-            if (err) {
-                console.error(err);
-                return res.status(500).json({
-                    success: false,
-                    message: "Database Error"
-                });
-            }
+            success: true,
 
-            return res.status(200).json({
-                success: true,
-                restaurant: restaurant[0],
-                foods: foods
-            });
+            foods: foods || []
 
         });
 
@@ -45,6 +39,7 @@ const getRestaurantMenu = (req, res) => {
 
 };
 
+
 module.exports = {
-    getRestaurantMenu
+    getMenu
 };

@@ -25,13 +25,22 @@ app.use(express.json());
 
 app.use(
     session({
+        name: "jigato.sid",
+
         secret: "jigato_secret_key",
+
         resave: false,
+
         saveUninitialized: false,
 
         cookie: {
             maxAge: 1000 * 60 * 60 * 24,
-            httpOnly: true
+
+            httpOnly: true,
+
+            secure: false,
+
+            sameSite: "lax"
         }
     })
 );
@@ -74,23 +83,19 @@ app.get("/login", (req, res) => {
 });
 
 
-// RESTAURANTS
-app.get("/restaurant", (req, res) => {
-    res.sendFile(
-        path.join(__dirname, "views", "restaurant.html")
-    );
-});
 
 
-// RESTAURANT MENU
-app.get("/restaurant/:id", (req, res) => {
+
+
+// MENU PAGE
+app.get("/menu", (req, res) => {
     res.sendFile(
         path.join(__dirname, "views", "menu.html")
     );
 });
 
 
-// CART PAGE
+//CART PAGE
 app.get("/cart-page", (req, res) => {
     res.sendFile(
         path.join(__dirname, "views", "cart.html")
@@ -98,7 +103,7 @@ app.get("/cart-page", (req, res) => {
 });
 
 
-// CHECKOUT PAGE
+//CHECKOUT PAGE
 app.get("/checkout", (req, res) => {
     res.sendFile(
         path.join(__dirname, "views", "checkout.html")
@@ -106,11 +111,11 @@ app.get("/checkout", (req, res) => {
 });
 
 
-// OLD CHECKOUT URL
+// // // OLD CHECKOUT URL
 app.get("/checkout-page", (req, res) => {
     res.redirect("/checkout");
 });
-//PROFILE
+// //PROFILE
 app.get("/profile", (req, res) => {
     res.sendFile(
         path.join(__dirname, "views", "profile.html")
@@ -119,15 +124,15 @@ app.get("/profile", (req, res) => {
 //offers
 app.get("/offers", (req, res) => {
     res.sendFile(
-        path.join(__dirname, "views", "offers.html")
-    );
-});
+         path.join(__dirname, "views", "offers.html")
+     );
+ });
 //offers
-app.get("/orders", (req, res) => {
-    res.sendFile(
-        path.join(__dirname, "views", "my-orders.html")
-    );
-});
+ app.get("/orders", (req, res) => {
+     res.sendFile(
+       path.join(__dirname, "views", "my-orders.html")
+     );
+ });
 
 // =====================================================
 // API ROUTES
@@ -146,14 +151,6 @@ const homeRoutes =
     require("./routes/homeRoutes");
 
 app.use(homeRoutes);
-
-
-// RESTAURANT
-const restaurantRoutes =
-    require("./routes/restaurantRoutes");
-
-app.use(restaurantRoutes);
-
 
 // FOOD
 const foodRoutes =

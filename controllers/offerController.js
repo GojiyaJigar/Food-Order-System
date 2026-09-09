@@ -7,32 +7,39 @@ const offerModel = require("../models/offerModel");
 
 const getOffers = (req, res) => {
 
-    offerModel.getAllOffers((err, offers) => {
+    offerModel.getAllOffers(
+        (err, offers) => {
 
-        if (err) {
+            if (err) {
 
-            console.error(
-                "GET OFFERS CONTROLLER ERROR:",
-                err
-            );
+                console.error(
+                    "GET OFFERS CONTROLLER ERROR:",
+                    err
+                );
 
-            return res.status(500).json({
-                success: false,
-                message: "Unable to load offers."
+                return res.status(500).json({
+
+                    success: false,
+
+                    message:
+                        "Unable to load offers."
+
+                });
+
+            }
+
+
+            return res.json({
+
+                success: true,
+
+                offers:
+                    offers || []
+
             });
 
         }
-
-
-        return res.json({
-
-            success: true,
-
-            offers: offers || []
-
-        });
-
-    });
+    );
 
 };
 
@@ -41,10 +48,15 @@ const getOffers = (req, res) => {
 // GET SINGLE OFFER
 // =====================================================
 
-const getOffer = (req, res) => {
+const getOffer = (
+    req,
+    res
+) => {
 
     const offerId =
-        Number(req.params.id);
+        Number(
+            req.params.id
+        );
 
 
     if (
@@ -55,7 +67,9 @@ const getOffer = (req, res) => {
         return res.status(400).json({
 
             success: false,
-            message: "Invalid offer ID."
+
+            message:
+                "Invalid offer ID."
 
         });
 
@@ -64,6 +78,7 @@ const getOffer = (req, res) => {
 
     offerModel.getOfferById(
         offerId,
+
         (err, offer) => {
 
             if (err) {
@@ -76,7 +91,9 @@ const getOffer = (req, res) => {
                 return res.status(500).json({
 
                     success: false,
-                    message: "Unable to load offer."
+
+                    message:
+                        "Unable to load offer."
 
                 });
 
@@ -88,7 +105,9 @@ const getOffer = (req, res) => {
                 return res.status(404).json({
 
                     success: false,
-                    message: "Offer not found."
+
+                    message:
+                        "Offer not found."
 
                 });
 
@@ -98,6 +117,7 @@ const getOffer = (req, res) => {
             return res.json({
 
                 success: true,
+
                 offer: offer
 
             });
@@ -112,7 +132,10 @@ const getOffer = (req, res) => {
 // APPLY / VALIDATE COUPON
 // =====================================================
 
-const applyCoupon = (req, res) => {
+const applyCoupon = (
+    req,
+    res
+) => {
 
     const body =
         req.body || {};
@@ -141,7 +164,9 @@ const applyCoupon = (req, res) => {
         return res.status(400).json({
 
             success: false,
-            message: "Please enter a coupon code."
+
+            message:
+                "Please enter a coupon code."
 
         });
 
@@ -156,7 +181,9 @@ const applyCoupon = (req, res) => {
         return res.status(400).json({
 
             success: false,
-            message: "Invalid order amount."
+
+            message:
+                "Invalid order amount."
 
         });
 
@@ -169,6 +196,7 @@ const applyCoupon = (req, res) => {
 
     offerModel.getOfferByCode(
         code,
+
         (err, offer) => {
 
             if (err) {
@@ -181,7 +209,9 @@ const applyCoupon = (req, res) => {
                 return res.status(500).json({
 
                     success: false,
-                    message: "Unable to verify coupon."
+
+                    message:
+                        "Unable to verify coupon."
 
                 });
 
@@ -193,7 +223,9 @@ const applyCoupon = (req, res) => {
                 return res.status(404).json({
 
                     success: false,
-                    message: "Invalid coupon code."
+
+                    message:
+                        "Invalid coupon code."
 
                 });
 
@@ -205,13 +237,17 @@ const applyCoupon = (req, res) => {
             // =================================================
 
             if (
-                Number(offer.is_active) !== 1
+                Number(
+                    offer.is_active
+                ) !== 1
             ) {
 
                 return res.status(400).json({
 
                     success: false,
-                    message: "This coupon is inactive."
+
+                    message:
+                        "This coupon is inactive."
 
                 });
 
@@ -245,7 +281,9 @@ const applyCoupon = (req, res) => {
                 return res.status(400).json({
 
                     success: false,
-                    message: "This coupon is not active yet."
+
+                    message:
+                        "This coupon is not active yet."
 
                 });
 
@@ -259,7 +297,9 @@ const applyCoupon = (req, res) => {
                 return res.status(400).json({
 
                     success: false,
-                    message: "This coupon has expired."
+
+                    message:
+                        "This coupon has expired."
 
                 });
 
@@ -272,14 +312,20 @@ const applyCoupon = (req, res) => {
 
             if (
                 offer.usage_limit !== null &&
-                Number(offer.used_count) >=
-                Number(offer.usage_limit)
+                Number(
+                    offer.used_count
+                ) >=
+                Number(
+                    offer.usage_limit
+                )
             ) {
 
                 return res.status(400).json({
 
                     success: false,
-                    message: "This coupon usage limit has been reached."
+
+                    message:
+                        "This coupon usage limit has been reached."
 
                 });
 
@@ -320,7 +366,9 @@ const applyCoupon = (req, res) => {
 
 
             const discountType =
-                offer.discount_type;
+                String(
+                    offer.discount_type || ""
+                ).toLowerCase();
 
 
             const discountValue =
@@ -329,9 +377,9 @@ const applyCoupon = (req, res) => {
                 );
 
 
-            // -------------------------------------------------
+            // =================================================
             // PERCENTAGE
-            // -------------------------------------------------
+            // =================================================
 
             if (
                 discountType ===
@@ -339,15 +387,17 @@ const applyCoupon = (req, res) => {
             ) {
 
                 discount =
-                    subtotal *
-                    discountValue /
-                    100;
+                    (
+                        subtotal *
+                        discountValue
+                    ) / 100;
 
 
-                // Max discount
                 if (
                     offer.max_discount !== null &&
-                    Number(offer.max_discount) > 0
+                    Number(
+                        offer.max_discount
+                    ) > 0
                 ) {
 
                     discount =
@@ -363,12 +413,13 @@ const applyCoupon = (req, res) => {
             }
 
 
-            // -------------------------------------------------
+            // =================================================
             // FLAT
-            // -------------------------------------------------
+            // =================================================
 
             else if (
-                discountType === "flat"
+                discountType ===
+                "flat"
             ) {
 
                 discount =
@@ -377,7 +428,9 @@ const applyCoupon = (req, res) => {
 
                 if (
                     offer.max_discount !== null &&
-                    Number(offer.max_discount) > 0
+                    Number(
+                        offer.max_discount
+                    ) > 0
                 ) {
 
                     discount =
@@ -393,17 +446,14 @@ const applyCoupon = (req, res) => {
             }
 
 
-            // -------------------------------------------------
+            // =================================================
             // FREE DELIVERY
-            // -------------------------------------------------
+            // =================================================
 
             else if (
                 discountType ===
                 "free_delivery"
             ) {
-
-                // Delivery fee will be handled
-                // by checkout.
 
                 discount = 0;
 
@@ -477,13 +527,7 @@ const applyCoupon = (req, res) => {
                         minimumOrder,
 
                     offerType:
-                        offer.offer_type,
-
-                    restaurantId:
-                        offer.restaurant_id,
-
-                    restaurantName:
-                        offer.restaurant_name || null
+                        offer.offer_type
 
                 }
 

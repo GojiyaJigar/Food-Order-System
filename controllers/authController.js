@@ -64,118 +64,266 @@ const registerUser = (req, res) => {
     });
 
 };
-
 // ==========================
 // Login User
 // ==========================
 
 const loginUser = (req, res) => {
 
-    const { email, password } = req.body;
+    const {
+        email,
+        password
+    } = req.body;
 
-    userModel.findUserByEmail(email, (err, result) => {
 
-        if (err) {
-            return res.status(500).json({
-                success: false,
-                message: "Database Error"
-            });
-        }
-
-        if (result.length === 0) {
-            return res.status(401).json({
-                success: false,
-                message: "Invalid Email or Password"
-            });
-        }
-
-        const user = result[0];
-
-        bcrypt.compare(password, user.password, (err, isMatch) => {
+    userModel.findUserByEmail(
+        email,
+        (err, result) => {
 
             if (err) {
+
+                console.error(
+                    "LOGIN DB ERROR:",
+                    err
+                );
+
                 return res.status(500).json({
                     success: false,
-                    message: "Password Compare Error"
+                    message: "Database Error"
                 });
+
             }
 
-            if (!isMatch) {
+
+            if (!result || result.length === 0) {
+
                 return res.status(401).json({
                     success: false,
                     message: "Invalid Email or Password"
                 });
+
             }
 
-            // Save Session
-            req.session.userId = user.id;
-            req.session.role = user.role;
-            req.session.name = user.name;
-            req.session.city=user.city;
 
-            req.session.save((err) => {
+            const user =
+                result[0];
 
-                if (err) {
-                    return res.status(500).json({
-                        success: false,
-                        message: "Session Save Failed"
-                    });
+
+            bcrypt.compare(
+                password,
+                user.password,
+                (err, isMatch) => {
+
+                    if (err) {
+
+                        console.error(
+                            "PASSWORD ERROR:",
+                            err
+                        );
+
+                        return res.status(500).json({
+                            success: false,
+                            message:
+                                "Password Compare Error"
+                        });
+
+                    }
+
+
+                    if (!isMatch) {
+
+                        return res.status(401).json({
+                            success: false,
+                            message:
+                                "Invalid Email or Password"
+                        });
+
+                    }
+
+
+                    /*
+                     * Fresh session create
+                     */
+
+                    req.session.regenerate(
+                        (sessionError) => {
+
+                            if (sessionError) {
+
+                                console.error(
+                                    "SESSION REGENERATE ERROR:",
+                                    sessionError
+                                );
+
+                                return res.status(500).json({
+                                    success: false,
+                                    message:
+                                        "Session Creation Failed"
+                                });
+
+                            }
+
+
+                            /*
+                             * Save user data
+                             */
+
+                            req.session.userId =
+                                user.id;
+
+                            req.session.role =
+                                user.role;
+
+                            req.session.name =
+                                user.name;
+
+                            req.session.city =
+                                user.city;
+
+
+                            console.log(
+                                "SESSION BEFORE SAVE:",
+                                {
+                                    userId:
+                                        req.session.userId,
+
+                                    role:
+                                        req.session.role,
+
+                                    name:
+                                        req.session.name,
+
+                                    city:
+                                        req.session.city
+                                }
+                            );
+
+
+                            req.session.save(
+                                (saveError) => {
+
+                                    if (saveError) {
+
+                                        console.error(
+                                            "SESSION SAVE ERROR:",
+                                            saveError
+                                        );
+
+                                        return res.status(500).json({
+                                            success: false,
+                                            message:
+                                                "Session Save Failed"
+                                        });
+
+                                    }
+
+
+                                    console.log(
+                                        "LOGIN SESSION SAVED:",
+                                        req.session.userId
+                                    );
+
+
+                                    return res.json({
+
+                                        success: true,
+
+                                        message:
+                                            "Login Successful",
+
+                                        role:
+                                            user.role,
+
+                                        name:
+                                            user.name
+
+                                    });
+
+                                }
+                            );
+
+                        }
+                    );
+
                 }
-                return res.json({
-                    success: true,
-                    message: "Login Successful",
-                    role: user.role,
-                    name: user.name
-                });
+            );
 
-            });
-
-        });
-
-    });
+        }
+    );
 
 };
-
 // ==========================
 // Check Authentication
 // ==========================
 
 const checkAuth = (req, res) => {
 
-    if (req.session.userId) {
+    console.log(
+        "CHECK AUTH SESSION:",
+        req.session
+    );
+
+
+    const loggedIn =
+        req.session &&
+        req.session.userId !== undefined &&
+        req.session.userId !== null;
+
+
+    if (loggedIn) {
 
         return res.json({
+
             loggedIn: true,
-            userId: req.session.userId,
-            role: req.session.role,
-            name: req.session.name,
-            city: req.session.city
+
+            userId:
+                req.session.userId,
+
+            role:
+                req.session.role,
+
+            name:
+                req.session.name,
+
+            city:
+                req.session.city
+
         });
 
     }
 
+
     return res.json({
+
         loggedIn: false
+
     });
 
 };
-
-// ==========================
-// Logout User
-// ==========================
 
 const logoutUser = (req, res) => {
 
     req.session.destroy((err) => {
 
         if (err) {
+
             return res.status(500).json({
                 success: false,
                 message: "Logout Failed"
             });
+
         }
 
-        res.clearCookie("connect.sid");
+
+        res.clearCookie(
+            "jigato.sid",
+            {
+                httpOnly: true,
+                sameSite: "lax",
+                secure: false
+            }
+        );
+
 
         return res.json({
             success: true,

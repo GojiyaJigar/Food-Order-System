@@ -1,5 +1,6 @@
 const db = require("../config/db");
 
+
 /* =====================================================
    CATEGORIES
 ===================================================== */
@@ -20,51 +21,25 @@ const getCategories = (callback) => {
 
 
 /* =====================================================
-   TOP RATED RESTAURANTS
+   HOME FOODS
+   ONLY 6 FOODS
 ===================================================== */
 
-const getTopRatedRestaurants = (callback) => {
+const getHomeFoods = (callback) => {
 
     const sql = `
         SELECT
             id,
+            restaurant_id,
             name,
-            image,
+            description,
+            price,
             category,
-            city,
-            rating,
-            delivery_time,
-            address,
-            is_open,
-            created_at
-        FROM restaurants
-        ORDER BY rating DESC
-        LIMIT 6
-    `;
-
-    db.query(sql, callback);
-};
-
-
-/* =====================================================
-   RECENT RESTAURANTS
-===================================================== */
-
-const getRecentRestaurants = (callback) => {
-
-    const sql = `
-        SELECT
-            id,
-            name,
             image,
-            category,
-            city,
-            rating,
-            delivery_time,
-            address,
-            is_open,
+            is_available,
             created_at
-        FROM restaurants
+        FROM foods
+        WHERE is_available = 1
         ORDER BY created_at DESC
         LIMIT 6
     `;
@@ -74,108 +49,26 @@ const getRecentRestaurants = (callback) => {
 
 
 /* =====================================================
-   HOME FOODS
-   ONLY 6 FOODS
-===================================================== */
-
-const getHomeFoods = (callback) => {
-
-    const sql = `
-        SELECT
-            f.id,
-            f.restaurant_id,
-            f.name,
-            f.description,
-            f.price,
-            f.category,
-            f.image,
-            f.is_available,
-            f.created_at,
-
-            r.name AS restaurant_name,
-            r.rating AS restaurant_rating,
-            r.delivery_time,
-            r.city,
-            r.is_open
-
-        FROM foods f
-
-        INNER JOIN restaurants r
-            ON f.restaurant_id = r.id
-
-        WHERE
-            f.is_available = 1
-            AND r.is_open = 1
-
-        ORDER BY f.created_at DESC
-
-        LIMIT 6
-    `;
-
-    db.query(sql, callback);
-};
-
-
-/* =====================================================
-   ALL RESTAURANTS
-   USED FOR SEARCH
-===================================================== */
-
-const getAllRestaurants = (callback) => {
-
-    const sql = `
-        SELECT
-            id,
-            name,
-            image,
-            category,
-            city,
-            rating,
-            delivery_time,
-            address,
-            is_open,
-            created_at
-        FROM restaurants
-        ORDER BY name ASC
-    `;
-
-    db.query(sql, callback);
-};
-
-
-/* =====================================================
    ALL FOODS
-   USED FOR SEARCH
+   USED FOR MENU + SEARCH
 ===================================================== */
 
 const getAllFoods = (callback) => {
 
     const sql = `
         SELECT
-            f.id,
-            f.restaurant_id,
-            f.name,
-            f.description,
-            f.price,
-            f.category,
-            f.image,
-            f.is_available,
-            f.created_at,
-
-            r.name AS restaurant_name,
-            r.rating AS restaurant_rating,
-            r.delivery_time,
-            r.city,
-            r.is_open
-
-        FROM foods f
-
-        INNER JOIN restaurants r
-            ON f.restaurant_id = r.id
-
-        WHERE f.is_available = 1
-
-        ORDER BY f.name ASC
+            id,
+            restaurant_id,
+            name,
+            description,
+            price,
+            category,
+            image,
+            is_available,
+            created_at
+        FROM foods
+        WHERE is_available = 1
+        ORDER BY name ASC
     `;
 
     db.query(sql, callback);
@@ -185,10 +78,7 @@ const getAllFoods = (callback) => {
 module.exports = {
 
     getCategories,
-    getTopRatedRestaurants,
-    getRecentRestaurants,
     getHomeFoods,
-    getAllRestaurants,
     getAllFoods
 
 };

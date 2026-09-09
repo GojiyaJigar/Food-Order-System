@@ -1,185 +1,357 @@
 const cartModel = require("../models/cartModel");
 
-// ==========================
+
+// =====================================================
+// LOGIN CHECK
+// =====================================================
+
+function isLoggedIn(req) {
+
+    return (
+        req.session &&
+        req.session.userId !== undefined &&
+        req.session.userId !== null
+    );
+
+}
+
+
+// =====================================================
 // Add Item To Cart
-// ==========================
+// =====================================================
+
 const addToCart = (req, res) => {
 
-    if (!req.session.userId) {
+    if (!isLoggedIn(req)) {
+
         return res.status(401).json({
+
             success: false,
+
             message: "Please login first."
+
         });
+
     }
 
-    const userId = req.session.userId;
-    const { foodId } = req.body;
+
+    const userId =
+        req.session.userId;
+
+
+    const { foodId } =
+        req.body;
+
 
     if (!foodId) {
+
         return res.status(400).json({
+
             success: false,
+
             message: "Food ID is required."
+
         });
+
     }
 
-    cartModel.addToCart(userId, foodId, (err) => {
 
-        if (err) {
-            console.log(err);
-            return res.status(500).json({
-                success: false,
-                message: "Database Error"
+    cartModel.addToCart(
+        userId,
+        Number(foodId),
+        (err) => {
+
+            if (err) {
+
+                console.error(
+                    "ADD CART ERROR:",
+                    err
+                );
+
+                return res.status(500).json({
+
+                    success: false,
+
+                    message:
+                        "Database Error"
+
+                });
+
+            }
+
+
+            return res.json({
+
+                success: true,
+
+                message:
+                    "Item added to cart successfully."
+
             });
+
         }
-
-        return res.json({
-            success: true,
-            message: "Item added to cart successfully."
-        });
-
-    });
+    );
 
 };
 
-// ==========================
+
+// =====================================================
 // Get User Cart
-// ==========================
+// =====================================================
+
 const getCartItems = (req, res) => {
 
-    if (!req.session.userId) {
+    if (!isLoggedIn(req)) {
+
         return res.status(401).json({
+
             success: false,
+
             message: "Please login first."
+
         });
+
     }
 
-    const userId = req.session.userId;
 
-    cartModel.getCartItems(userId, (err, result) => {
+    const userId =
+        req.session.userId;
 
-        if (err) {
-            console.log(err);
-            return res.status(500).json({
-                success: false,
-                message: "Database Error"
+
+    cartModel.getCartItems(
+        userId,
+        (err, result) => {
+
+            if (err) {
+
+                console.error(
+                    "GET CART ERROR:",
+                    err
+                );
+
+                return res.status(500).json({
+
+                    success: false,
+
+                    message:
+                        "Database Error"
+
+                });
+
+            }
+
+
+            return res.json({
+
+                success: true,
+
+                cart:
+                    result || []
+
             });
+
         }
-
-        return res.json({
-            success: true,
-            cart: result
-        });
-
-    });
+    );
 
 };
 
-// ==========================
+
+// =====================================================
 // Increase Quantity
-// ==========================
+// =====================================================
+
 const increaseQuantity = (req, res) => {
 
-    if (!req.session.userId) {
+    if (!isLoggedIn(req)) {
+
         return res.status(401).json({
+
             success: false,
+
             message: "Please login first."
+
         });
+
     }
 
-    const { cartId } = req.params;
 
-    cartModel.increaseQuantity(cartId, (err) => {
+    const { cartId } =
+        req.params;
 
-        if (err) {
-            console.log(err);
-            return res.status(500).json({
-                success: false,
-                message: "Database Error"
+
+    cartModel.increaseQuantity(
+        cartId,
+        req.session.userId,
+        (err) => {
+
+            if (err) {
+
+                console.error(
+                    "INCREASE CART ERROR:",
+                    err
+                );
+
+                return res.status(500).json({
+
+                    success: false,
+
+                    message:
+                        "Database Error"
+
+                });
+
+            }
+
+
+            return res.json({
+
+                success: true,
+
+                message:
+                    "Quantity increased."
+
             });
+
         }
-
-        return res.json({
-            success: true,
-            message: "Quantity increased."
-        });
-
-    });
+    );
 
 };
 
-// ==========================
+
+// =====================================================
 // Decrease Quantity
-// ==========================
+// =====================================================
+
 const decreaseQuantity = (req, res) => {
 
-    if (!req.session.userId) {
+    if (!isLoggedIn(req)) {
+
         return res.status(401).json({
+
             success: false,
+
             message: "Please login first."
+
         });
+
     }
 
-    const { cartId } = req.params;
 
-    cartModel.decreaseQuantity(cartId, (err) => {
+    const { cartId } =
+        req.params;
 
-        if (err) {
-            console.log(err);
-            return res.status(500).json({
-                success: false,
-                message: "Database Error"
+
+    cartModel.decreaseQuantity(
+        cartId,
+        req.session.userId,
+        (err) => {
+
+            if (err) {
+
+                console.error(
+                    "DECREASE CART ERROR:",
+                    err
+                );
+
+                return res.status(500).json({
+
+                    success: false,
+
+                    message:
+                        "Database Error"
+
+                });
+
+            }
+
+
+            return res.json({
+
+                success: true,
+
+                message:
+                    "Quantity decreased."
+
             });
+
         }
-
-        return res.json({
-            success: true,
-            message: "Quantity decreased."
-        });
-
-    });
+    );
 
 };
 
-// ==========================
+
+// =====================================================
 // Remove Cart Item
-// ==========================
+// =====================================================
+
 const removeCartItem = (req, res) => {
 
-    if (!req.session.userId) {
+    if (!isLoggedIn(req)) {
+
         return res.status(401).json({
+
             success: false,
+
             message: "Please login first."
+
         });
+
     }
 
-    const { cartId } = req.params;
 
-    cartModel.removeCartItem(cartId, (err) => {
+    const { cartId } =
+        req.params;
 
-        if (err) {
-            console.log(err);
-            return res.status(500).json({
-                success: false,
-                message: "Database Error"
+
+    cartModel.removeCartItem(
+        cartId,
+        req.session.userId,
+        (err) => {
+
+            if (err) {
+
+                console.error(
+                    "REMOVE CART ERROR:",
+                    err
+                );
+
+                return res.status(500).json({
+
+                    success: false,
+
+                    message:
+                        "Database Error"
+
+                });
+
+            }
+
+
+            return res.json({
+
+                success: true,
+
+                message:
+                    "Item removed successfully."
+
             });
+
         }
-
-        return res.json({
-            success: true,
-            message: "Item removed successfully."
-        });
-
-    });
+    );
 
 };
 
-// ==========================
-// Export
-// ==========================
+
 module.exports = {
+
     addToCart,
+
     getCartItems,
+
     removeCartItem,
+
     increaseQuantity,
+
     decreaseQuantity
+
 };

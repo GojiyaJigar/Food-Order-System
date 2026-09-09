@@ -10,26 +10,26 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Restaurant Menu | Jigato</title>
+    <title>Menu | Jigato</title>
 
 
-    <!-- =====================================================
-         NAVBAR CSS
-    ====================================================== -->
+    <!-- NAVBAR -->
 
     <link
         rel="stylesheet"
         href="/header/navbar.css"
     >
+
+
+    <!-- FOOTER -->
+
     <link
-    rel="stylesheet"
-    href="/footer/footer.css"
->
+        rel="stylesheet"
+        href="/footer/footer.css"
+    >
 
 
-    <!-- =====================================================
-         MENU CSS
-    ====================================================== -->
+    <!-- MENU CSS -->
 
     <link
         rel="stylesheet"
@@ -37,9 +37,7 @@
     >
 
 
-    <!-- =====================================================
-         FONT AWESOME
-    ====================================================== -->
+    <!-- FONT AWESOME -->
 
     <link
         rel="stylesheet"
@@ -61,70 +59,29 @@
 
 
 <!-- =====================================================
-     RESTAURANT HERO
+     MENU HERO
 ===================================================== -->
 
-<section class="restaurant-hero">
+<section class="menu-hero">
 
+    <div class="menu-hero-content">
 
-    <!-- RESTAURANT IMAGE -->
-
-    <div class="restaurant-image">
-
-        <img
-            id="restaurantImage"
-            src="/images/restaurants/mc.jpg"
-            alt="Restaurant"
-        >
-
-    </div>
-
-
-
-    <!-- RESTAURANT INFORMATION -->
-
-    <div class="restaurant-info">
-
-
-        <span class="restaurant-label">
-            RESTAURANT
+        <span class="section-label">
+            JIGATO MENU
         </span>
 
-
-        <h1 id="restaurantName">
-            Loading restaurant...
+        <h1>
+            Delicious Food,
+            <br>
+            Delivered To You 🍽️
         </h1>
 
-
-        <p id="restaurantCategory">
-            🍽️ Loading...
+        <p>
+            Explore our delicious food collection
+            and order your favourites.
         </p>
 
-
-
-        <div class="restaurant-details">
-
-
-            <span id="restaurantRating">
-                ⭐ -
-            </span>
-
-
-            <span id="restaurantTime">
-                🚚 -
-            </span>
-
-
-            <span id="restaurantCity">
-                📍 Loading...
-            </span>
-
-
-        </div>
-
-
     </div>
-
 
 </section>
 
@@ -136,12 +93,9 @@
 
 <section class="search-section">
 
-
     <div class="search-box">
 
-
         <i class="fa-solid fa-magnifying-glass"></i>
-
 
         <input
             type="text"
@@ -150,9 +104,7 @@
             autocomplete="off"
         >
 
-
     </div>
-
 
 </section>
 
@@ -162,8 +114,7 @@
      FOOD CATEGORIES
 ===================================================== -->
 
-<section class="category-section">
-
+<section class="category-section" id="categorySection">
 
     <button
         class="category-btn active"
@@ -172,43 +123,6 @@
     >
         All
     </button>
-
-
-    <button
-        class="category-btn"
-        data-category="Burger"
-        type="button"
-    >
-        🍔 Burger
-    </button>
-
-
-    <button
-        class="category-btn"
-        data-category="Pizza"
-        type="button"
-    >
-        🍕 Pizza
-    </button>
-
-
-    <button
-        class="category-btn"
-        data-category="Snacks"
-        type="button"
-    >
-        🍟 Snacks
-    </button>
-
-
-    <button
-        class="category-btn"
-        data-category="Drinks"
-        type="button"
-    >
-        🥤 Drinks
-    </button>
-
 
 </section>
 
@@ -220,59 +134,42 @@
 
 <section class="food-section">
 
-
-    <!-- FOOD HEADING -->
-
     <div class="food-heading">
 
-
         <div>
-
 
             <span class="section-label">
                 MENU
             </span>
 
-
             <h2>
-                Popular Dishes 🍽️
+                Explore Our Food 🍽️
             </h2>
 
-
             <p>
-                Delicious food from this restaurant.
+                Choose from our delicious food collection.
             </p>
 
-
         </div>
-
 
     </div>
 
 
-
-    <!-- =================================================
-         FOOD CONTAINER
-    ================================================== -->
+    <!-- FOOD CONTAINER -->
 
     <div
         class="food-container"
         id="foodContainer"
     >
 
-
         <div class="food-loading">
             Loading delicious food...
         </div>
 
-
     </div>
 
 
-
-    <!-- =================================================
-         EMPTY FOOD
-    ================================================== -->
+    <!-- EMPTY FOOD -->
 
     <div
         class="empty-food"
@@ -280,53 +177,49 @@
         style="display:none;"
     >
 
-
         <div class="empty-food-icon">
             🍽️
         </div>
-
 
         <h3>
             No food found
         </h3>
 
-
         <p>
             Try another food or category.
         </p>
 
-
     </div>
 
-
 </section>
+
+
+
+<!-- FOOTER -->
+
 <div id="footer"></div>
 
 
 
-<!-- =====================================================
-     SWEET ALERT
-===================================================== -->
+<!-- SWEET ALERT -->
 
 <script
     src="https://cdn.jsdelivr.net/npm/sweetalert2@11">
 </script>
 
 
-
-<!-- =====================================================
-     NAVBAR JS
-===================================================== -->
+<!-- NAVBAR JS -->
 
 <script src="/header/navbar.js"></script>
 
 
-
-<!-- =====================================================
-     MENU JS
-===================================================== -->
+<!-- MENU JS -->
 
 <script src="/js/menu.js"></script>
+
+
+<!-- FOOTER JS -->
+
 <script src="/footer/footer.js"></script>
 
 

@@ -7,15 +7,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     const clearBtn = $("clearSearchBtn");
 
     const foodBox = $("foodContainer");
-    const topBox = $("topRatedContainer");
-    const recentBox = $("recentContainer");
     const categoryBox = $("categoryContainer");
 
     const searchSection = $("searchResultsSection");
-    const searchRestaurantBox = $("searchRestaurantContainer");
     const searchFoodBox = $("searchFoodContainer");
 
-    let home = {};
+    let allFoods = [];
     let loggedIn = false;
 
 
@@ -23,211 +20,45 @@ document.addEventListener("DOMContentLoaded", async () => {
        AUTH
     ===================================================== */
 
-    async function auth() {
+    async function checkAuth() {
 
         try {
 
-            const res = await fetch(
-                "/check-auth",
-                {
-                    credentials: "include"
-                }
-            );
-
-            const user = await res.json();
-
-            loggedIn =
-                user.loggedIn === true;
-
-
-            if (loggedIn) {
-
-                if ($("loginBtn"))
-                    $("loginBtn").style.display =
-                        "none";
-
-
-                if ($("registerBtn"))
-                    $("registerBtn").style.display =
-                        "none";
-
-
-                if ($("profileName")) {
-
-                    $("profileName").style.display =
-                        "inline-flex";
-
-                    $("profileName").textContent =
-                        "👤 " +
-                        (
-                            user.name ||
-                            "User"
-                        );
-
-                }
-
-
-                if ($("logoutBtn"))
-                    $("logoutBtn").style.display =
-                        "inline-flex";
-
-
-                /*
-                 * Login ke baad database cart
-                 * ka actual count lao.
-                 */
-
-                await updateCartCount();
-
-            } else {
-
-                if ($("cartCount"))
-                    $("cartCount").textContent =
-                        "0 items";
-
-            }
-
-        } catch (err) {
-
-            console.error(
-                "AUTH ERROR:",
-                err
-            );
-
-        }
-
-    }
-
-
-    /* =====================================================
-       HOME
-    ===================================================== */
-
-    async function loadHome() {
-
-        try {
-
-            const res = await fetch(
-                "/api/home",
-                {
-                    credentials: "include"
-                }
-            );
+            const response =
+                await fetch(
+                    "/check-auth",
+                    {
+                        credentials: "include",
+                        cache: "no-store"
+                    }
+                );
 
 
             const data =
-                await res.json();
+                await response.json();
+
+
+            loggedIn =
+                data.loggedIn === true;
 
 
             console.log(
-                "HOME DATA:",
+                "AUTH:",
                 data
             );
 
 
-            if (!data.success)
-                throw new Error(
-                    data.message ||
-                    "Home API error"
-                );
+            await updateCartCount();
 
-
-            home = data;
-
-
-            /*
-             * FOOD
-             *
-             * Duplicate remove
-             * Maximum 6
-             */
-
-            const foods =
-                uniqueById(
-                    data.foods || []
-                ).slice(0, 6);
-
-
-            renderFoods(
-                foods,
-                foodBox
-            );
-
-
-            /*
-             * TOP RESTAURANTS
-             */
-
-            const restaurants =
-                uniqueById(
-                    data.topRated || []
-                ).slice(0, 6);
-
-
-            renderRestaurants(
-                restaurants,
-                topBox
-            );
-
-
-            /*
-             * RECENT RESTAURANTS
-             */
-
-            const recent =
-                uniqueById(
-                    data.recent || []
-                ).slice(0, 6);
-
-
-            renderRecent(
-                recent
-            );
-
-
-            /*
-             * CATEGORIES
-             */
-
-            renderCategories(
-                data.categories || []
-            );
-
-
-            /*
-             * RESTAURANT COUNT
-             */
-
-            if ($("restaurantCount")) {
-
-                $("restaurantCount")
-                    .textContent =
-                    data.restaurantCount ??
-                    data.totalRestaurants ??
-                    restaurants.length;
-
-            }
-
-
-            /*
-             * FOOD COUNT
-             */
-
-            if ($("foodCount")) {
-
-                $("foodCount")
-                    .textContent =
-                    data.foodCount ??
-                    foods.length;
-
-            }
-
-        } catch (err) {
+        }
+        catch (error) {
 
             console.error(
-                "HOME ERROR:",
-                err
+                "AUTH ERROR:",
+                error
             );
+
+            loggedIn = false;
 
         }
 
@@ -235,35 +66,157 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
     /* =====================================================
-       UNIQUE
+       LOAD MENU DATA
     ===================================================== */
 
-    function uniqueById(list) {
+    async function loadFoods() {
 
-        const map = new Map();
+        try {
+
+            const response =
+                await fetch(
+                    "/api/menu",
+                    {
+                        credentials: "include",
+                        cache: "no-store"
+                    }
+                );
 
 
-        list.forEach(item => {
+            if (!response.ok) {
 
-            if (!item)
+                throw new Error(
+                    "Menu API failed"
+                );
+
+            }
+
+
+            const data =
+                await response.json();
+
+
+            console.log(
+                "MENU DATA:",
+                data
+            );
+
+
+            if (
+                data.success !== true
+            ) {
+
+                throw new Error(
+                    data.message ||
+                    "Menu data failed"
+                );
+
+            }
+
+
+            allFoods =
+                uniqueFoods(
+                    data.foods || []
+                );
+
+
+            console.log(
+                "ALL FOODS:",
+                allFoods
+            );
+
+
+            /* =============================================
+               FOOD COUNT
+            ============================================= */
+
+            if ($("foodCount")) {
+
+                $("foodCount").textContent =
+                    allFoods.length;
+
+            }
+
+
+            /* =============================================
+               CATEGORIES
+            ============================================= */
+
+            createCategories();
+
+
+            /* =============================================
+               POPULAR FOOD
+            ============================================= */
+
+            renderFoods(
+                allFoods.slice(0, 6),
+                foodBox
+            );
+
+
+        }
+        catch (error) {
+
+            console.error(
+                "FOOD LOAD ERROR:",
+                error
+            );
+
+
+            if (foodBox) {
+
+                foodBox.innerHTML = `
+                    <div class="empty-message">
+                        🍽️ Unable to load food.
+                    </div>
+                `;
+
+            }
+
+        }
+
+    }
+
+
+    /* =====================================================
+       UNIQUE FOODS
+    ===================================================== */
+
+    function uniqueFoods(list) {
+
+        const map =
+            new Map();
+
+
+        list.forEach(food => {
+
+            if (!food)
                 return;
 
 
             const id =
-                item.id ??
-                item.food_id ??
-                item.restaurant_id;
+                food.id ??
+                food.food_id;
 
 
             if (
-                id !== undefined &&
-                id !== null &&
-                !map.has(String(id))
+                id === undefined ||
+                id === null
             ) {
+                return;
+            }
+
+
+            const key =
+                String(id);
+
+
+            if (!map.has(key)) {
 
                 map.set(
-                    String(id),
-                    item
+                    key,
+                    food
                 );
 
             }
@@ -279,7 +232,173 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
     /* =====================================================
-       FOOD
+       CREATE CATEGORIES
+    ===================================================== */
+
+    function createCategories() {
+
+        if (!categoryBox)
+            return;
+
+
+        const categories =
+            [
+                ...new Set(
+                    allFoods
+                        .map(food =>
+                            String(
+                                food.category || ""
+                            ).trim()
+                        )
+                        .filter(Boolean)
+                )
+            ]
+            .sort();
+
+
+        categoryBox.innerHTML = "";
+
+
+        categories.forEach(
+            category => {
+
+                const button =
+                    document.createElement(
+                        "button"
+                    );
+
+
+                button.type =
+                    "button";
+
+
+                button.className =
+                    "category-card";
+
+
+                button.dataset.category =
+                    category;
+
+
+                button.innerHTML = `
+
+                    <div class="category-icon">
+                        ${getCategoryIcon(category)}
+                    </div>
+
+                    <h3>
+                        ${escapeHTML(category)}
+                    </h3>
+
+                    <span>
+                        Explore food
+                    </span>
+
+                `;
+
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        if (searchInput) {
+
+                            searchInput.value =
+                                category;
+
+                        }
+
+
+                        showCategoryResults(
+                            category
+                        );
+
+                    }
+                );
+
+
+                categoryBox.appendChild(
+                    button
+                );
+
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       CATEGORY RESULTS
+    ===================================================== */
+
+    function showCategoryResults(
+        category
+    ) {
+
+        const value =
+            String(category)
+                .trim()
+                .toLowerCase();
+
+
+        const foods =
+            allFoods.filter(food => {
+
+                return String(
+                    food.category || ""
+                )
+                .toLowerCase()
+                === value;
+
+            });
+
+
+        if (searchSection) {
+
+            searchSection.style.display =
+                "block";
+
+        }
+
+
+        if ($("searchResultsTitle")) {
+
+            $("searchResultsTitle")
+                .textContent =
+                `${category} Food`;
+
+        }
+
+
+        if ($("searchResultsSubtitle")) {
+
+            $("searchResultsSubtitle")
+                .textContent =
+                `${foods.length} ${
+                    foods.length === 1
+                        ? "food item"
+                        : "food items"
+                } found`;
+
+        }
+
+
+        renderFoods(
+            foods,
+            searchFoodBox
+        );
+
+
+        searchSection?.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+
+    }
+
+
+    /* =====================================================
+       RENDER FOODS
     ===================================================== */
 
     function renderFoods(
@@ -307,38 +426,34 @@ document.addEventListener("DOMContentLoaded", async () => {
         box.innerHTML =
             list.map(food => {
 
-                const foodId =
+                const id =
                     food.id ??
                     food.food_id;
 
 
-                const foodName =
+                const name =
                     food.name ??
-                    food.food_name ??
+                    "Food";
+
+
+                const description =
+                    food.description ??
+                    "Delicious food";
+
+
+                const category =
+                    food.category ??
                     "Food";
 
 
                 const price =
                     food.price ??
-                    food.food_price ??
                     0;
 
 
-                const restaurant =
-                    food.restaurant_name ||
-                    food.restaurant ||
-                    "Restaurant";
-
-
-                const rating =
-                    food.restaurant_rating ??
-                    food.rating ??
-                    0;
-
-
-                const delivery =
-                    food.delivery_time ||
-                    "N/A";
+                const image =
+                    food.image ??
+                    "";
 
 
                 return `
@@ -348,17 +463,15 @@ document.addEventListener("DOMContentLoaded", async () => {
                         <div class="deal-image">
 
                             <img
-                                src="${imgPath(
-                                    food.image,
-                                    "food"
-                                )}"
-                                alt="${safe(foodName)}"
-                                onerror="fixImage(
-                                    this,
-                                    '${safeAttr(food.image)}',
-                                    'food'
-                                )"
+                                src="${getImage(image)}"
+                                alt="${escapeHTML(name)}"
+
+                                onerror="
+                                    this.onerror=null;
+                                    this.src='/images/foods/default-food.jpg';
+                                "
                             >
+
 
                             <span class="offer">
                                 AVAILABLE
@@ -370,37 +483,38 @@ document.addEventListener("DOMContentLoaded", async () => {
                         <div class="deal-info">
 
                             <h3>
-                                ${safe(foodName)}
+                                ${escapeHTML(name)}
                             </h3>
 
 
                             <p>
-                                🏪
-                                ${safe(restaurant)}
+                                ${escapeHTML(description)}
                             </p>
 
 
                             <p>
-                                ⭐ ${rating}
-                                •
-                                🛵 ${safe(delivery)}
+                                ${escapeHTML(category)}
                             </p>
 
 
                             <div class="price-row">
 
                                 <strong>
-                                    ₹${price}
+                                    ₹${escapeHTML(price)}
                                 </strong>
 
 
                                 <button
-                                    class="order-btn"
-                                    data-id="${foodId}"
-                                    data-name="${safeAttr(foodName)}"
                                     type="button"
+                                    class="order-btn"
+
+                                    data-food-id="${escapeHTML(id)}"
+
+                                    data-food-name="${escapeAttr(name)}"
                                 >
+
                                     Add to Cart
+
                                 </button>
 
                             </div>
@@ -415,21 +529,26 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
         /*
-         * Add to Cart buttons
+         * ADD TO CART
          */
 
         box
-            .querySelectorAll(".order-btn")
-            .forEach(btn => {
+            .querySelectorAll(
+                ".order-btn"
+            )
+            .forEach(button => {
 
-                btn.onclick = () => {
+                button.addEventListener(
+                    "click",
+                    () => {
 
-                    addCart(
-                        btn.dataset.id,
-                        btn.dataset.name
-                    );
+                        addToCart(
+                            button.dataset.foodId,
+                            button.dataset.foodName
+                        );
 
-                };
+                    }
+                );
 
             });
 
@@ -440,14 +559,10 @@ document.addEventListener("DOMContentLoaded", async () => {
        ADD TO CART
     ===================================================== */
 
-    async function addCart(
+    async function addToCart(
         foodId,
         foodName
     ) {
-
-        /*
-         * LOGIN CHECK
-         */
 
         if (!loggedIn) {
 
@@ -460,10 +575,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         }
 
-
-        /*
-         * Food ID check
-         */
 
         if (!foodId) {
 
@@ -479,14 +590,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         try {
 
-            const res =
+            const response =
                 await fetch(
                     "/cart/add",
                     {
                         method: "POST",
 
-                        credentials:
-                            "include",
+                        credentials: "include",
 
                         headers: {
                             "Content-Type":
@@ -496,7 +606,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                         body: JSON.stringify({
 
                             foodId:
-                                foodId
+                                Number(foodId),
+
+                            quantity: 1
 
                         })
 
@@ -505,30 +617,22 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
             const data =
-                await res.json();
+                await response.json();
 
 
             console.log(
-                "ADD CART:",
+                "ADD CART RESPONSE:",
                 data
             );
 
 
-            /*
-             * ERROR
-             */
-
             if (
-                !res.ok ||
-                data.success !== true
+                response.status === 401 ||
+                response.status === 403
             ) {
 
                 showPopup(
-                    "❌ " +
-                    (
-                        data.message ||
-                        "Unable to add item"
-                    ),
+                    "🔐 Please login first",
                     "error"
                 );
 
@@ -537,33 +641,46 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
 
 
-            /*
-             * SUCCESS
-             */
+            if (
+                !response.ok ||
+                data.success !== true
+            ) {
+
+                throw new Error(
+                    data.message ||
+                    "Unable to add item"
+                );
+
+            }
+
 
             showPopup(
-                "✅ Item added successfully",
+                `✅ ${foodName} added to cart`,
                 "success"
             );
 
 
-            /*
-             * Refresh actual DB cart
-             */
-
             await updateCartCount();
 
 
-        } catch (err) {
+            document.dispatchEvent(
+                new CustomEvent(
+                    "cartUpdated"
+                )
+            );
+
+        }
+        catch (error) {
 
             console.error(
                 "ADD CART ERROR:",
-                err
+                error
             );
 
 
             showPopup(
-                "❌ Something went wrong",
+                "❌ " +
+                error.message,
                 "error"
             );
 
@@ -580,9 +697,29 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (!loggedIn) {
 
-            if ($("cartCount"))
+            if ($("cartCount")) {
+
                 $("cartCount").textContent =
                     "0 items";
+
+            }
+
+
+            if ($("headerCartCount")) {
+
+                $("headerCartCount").textContent =
+                    "0";
+
+            }
+
+
+            if ($("mobileCartCount")) {
+
+                $("mobileCartCount").textContent =
+                    "0";
+
+            }
+
 
             return;
 
@@ -591,48 +728,29 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         try {
 
-            const res =
+            const response =
                 await fetch(
                     "/cart",
                     {
-                        credentials:
-                            "include"
+                        credentials: "include",
+                        cache: "no-store"
                     }
                 );
 
 
-            const data =
-                await res.json();
-
-
-            console.log(
-                "DATABASE CART:",
-                data
-            );
-
-
-            if (
-                !res.ok ||
-                !data.success
-            ) {
-
+            if (!response.ok)
                 return;
 
-            }
+
+            const data =
+                await response.json();
 
 
             const cart =
-                mergeCart(
-                    data.cart || []
-                );
+                Array.isArray(data.cart)
+                    ? data.cart
+                    : [];
 
-
-            /*
-             * Quantity total
-             *
-             * Pizza x5
-             * => 5 items
-             */
 
             const count =
                 cart.reduce(
@@ -644,8 +762,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                         return (
                             total +
                             Number(
-                                item.quantity ||
-                                0
+                                item.quantity || 0
                             )
                         );
 
@@ -666,347 +783,33 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             }
 
-        } catch (err) {
 
-            console.error(
-                "CART COUNT ERROR:",
-                err
-            );
+            if ($("headerCartCount")) {
 
-        }
-
-    }
-
-
-    /*
-     * Same food ki multiple rows
-     * ko merge karta hai.
-     */
-
-    function mergeCart(cart) {
-
-        const map =
-            new Map();
-
-
-        cart.forEach(item => {
-
-            const id =
-                item.food_id ??
-                item.foodId ??
-                item.id;
-
-
-            const key =
-                String(id);
-
-
-            const quantity =
-                Number(
-                    item.quantity || 0
-                );
-
-
-            if (!map.has(key)) {
-
-                map.set(
-                    key,
-                    {
-                        ...item,
-                        quantity:
-                            quantity
-                    }
-                );
-
-            } else {
-
-                map.get(key).quantity +=
-                    quantity;
+                $("headerCartCount")
+                    .textContent =
+                    count;
 
             }
 
-        });
 
+            if ($("mobileCartCount")) {
 
-        return [
-            ...map.values()
-        ];
+                $("mobileCartCount")
+                    .textContent =
+                    count;
 
-    }
-
-
-    /* =====================================================
-       RESTAURANTS
-    ===================================================== */
-
-    function renderRestaurants(
-        list,
-        box
-    ) {
-
-        if (!box)
-            return;
-
-
-        if (!list.length) {
-
-            box.innerHTML = `
-                <div class="empty-message">
-                    🍽️ No restaurants available
-                </div>
-            `;
-
-            return;
+            }
 
         }
+        catch (error) {
 
-
-        box.innerHTML =
-            list.map(r => {
-
-                const name =
-                    r.name ??
-                    r.restaurant_name ??
-                    "Restaurant";
-
-
-                return `
-
-                    <div class="restaurant-card">
-
-                        <div class="restaurant-image">
-
-                            <img
-                                src="${imgPath(
-                                    r.image,
-                                    "restaurant"
-                                )}"
-                                alt="${safe(name)}"
-                                onerror="fixImage(
-                                    this,
-                                    '${safeAttr(r.image)}',
-                                    'restaurant'
-                                )"
-                            >
-
-
-                            <span class="open-badge">
-
-                                ${
-                                    Number(
-                                        r.is_open
-                                    ) === 1
-                                        ? "OPEN"
-                                        : "CLOSED"
-                                }
-
-                            </span>
-
-                        </div>
-
-
-                        <div class="restaurant-info">
-
-                            <h3>
-                                ${safe(name)}
-                            </h3>
-
-
-                            <p>
-                                ${safe(
-                                    r.category ||
-                                    "Restaurant"
-                                )}
-
-                                •
-
-                                ${safe(
-                                    r.city ||
-                                    ""
-                                )}
-                            </p>
-
-
-                            <div class="restaurant-meta">
-
-                                <span>
-                                    ⭐
-                                    ${r.rating || "0"}
-                                </span>
-
-
-                                <span>
-                                    🛵
-                                    ${safe(
-                                        r.delivery_time ||
-                                        "N/A"
-                                    )}
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                `;
-
-            }).join("");
-
-    }
-
-
-    /* =====================================================
-       RECENT
-    ===================================================== */
-
-    function renderRecent(list) {
-
-        if (!recentBox)
-            return;
-
-
-        if (!list.length) {
-
-            recentBox.innerHTML =
-                `<p>No restaurants available.</p>`;
-
-            return;
+            console.error(
+                "CART COUNT ERROR:",
+                error
+            );
 
         }
-
-
-        recentBox.innerHTML =
-            list.map(r => {
-
-                const name =
-                    r.name ??
-                    r.restaurant_name ??
-                    "Restaurant";
-
-
-                return `
-
-                    <div class="new-card">
-
-                        <img
-                            src="${imgPath(
-                                r.image,
-                                "restaurant"
-                            )}"
-                            alt="${safe(name)}"
-                            onerror="fixImage(
-                                this,
-                                '${safeAttr(r.image)}',
-                                'restaurant'
-                            )"
-                        >
-
-
-                        <div>
-
-                            <span class="new-badge">
-                                NEW
-                            </span>
-
-
-                            <h3>
-                                ${safe(name)}
-                            </h3>
-
-
-                            <p>
-                                ${safe(
-                                    r.category ||
-                                    "Restaurant"
-                                )}
-                            </p>
-
-
-                            <span>
-                                ⭐
-                                ${r.rating || "0"}
-                            </span>
-
-                        </div>
-
-                    </div>
-
-                `;
-
-            }).join("");
-
-    }
-
-
-    /* =====================================================
-       CATEGORIES
-    ===================================================== */
-
-    function renderCategories(list) {
-
-        if (!categoryBox)
-            return;
-
-
-        categoryBox.innerHTML =
-            list.map(c => {
-
-                const name =
-                    c.category ||
-                    c.name ||
-                    "";
-
-
-                return `
-
-                    <button
-                        type="button"
-                        class="category-card"
-                        data-category="${safeAttr(name)}"
-                    >
-
-                        <div class="category-icon">
-                            ${icon(name)}
-                        </div>
-
-
-                        <h3>
-                            ${safe(name)}
-                        </h3>
-
-
-                        <span>
-                            Explore food
-                        </span>
-
-                    </button>
-
-                `;
-
-            }).join("");
-
-
-        categoryBox
-            .querySelectorAll(
-                ".category-card"
-            )
-            .forEach(btn => {
-
-                btn.onclick = () => {
-
-                    if (searchInput)
-                        searchInput.value =
-                            btn.dataset.category;
-
-
-                    search(
-                        btn.dataset.category
-                    );
-
-                };
-
-            });
 
     }
 
@@ -1015,14 +818,17 @@ document.addEventListener("DOMContentLoaded", async () => {
        SEARCH
     ===================================================== */
 
-    async function search(q) {
+    function search(
+        query
+    ) {
 
-        q =
-            String(q || "")
-                .trim();
+        query =
+            String(query || "")
+                .trim()
+                .toLowerCase();
 
 
-        if (!q) {
+        if (!query) {
 
             clearSearch();
 
@@ -1031,114 +837,70 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
 
-        try {
+        const foods =
+            allFoods.filter(food => {
 
-            if (searchSection)
-                searchSection.style.display =
-                    "block";
+                const text = [
+
+                    food.name,
+
+                    food.description,
+
+                    food.category
+
+                ]
+                    .filter(Boolean)
+                    .join(" ")
+                    .toLowerCase();
 
 
-            const res =
-                await fetch(
-                    "/api/home/search?q=" +
-                    encodeURIComponent(q),
-                    {
-                        credentials:
-                            "include"
-                    }
+                return text.includes(
+                    query
                 );
 
-
-            const data =
-                await res.json();
-
-
-            console.log(
-                "SEARCH DATA:",
-                data
-            );
-
-
-            /*
-             * Restaurant duplicate remove
-             */
-
-            const restaurants =
-                uniqueById(
-                    data.restaurants ||
-                    []
-                );
-
-
-            /*
-             * Food duplicate remove
-             */
-
-            const foods =
-                uniqueById(
-                    data.foods ||
-                    []
-                );
-
-
-            if ($("searchResultsTitle")) {
-
-                $("searchResultsTitle")
-                    .textContent =
-                    `Results for "${q}"`;
-
-            }
-
-
-            if ($("searchResultsSubtitle")) {
-
-                $("searchResultsSubtitle")
-                    .textContent =
-                    `${restaurants.length} restaurants • ${foods.length} food items`;
-
-            }
-
-
-            /*
-             * Restaurants
-             */
-
-            renderRestaurants(
-                restaurants,
-                searchRestaurantBox
-            );
-
-
-            /*
-             * Foods
-             */
-
-            renderFoods(
-                foods,
-                searchFoodBox
-            );
-
-
-            searchSection?.scrollIntoView({
-                behavior: "smooth",
-                block: "start"
             });
 
 
-        } catch (err) {
+        if (searchSection) {
 
-            console.error(
-                "SEARCH ERROR:",
-                err
-            );
-
-
-            showPopup(
-                "❌ Search failed",
-                "error"
-            );
+            searchSection.style.display =
+                "block";
 
         }
+
+
+        if ($("searchResultsTitle")) {
+
+            $("searchResultsTitle")
+                .textContent =
+                `Results for "${query}"`;
+
+        }
+
+
+        if ($("searchResultsSubtitle")) {
+
+            $("searchResultsSubtitle")
+                .textContent =
+                `${foods.length} ${
+                    foods.length === 1
+                        ? "food item"
+                        : "food items"
+                } found`;
+
+        }
+
+
+        renderFoods(
+            foods,
+            searchFoodBox
+        );
+
+
+        searchSection?.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
 
     }
 
@@ -1165,11 +927,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     searchInput?.addEventListener(
         "keydown",
-        e => {
+        event => {
 
-            if (e.key === "Enter") {
+            if (
+                event.key === "Enter"
+            ) {
 
-                e.preventDefault();
+                event.preventDefault();
 
                 search(
                     searchInput.value
@@ -1189,22 +953,31 @@ document.addEventListener("DOMContentLoaded", async () => {
         .querySelectorAll(
             ".quick-search button"
         )
-        .forEach(btn => {
+        .forEach(button => {
 
-            btn.onclick = () => {
+            button.addEventListener(
+                "click",
+                () => {
 
-                const q =
-                    btn.dataset.search;
-
-
-                if (searchInput)
-                    searchInput.value =
-                        q;
+                    const query =
+                        button.dataset.search ||
+                        "";
 
 
-                search(q);
+                    if (searchInput) {
 
-            };
+                        searchInput.value =
+                            query;
+
+                    }
+
+
+                    search(
+                        query
+                    );
+
+                }
+            );
 
         });
 
@@ -1213,191 +986,101 @@ document.addEventListener("DOMContentLoaded", async () => {
        CLEAR SEARCH
     ===================================================== */
 
-    function clearSearch() {
-
-        if (searchInput)
-            searchInput.value =
-                "";
-
-
-        if (searchSection)
-            searchSection.style.display =
-                "none";
-
-
-        if (searchRestaurantBox)
-            searchRestaurantBox.innerHTML =
-                "";
-
-
-        if (searchFoodBox)
-            searchFoodBox.innerHTML =
-                "";
-
-    }
-
-
     clearBtn?.addEventListener(
         "click",
         clearSearch
     );
 
 
-    /* =====================================================
-       IMAGE
-       YE TERE WORKING CODE WALA HAI
-    ===================================================== */
+    function clearSearch() {
 
-    function imgPath(
-        value,
-        type
-    ) {
+        if (searchInput) {
 
-        if (!value) {
-
-            return type === "food"
-                ? "/images/default-food.jpg"
-                : "/images/default-restaurant.jpg";
+            searchInput.value =
+                "";
 
         }
 
 
-        let v =
-            String(value).trim();
+        if (searchSection) {
 
-
-        /*
-         * Full URL
-         */
-
-        if (
-            v.startsWith("http://") ||
-            v.startsWith("https://")
-        ) {
-
-            return v;
+            searchSection.style.display =
+                "none";
 
         }
 
 
-        /*
-         * Already /images/...
-         */
+        if (searchFoodBox) {
 
-        if (v.startsWith("/")) {
-
-            return v;
+            searchFoodBox.innerHTML =
+                "";
 
         }
-
-
-        /*
-         * images/file.jpg
-         */
-
-        if (
-            v.startsWith("images/")
-        ) {
-
-            return "/" + v;
-
-        }
-
-
-        /*
-         * uploads/file.jpg
-         */
-
-        if (
-            v.startsWith("uploads/")
-        ) {
-
-            return "/" + v;
-
-        }
-
-
-        /*
-         * Normal filename
-         */
-
-        return "/images/" + v;
 
     }
 
 
-    /*
-     * Image fail hone par multiple
-     * possible folders try karega.
-     */
+    /* =====================================================
+       IMAGE PATH
+    ===================================================== */
 
-    window.fixImage =
-        function(
-            img,
-            original,
-            type
+    function getImage(
+        image
+    ) {
+
+        if (!image) {
+
+            return "/images/foods/default-food.jpg";
+
+        }
+
+
+        const value =
+            String(image).trim();
+
+
+        if (
+            value.startsWith(
+                "http://"
+            ) ||
+            value.startsWith(
+                "https://"
+            )
         ) {
 
-            const name =
-                String(
-                    original || ""
-                )
-                .split("/")
-                .pop();
+            return value;
+
+        }
 
 
-            const paths = [
+        if (
+            value.startsWith(
+                "/"
+            )
+        ) {
 
-                `/images/${name}`,
+            return value;
 
-                `/uploads/${name}`,
-
-                `/images/foods/${name}`,
-
-                `/images/restaurants/${name}`,
-
-                `/uploads/foods/${name}`,
-
-                `/uploads/restaurants/${name}`
-
-            ];
+        }
 
 
-            let i =
-                Number(
-                    img.dataset.try ||
-                    0
-                );
+        if (
+            value.startsWith(
+                "images/"
+            )
+        ) {
+
+            return "/" + value;
+
+        }
 
 
-            if (
-                i <
-                paths.length
-            ) {
+        return (
+            "/images/foods/" +
+            value.split("/").pop()
+        );
 
-                img.dataset.try =
-                    i + 1;
-
-
-                img.src =
-                    paths[i];
-
-
-                return;
-
-            }
-
-
-            img.onerror =
-                null;
-
-
-            img.src =
-                type === "food"
-                    ? "/images/default-food.jpg"
-                    : "/images/default-restaurant.jpg";
-
-        };
+    }
 
 
     /* =====================================================
@@ -1409,10 +1092,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         type = "success"
     ) {
 
-        /*
-         * Purana popup remove
-         */
-
         document
             .querySelector(
                 ".jigato-popup"
@@ -1420,17 +1099,17 @@ document.addEventListener("DOMContentLoaded", async () => {
             ?.remove();
 
 
-        const box =
+        const popup =
             document.createElement(
                 "div"
             );
 
 
-        box.className =
+        popup.className =
             `jigato-popup ${type}`;
 
 
-        box.innerHTML = `
+        popup.innerHTML = `
 
             <div class="popup-icon">
 
@@ -1445,7 +1124,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             <div class="popup-message">
 
-                ${safe(message)}
+                ${escapeHTML(message)}
 
             </div>
 
@@ -1453,20 +1132,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
         document.body.appendChild(
-            box
+            popup
         );
 
 
         setTimeout(
             () => {
 
-                box.classList.add(
+                popup.classList.add(
                     "hide"
                 );
 
 
                 setTimeout(
-                    () => box.remove(),
+                    () => popup.remove(),
                     300
                 );
 
@@ -1478,56 +1157,72 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
     /* =====================================================
-       ICON
+       CATEGORY ICON
     ===================================================== */
 
-    function icon(name) {
+    function getCategoryIcon(
+        name
+    ) {
 
-        name =
+        const value =
             String(name || "")
                 .toLowerCase();
 
 
         if (
-            name.includes("pizza")
+            value.includes("pizza")
         )
             return "🍕";
 
 
         if (
-            name.includes("burger")
+            value.includes("burger")
         )
             return "🍔";
 
 
         if (
-            name.includes("biryani")
+            value.includes("biryani")
         )
             return "🍛";
 
 
         if (
-            name.includes("chinese")
+            value.includes("chinese")
         )
             return "🍜";
 
 
         if (
-            name.includes("pasta")
+            value.includes("pasta")
         )
             return "🍝";
 
 
         if (
-            name.includes("cafe")
+            value.includes("drink") ||
+            value.includes("beverage")
         )
-            return "☕";
+            return "🥤";
 
 
         if (
-            name.includes("dessert")
+            value.includes("dessert") ||
+            value.includes("sweet")
         )
             return "🍰";
+
+
+        if (
+            value.includes("snack")
+        )
+            return "🍟";
+
+
+        if (
+            value.includes("wrap")
+        )
+            return "🌯";
 
 
         return "🍽️";
@@ -1536,10 +1231,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
     /* =====================================================
-       HELPERS
+       SAFE HTML
     ===================================================== */
 
-    function safe(value) {
+    function escapeHTML(
+        value
+    ) {
 
         const div =
             document.createElement(
@@ -1556,258 +1253,35 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
 
-    function safeAttr(value) {
-
-        return safe(value)
-            .replaceAll(
-                '"',
-                "&quot;"
-            )
-            .replaceAll(
-                "'",
-                "&#039;"
-            );
-
-    }
-
-
     /* =====================================================
-       LOGOUT
+       SAFE ATTRIBUTE
     ===================================================== */
 
-    $("logoutBtn")?.addEventListener(
-        "click",
-        async () => {
+    function escapeAttr(
+        value
+    ) {
 
-            try {
+        return escapeHTML(
+            value
+        )
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
 
-                await fetch(
-                    "/logout",
-                    {
-                        method: "POST",
-                        credentials:
-                            "include"
-                    }
-                );
-
-
-                loggedIn =
-                    false;
-
-
-                if ($("cartCount"))
-                    $("cartCount")
-                        .textContent =
-                        "0 items";
-
-
-                location.reload();
-
-
-            } catch (err) {
-
-                console.error(
-                    "LOGOUT ERROR:",
-                    err
-                );
-
-            }
-
-        }
-    );
+    }
 
 
     /* =====================================================
        START
     ===================================================== */
 
-    await auth();
+    await checkAuth();
 
-    await loadHome();
-
-});
-document.addEventListener("DOMContentLoaded", () => {
-
-    const $ = id => document.getElementById(id);
-
-    /* ================= AUTH ================= */
-
-    fetch("/check-auth")
-        .then(res => res.json())
-        .then(data => {
-
-            const logged = data.loggedIn;
-
-            $("loginBtn").style.display =
-                logged ? "none" : "inline-flex";
-
-            $("registerBtn").style.display =
-                logged ? "none" : "inline-flex";
-
-            $("profileBtn").style.display =
-                logged ? "flex" : "none";
-
-            $("logoutBtn").style.display =
-                logged ? "inline-flex" : "none";
-
-            $("mobileLogin").style.display =
-                logged ? "none" : "block";
-
-            $("mobileRegister").style.display =
-                logged ? "none" : "block";
-
-            $("mobileProfile").style.display =
-                logged ? "flex" : "none";
-
-            $("mobileLogout").style.display =
-                logged ? "block" : "none";
-
-            if (logged) {
-
-                const name = data.name || "Profile";
-                const city = data.city || "Choose location";
-
-                $("profileName").textContent = name;
-                $("mobileProfileName").textContent = name;
-
-                $("userCity").textContent = city;
-                $("mobileCity").textContent = city;
-            }
-
-            loadCart();
-
-        })
-        .catch(err =>
-            console.log("Auth error:", err)
-        );
-
-
-    /* ================= LOGOUT ================= */
-
-    $("logoutBtn").onclick = logout;
-    $("mobileLogout").onclick = logout;
-
-    function logout() {
-
-        fetch("/logout", {
-            method: "POST",
-            credentials: "include"
-        })
-        .then(() => location.reload());
-
-    }
-
-
-    /* ================= MOBILE MENU ================= */
-
-    $("menuToggle").onclick = () =>
-        $("mobileMenu").classList.add("active");
-
-    $("closeMenu").onclick = () =>
-        $("mobileMenu").classList.remove("active");
-
-
-    /* ================= SEARCH ================= */
-
-    const search = () => {
-
-        const q = $("searchInput").value.trim();
-
-        if (!q) return;
-
-        window.location.href =
-            "/restaurant?search=" +
-            encodeURIComponent(q);
-
-    };
-
-    $("searchBtn").onclick = search;
-
-    $("searchInput").addEventListener(
-        "keydown",
-        e => {
-            if (e.key === "Enter") search();
-        }
-    );
-
-
-    /* ================= CLEAR SEARCH ================= */
-
-    const clear = $("clearSearchBtn");
-
-    if (clear) {
-
-        clear.onclick = () => {
-
-            $("searchInput").value = "";
-
-            $("searchResultsSection").style.display =
-                "none";
-
-        };
-
-    }
-
-
-    /* ================= QUICK SEARCH ================= */
-
-    document
-        .querySelectorAll("[data-search]")
-        .forEach(btn => {
-
-            btn.onclick = () => {
-
-                $("searchInput").value =
-                    btn.dataset.search;
-
-                search();
-
-            };
-
-        });
-
-
-    /* ================= CART COUNT ================= */
-
-    function loadCart() {
-
-        fetch("/cart", {
-            credentials: "include"
-        })
-        .then(res => {
-
-            if (!res.ok)
-                throw new Error("Not logged");
-
-            return res.json();
-
-        })
-        .then(data => {
-
-            const items = data.cart || [];
-
-            /*
-             * Same food ko 5 baar + kiya ho,
-             * count 5 nahi — unique cart items count.
-             */
-
-            const count = items.length;
-
-            $("cartCount").textContent =
-                count + (count === 1 ? " item" : " items");
-
-            $("navCartCount").textContent = count;
-            $("mobileCartCount").textContent = count;
-
-        })
-        .catch(() => {
-
-            $("cartCount").textContent = "0 items";
-            $("navCartCount").textContent = "0";
-            $("mobileCartCount").textContent = "0";
-
-        });
-
-    }
+    await loadFoods();
 
 });

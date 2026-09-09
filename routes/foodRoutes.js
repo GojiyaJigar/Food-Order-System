@@ -2,9 +2,19 @@ const express = require("express");
 
 const router = express.Router();
 
-const { getRestaurantMenu } = require("../controllers/foodController");
+const {
+    getMenu
+} = require("../controllers/foodController");
 
-// Get Restaurant Menu
-router.get("/restaurant/:id/menu", getRestaurantMenu);
+
+/* =====================================================
+   MENU
+===================================================== */
+
+router.get(
+    "/api/menu",
+    getMenu
+);
+
 
 module.exports = router;

@@ -2,1217 +2,1173 @@
    JIGATO - OFFERS PAGE JS
 ===================================================== */
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
 
-    const offersGrid =
-        document.getElementById("offersGrid");
-
-    const filterButtons =
-        document.querySelectorAll(".filter-btn");
-
-
-    let allOffers = [];
-
-    let currentFilter = "all";
-
-
-    // =====================================================
-    // LOAD OFFERS
-    // =====================================================
-
-    loadOffers();
-
-
-    async function loadOffers() {
-
-        if (!offersGrid) return;
-
-
-        showLoading();
-
-
-        try {
-
-            const response =
-                await fetch(
-                    "/api/offers",
-                    {
-                        method: "GET",
-                        credentials: "include",
-                        cache: "no-store",
-                        headers: {
-                            "Accept":
-                                "application/json"
-                        }
-                    }
-                );
-
-
-            const raw =
-                await response.text();
-
-
-            console.log(
-                "OFFERS API STATUS:",
-                response.status
+        const offersGrid =
+            document.getElementById(
+                "offersGrid"
             );
 
 
-            console.log(
-                "OFFERS API RESPONSE:",
-                raw
+        const filterButtons =
+            document.querySelectorAll(
+                ".filter-btn"
             );
 
 
-            let data;
+        let allOffers = [];
+
+        let currentFilter = "all";
+
+
+        /* =================================================
+           LOAD
+        ================================================= */
+
+        loadOffers();
+
+
+        async function loadOffers() {
+
+            if (!offersGrid)
+                return;
+
+
+            showLoading();
 
 
             try {
 
-                data =
-                    JSON.parse(raw);
+                const response =
+                    await fetch(
+                        "/api/offers",
+                        {
+                            method: "GET",
 
-            } catch (error) {
+                            credentials:
+                                "include",
 
-                console.error(
-                    "INVALID OFFERS JSON:",
-                    error
-                );
+                            cache:
+                                "no-store",
 
-                throw new Error(
-                    "Server returned invalid offers data."
-                );
-
-            }
-
-
-            if (
-                !response.ok ||
-                !data.success
-            ) {
-
-                throw new Error(
-                    data.message ||
-                    "Unable to load offers."
-                );
-
-            }
+                            headers: {
+                                "Accept":
+                                    "application/json"
+                            }
+                        }
+                    );
 
 
-            allOffers =
-                Array.isArray(
-                    data.offers
-                )
-                    ? data.offers
-                    : [];
+                const raw =
+                    await response.text();
 
 
-            renderOffers();
-
-
-        } catch (error) {
-
-            console.error(
-                "LOAD OFFERS ERROR:",
-                error
-            );
-
-
-            showError(
-                error.message ||
-                "Unable to load offers."
-            );
-
-        }
-
-    }
-
-
-    // =====================================================
-    // FILTER BUTTONS
-    // =====================================================
-
-    filterButtons.forEach(button => {
-
-        button.addEventListener(
-            "click",
-            () => {
-
-                filterButtons.forEach(
-                    item =>
-                        item.classList.remove(
-                            "active"
-                        )
+                console.log(
+                    "OFFERS API STATUS:",
+                    response.status
                 );
 
 
-                button.classList.add(
-                    "active"
+                console.log(
+                    "OFFERS API RESPONSE:",
+                    raw
                 );
 
 
-                currentFilter =
-                    button.dataset.filter ||
-                    "all";
+                let data;
+
+
+                try {
+
+                    data =
+                        JSON.parse(raw);
+
+                }
+                catch (error) {
+
+                    throw new Error(
+                        "Server returned invalid offers data."
+                    );
+
+                }
+
+
+                if (
+                    !response.ok ||
+                    data.success !== true
+                ) {
+
+                    throw new Error(
+                        data.message ||
+                        "Unable to load offers."
+                    );
+
+                }
+
+
+                allOffers =
+                    Array.isArray(
+                        data.offers
+                    )
+                        ? data.offers
+                        : [];
 
 
                 renderOffers();
 
             }
-        );
+            catch (error) {
 
-    });
-
-
-    // =====================================================
-    // RENDER OFFERS
-    // =====================================================
-
-    function renderOffers() {
-
-        if (!offersGrid) return;
+                console.error(
+                    "LOAD OFFERS ERROR:",
+                    error
+                );
 
 
-        let filteredOffers =
-            allOffers;
+                showError(
+                    error.message ||
+                    "Unable to load offers."
+                );
+
+            }
+
+        }
 
 
-        if (
-            currentFilter !== "all"
-        ) {
+        /* =================================================
+           FILTER
+        ================================================= */
 
-            filteredOffers =
-                allOffers.filter(
-                    offer => {
+        filterButtons.forEach(
+            button => {
 
-                        return (
-                            String(
-                                offer.offer_type
-                            ).toLowerCase()
-                            ===
-                            String(
-                                currentFilter
-                            ).toLowerCase()
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        filterButtons.forEach(
+                            item =>
+                                item.classList.remove(
+                                    "active"
+                                )
                         );
+
+
+                        button.classList.add(
+                            "active"
+                        );
+
+
+                        currentFilter =
+                            button.dataset.filter ||
+                            "all";
+
+
+                        renderOffers();
 
                     }
                 );
 
+            }
+        );
+
+
+        /* =================================================
+           RENDER
+        ================================================= */
+
+        function renderOffers() {
+
+            if (!offersGrid)
+                return;
+
+
+            let filtered =
+                allOffers;
+
+
+            if (
+                currentFilter !==
+                "all"
+            ) {
+
+                filtered =
+                    allOffers.filter(
+                        offer => {
+
+                            const type =
+                                String(
+                                    offer.offer_type ||
+                                    ""
+                                ).toLowerCase();
+
+
+                            const discountType =
+                                String(
+                                    offer.discount_type ||
+                                    ""
+                                ).toLowerCase();
+
+
+                            return (
+                                type ===
+                                currentFilter.toLowerCase()
+                            )
+                            ||
+                            (
+                                discountType ===
+                                currentFilter.toLowerCase()
+                            );
+
+                        }
+                    );
+
+            }
+
+
+            if (!filtered.length) {
+
+                showEmpty();
+
+                return;
+
+            }
+
+
+            offersGrid.innerHTML =
+                filtered
+                    .map(
+                        createOfferCard
+                    )
+                    .join("");
+
+
+            setupCopyButtons();
+
+            setupOrderButtons();
+
         }
 
 
-        if (!filteredOffers.length) {
+        /* =================================================
+           OFFER CARD
+        ================================================= */
 
-            showEmpty();
-
-            return;
-
-        }
-
-
-        offersGrid.innerHTML =
-            filteredOffers
-                .map(
-                    createOfferCard
-                )
-                .join("");
-
-
-        setupCopyButtons();
-
-        setupOrderButtons();
-
-    }
-
-
-    // =====================================================
-    // CREATE OFFER CARD
-    // =====================================================
-
-    function createOfferCard(
-        offer
-    ) {
-
-        const type =
-            String(
-                offer.offer_type ||
-                "general"
-            ).toLowerCase();
-
-
-        const discountType =
-            String(
-                offer.discount_type ||
-                ""
-            ).toLowerCase();
-
-
-        const discountValue =
-            Number(
-                offer.discount_value ||
-                0
-            );
-
-
-        const minimum =
-            Number(
-                offer.min_order_amount ||
-                0
-            );
-
-
-        const maxDiscount =
-            offer.max_discount !== null &&
-            offer.max_discount !== undefined
-                ? Number(
-                    offer.max_discount
-                )
-                : null;
-
-
-        // =================================================
-        // DISCOUNT TEXT
-        // =================================================
-
-        let discountText = "";
-
-
-        if (
-            discountType ===
-            "percentage"
+        function createOfferCard(
+            offer
         ) {
 
-            discountText =
-                `${formatNumber(
-                    discountValue
-                )}% OFF`;
-
-        }
-
-        else if (
-            discountType ===
-            "flat"
-        ) {
-
-            discountText =
-                `₹${formatNumber(
-                    discountValue
-                )} OFF`;
-
-        }
-
-        else if (
-            discountType ===
-            "free_delivery"
-        ) {
-
-            discountText =
-                "FREE";
-
-        }
-
-        else {
-
-            discountText =
-                "SPECIAL";
-
-        }
+            const type =
+                String(
+                    offer.offer_type ||
+                    "general"
+                ).toLowerCase();
 
 
-        // =================================================
-        // TYPE LABEL
-        // =================================================
-
-        const typeLabel =
-            getOfferTypeLabel(
-                type,
-                discountType
-            );
+            const discountType =
+                String(
+                    offer.discount_type ||
+                    ""
+                ).toLowerCase();
 
 
-        const typeIcon =
-            getOfferTypeIcon(
-                type,
-                discountType
-            );
+            const discountValue =
+                Number(
+                    offer.discount_value ||
+                    0
+                );
 
 
-        // =================================================
-        // DESCRIPTION
-        // =================================================
-
-        const description =
-            offer.description ||
-            "Enjoy this exclusive Jigato offer.";
+            const minimum =
+                Number(
+                    offer.min_order_amount ||
+                    0
+                );
 
 
-        // =================================================
-        // MINIMUM ORDER
-        // =================================================
+            const maxDiscount =
+                offer.max_discount !== null &&
+                offer.max_discount !== undefined
 
-        const minimumText =
-            minimum > 0
+                    ? Number(
+                        offer.max_discount
+                    )
 
-                ? `Minimum order ₹${minimum.toFixed(0)}`
-
-                : "No minimum order";
-
-
-        // =================================================
-        // MAX DISCOUNT
-        // =================================================
-
-        let maxText = "";
+                    : null;
 
 
-        if (
-            maxDiscount !== null &&
-            maxDiscount > 0 &&
-            discountType ===
+            /* =============================================
+               DISCOUNT TEXT
+            ============================================= */
+
+            let discountText;
+
+
+            if (
+                discountType ===
                 "percentage"
-        ) {
+            ) {
 
-            maxText =
-                ` • Max discount ₹${maxDiscount.toFixed(0)}`;
+                discountText =
+                    `${formatNumber(
+                        discountValue
+                    )}% OFF`;
+
+            }
+            else if (
+                discountType ===
+                "flat"
+            ) {
+
+                discountText =
+                    `₹${formatNumber(
+                        discountValue
+                    )} OFF`;
+
+            }
+            else if (
+                discountType ===
+                "free_delivery"
+            ) {
+
+                discountText =
+                    "FREE";
+
+            }
+            else {
+
+                discountText =
+                    "SPECIAL";
+
+            }
+
+
+            /* =============================================
+               LABEL / ICON
+            ============================================= */
+
+            const typeLabel =
+                getOfferTypeLabel(
+                    type,
+                    discountType
+                );
+
+
+            const typeIcon =
+                getOfferTypeIcon(
+                    type,
+                    discountType
+                );
+
+
+            /* =============================================
+               DESCRIPTION
+            ============================================= */
+
+            const description =
+                offer.description ||
+                "Enjoy this exclusive Jigato offer.";
+
+
+            /* =============================================
+               MINIMUM
+            ============================================= */
+
+            const minimumText =
+                minimum > 0
+
+                    ? `Minimum order ₹${minimum.toFixed(0)}`
+
+                    : "No minimum order";
+
+
+            /* =============================================
+               MAX
+            ============================================= */
+
+            let maxText = "";
+
+
+            if (
+                maxDiscount !== null &&
+                maxDiscount > 0 &&
+                discountType ===
+                    "percentage"
+            ) {
+
+                maxText =
+                    ` • Max discount ₹${maxDiscount.toFixed(0)}`;
+
+            }
+
+
+            /* =============================================
+               EXPIRY
+            ============================================= */
+
+            const expiry =
+                formatExpiry(
+                    offer.end_date
+                );
+
+
+            return `
+
+                <article
+                    class="offer-card"
+                    data-type="${escapeHTML(type)}"
+                    data-id="${Number(offer.id)}"
+                >
+
+                    <div class="offer-card-top">
+
+                        <span class="offer-type">
+
+                            <i class="${typeIcon}"></i>
+
+                            ${escapeHTML(
+                                typeLabel
+                            )}
+
+                        </span>
+
+
+                        <span class="offer-expiry">
+
+                            ${escapeHTML(
+                                expiry
+                            )}
+
+                        </span>
+
+                    </div>
+
+
+                    <h3>
+
+                        ${escapeHTML(
+                            offer.title ||
+                            "Special Offer"
+                        )}
+
+                    </h3>
+
+
+                    <p class="offer-card-description">
+
+                        ${escapeHTML(
+                            description
+                        )}
+
+                    </p>
+
+
+                    <div class="offer-discount">
+
+                        <strong>
+
+                            ${escapeHTML(
+                                discountText
+                            )}
+
+                        </strong>
+
+
+                        ${
+                            discountType ===
+                            "percentage"
+
+                                ? `
+                                    <span>
+                                        on your order
+                                    </span>
+                                  `
+
+                                : discountType ===
+                                  "free_delivery"
+
+                                    ? `
+                                        <span>
+                                            on delivery
+                                        </span>
+                                      `
+
+                                    : `
+                                        <span>
+                                            on your order
+                                        </span>
+                                      `
+                        }
+
+                    </div>
+
+
+                    <div class="offer-min-order">
+
+                        <i class="fa-solid fa-circle-info"></i>
+
+                        ${escapeHTML(
+                            minimumText
+                        )}
+
+                        ${escapeHTML(
+                            maxText
+                        )}
+
+                    </div>
+
+
+                    <div class="offer-code-box">
+
+                        <span class="offer-code">
+
+                            ${escapeHTML(
+                                offer.code
+                            )}
+
+                        </span>
+
+
+                        <button
+                            type="button"
+                            class="copy-code-btn"
+                            data-code="${escapeHTML(
+                                offer.code
+                            )}"
+                        >
+
+                            <i class="fa-regular fa-copy"></i>
+
+                            Copy
+
+                        </button>
+
+                    </div>
+
+
+                    <div class="offer-card-footer">
+
+
+                        <span class="offer-restaurant">
+
+                            <i class="fa-solid fa-utensils"></i>
+
+                            All Jigato Food
+
+                        </span>
+
+
+                        <a
+                            href="/menu"
+                            class="offer-order-btn"
+                        >
+
+                            Order Now
+
+                            <i class="fa-solid fa-arrow-right"></i>
+
+                        </a>
+
+
+                    </div>
+
+
+                </article>
+
+            `;
 
         }
 
 
-        // =================================================
-        // EXPIRY
-        // =================================================
+        /* =================================================
+           COPY
+        ================================================= */
 
-        const expiry =
-            formatExpiry(
-                offer.end_date
+        function setupCopyButtons() {
+
+            const buttons =
+                document.querySelectorAll(
+                    ".copy-code-btn"
+                );
+
+
+            buttons.forEach(
+                button => {
+
+                    button.addEventListener(
+                        "click",
+                        async () => {
+
+                            const code =
+                                button.dataset.code;
+
+
+                            if (!code)
+                                return;
+
+
+                            const copied =
+                                await copyToClipboard(
+                                    code
+                                );
+
+
+                            if (copied) {
+
+                                const oldHTML =
+                                    button.innerHTML;
+
+
+                                button.innerHTML = `
+                                    <i class="fa-solid fa-check"></i>
+                                    Copied
+                                `;
+
+
+                                button.classList.add(
+                                    "copied"
+                                );
+
+
+                                if (
+                                    typeof Swal !==
+                                    "undefined"
+                                ) {
+
+                                    Swal.fire({
+
+                                        toast: true,
+
+                                        position:
+                                            "top-end",
+
+                                        icon:
+                                            "success",
+
+                                        title:
+                                            `${code} copied`,
+
+                                        showConfirmButton:
+                                            false,
+
+                                        timer:
+                                            1600
+
+                                    });
+
+                                }
+
+
+                                setTimeout(
+                                    () => {
+
+                                        button.innerHTML =
+                                            oldHTML;
+
+                                        button.classList.remove(
+                                            "copied"
+                                        );
+
+                                    },
+                                    1800
+                                );
+
+                            }
+
+                        }
+                    );
+
+                }
             );
 
-
-        // =================================================
-        // RESTAURANT
-        // =================================================
-
-        const restaurantName =
-            offer.restaurant_name ||
-            "";
+        }
 
 
-        // =================================================
-        // ORDER LINK
-        // =================================================
+        /* =================================================
+           ORDER BUTTON
+        ================================================= */
 
-        let orderLink =
-            "/restaurant";
+        function setupOrderButtons() {
+
+            const buttons =
+                document.querySelectorAll(
+                    ".offer-order-btn"
+                );
 
 
-        if (
-            offer.restaurant_id
-        ) {
+            buttons.forEach(
+                button => {
 
-            orderLink =
-                `/restaurant/${Number(
-                    offer.restaurant_id
-                )}`;
+                    button.addEventListener(
+                        "click",
+                        () => {
+
+                            const card =
+                                button.closest(
+                                    ".offer-card"
+                                );
+
+
+                            if (!card)
+                                return;
+
+
+                            const codeElement =
+                                card.querySelector(
+                                    ".offer-code"
+                                );
+
+
+                            if (
+                                codeElement
+                            ) {
+
+                                localStorage.setItem(
+                                    "jigatoCoupon",
+                                    codeElement
+                                        .textContent
+                                        .trim()
+                                );
+
+                            }
+
+                        }
+                    );
+
+                }
+            );
 
         }
 
 
-        return `
+        /* =================================================
+           CLIPBOARD
+        ================================================= */
 
-            <article
-                class="offer-card"
-                data-type="${escapeHTML(
-                    type
-                )}"
-                data-id="${Number(
-                    offer.id
-                )}"
-            >
+        async function copyToClipboard(
+            text
+        ) {
 
+            try {
 
-                <div class="offer-card-top">
+                if (
+                    navigator.clipboard &&
+                    window.isSecureContext
+                ) {
 
-                    <span class="offer-type">
+                    await navigator.clipboard.writeText(
+                        text
+                    );
 
-                        <i class="${typeIcon}"></i>
+                    return true;
 
-                        ${escapeHTML(
-                            typeLabel
-                        )}
-
-                    </span>
+                }
 
 
-                    <span class="offer-expiry">
-
-                        ${escapeHTML(
-                            expiry
-                        )}
-
-                    </span>
-
-                </div>
+                const textarea =
+                    document.createElement(
+                        "textarea"
+                    );
 
 
-                <h3>
-
-                    ${escapeHTML(
-                        offer.title ||
-                        "Special Offer"
-                    )}
-
-                </h3>
+                textarea.value =
+                    text;
 
 
-                <p class="offer-card-description">
-
-                    ${escapeHTML(
-                        description
-                    )}
-
-                </p>
+                textarea.style.position =
+                    "fixed";
 
 
-                <div class="offer-discount">
-
-                    <strong>
-
-                        ${escapeHTML(
-                            discountText
-                        )}
-
-                    </strong>
+                textarea.style.left =
+                    "-9999px";
 
 
-                    ${
-                        discountType ===
-                        "percentage"
-
-                            ? `<span>
-                                on your order
-                               </span>`
-
-                            : discountType ===
-                              "free_delivery"
-
-                                ? `<span>
-                                    on delivery
-                                   </span>`
-
-                                : `<span>
-                                    on your order
-                                   </span>`
-                    }
-
-                </div>
+                document.body.appendChild(
+                    textarea
+                );
 
 
-                <div class="offer-min-order">
+                textarea.select();
 
-                    <i class="fa-solid fa-circle-info"></i>
 
-                    ${escapeHTML(
-                        minimumText
-                    )}
+                const success =
+                    document.execCommand(
+                        "copy"
+                    );
 
-                    ${escapeHTML(
-                        maxText
-                    )}
+
+                textarea.remove();
+
+
+                return success;
+
+            }
+            catch (error) {
+
+                console.error(
+                    "COPY ERROR:",
+                    error
+                );
+
+                return false;
+
+            }
+
+        }
+
+
+        /* =================================================
+           LOADING
+        ================================================= */
+
+        function showLoading() {
+
+            if (!offersGrid)
+                return;
+
+
+            offersGrid.innerHTML = `
+
+                <div class="offers-loading">
+
+                    <div class="loading-spinner"></div>
+
+                    <p>
+                        Finding the best offers for you...
+                    </p>
 
                 </div>
 
+            `;
 
-                <div class="offer-code-box">
+        }
 
-                    <span class="offer-code">
 
-                        ${escapeHTML(
-                            offer.code
-                        )}
+        /* =================================================
+           EMPTY
+        ================================================= */
 
-                    </span>
+        function showEmpty() {
+
+            if (!offersGrid)
+                return;
+
+
+            offersGrid.innerHTML = `
+
+                <div class="offers-empty">
+
+                    <i class="fa-solid fa-ticket"></i>
+
+                    <h3>
+                        No Offers Available
+                    </h3>
+
+                    <p>
+                        There are no offers in this category
+                        right now. Check again soon.
+                    </p>
+
+                </div>
+
+            `;
+
+        }
+
+
+        /* =================================================
+           ERROR
+        ================================================= */
+
+        function showError(
+            message
+        ) {
+
+            if (!offersGrid)
+                return;
+
+
+            offersGrid.innerHTML = `
+
+                <div class="offers-empty">
+
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+
+                    <h3>
+                        Unable To Load Offers
+                    </h3>
+
+                    <p>
+                        ${escapeHTML(message)}
+                    </p>
 
 
                     <button
                         type="button"
-                        class="copy-code-btn"
-                        data-code="${escapeHTML(
-                            offer.code
-                        )}"
+                        id="retryOffers"
+                        class="filter-btn active"
+                        style="margin-top:15px;"
                     >
 
-                        <i class="fa-regular fa-copy"></i>
-
-                        Copy
+                        Try Again
 
                     </button>
 
                 </div>
 
-
-                <div class="offer-card-footer">
-
-
-                    <span
-                        class="offer-restaurant"
-                    >
-
-                        ${
-                            restaurantName
-
-                                ? `
-                                    <i class="fa-solid fa-store"></i>
-                                    ${escapeHTML(
-                                        restaurantName
-                                    )}
-                                  `
-
-                                : `
-                                    <i class="fa-solid fa-utensils"></i>
-                                    All Restaurants
-                                  `
-                        }
-
-                    </span>
-
-
-                    <a
-                        href="${orderLink}"
-                        class="offer-order-btn"
-                    >
-
-                        Order Now
-
-                        <i class="fa-solid fa-arrow-right"></i>
-
-                    </a>
-
-
-                </div>
-
-
-            </article>
-
-        `;
-
-    }
-
-
-    // =====================================================
-    // COPY BUTTONS
-    // =====================================================
-
-    function setupCopyButtons() {
-
-        const buttons =
-            document.querySelectorAll(
-                ".copy-code-btn"
-            );
-
-
-        buttons.forEach(button => {
-
-            button.addEventListener(
-                "click",
-                async () => {
-
-                    const code =
-                        button.dataset.code;
-
-
-                    if (!code) return;
-
-
-                    const copied =
-                        await copyToClipboard(
-                            code
-                        );
-
-
-                    if (copied) {
-
-                        const oldHTML =
-                            button.innerHTML;
-
-
-                        button.innerHTML = `
-                            <i class="fa-solid fa-check"></i>
-                            Copied
-                        `;
-
-
-                        button.classList.add(
-                            "copied"
-                        );
-
-
-                        if (
-                            typeof Swal !==
-                            "undefined"
-                        ) {
-
-                            Swal.fire({
-
-                                toast: true,
-
-                                position:
-                                    "top-end",
-
-                                icon:
-                                    "success",
-
-                                title:
-                                    `${code} copied`,
-
-                                showConfirmButton:
-                                    false,
-
-                                timer:
-                                    1600
-
-                            });
-
-                        }
-
-
-                        setTimeout(
-                            () => {
-
-                                button.innerHTML =
-                                    oldHTML;
-
-                                button.classList.remove(
-                                    "copied"
-                                );
-
-                            },
-                            1800
-                        );
-
-                    }
-
-                    else {
-
-                        if (
-                            typeof Swal !==
-                            "undefined"
-                        ) {
-
-                            Swal.fire({
-
-                                icon:
-                                    "info",
-
-                                title:
-                                    "Coupon Code",
-
-                                text:
-                                    code,
-
-                                confirmButtonColor:
-                                    "#ff5a1f"
-
-                            });
-
-                        }
-
-                    }
-
-                }
-            );
-
-        });
-
-    }
-
-
-    // =====================================================
-    // ORDER BUTTONS
-    // =====================================================
-
-    function setupOrderButtons() {
-
-        const buttons =
-            document.querySelectorAll(
-                ".offer-order-btn"
-            );
-
-
-        buttons.forEach(button => {
-
-            button.addEventListener(
-                "click",
-                () => {
-
-                    const card =
-                        button.closest(
-                            ".offer-card"
-                        );
-
-
-                    if (!card) return;
-
-
-                    const code =
-                        card.querySelector(
-                            ".offer-code"
-                        );
-
-
-                    if (
-                        code &&
-                        code.textContent
-                    ) {
-
-                        localStorage.setItem(
-                            "jigatoCoupon",
-                            code.textContent.trim()
-                        );
-
-                    }
-
-                }
-            );
-
-        });
-
-    }
-
-
-    // =====================================================
-    // COPY TO CLIPBOARD
-    // =====================================================
-
-    async function copyToClipboard(
-        text
-    ) {
-
-        try {
-
-            if (
-                navigator.clipboard &&
-                window.isSecureContext
-            ) {
-
-                await navigator.clipboard.writeText(
-                    text
+            `;
+
+
+            document
+                .getElementById(
+                    "retryOffers"
+                )
+                ?.addEventListener(
+                    "click",
+                    loadOffers
                 );
-
-                return true;
-
-            }
-
-
-            const textarea =
-                document.createElement(
-                    "textarea"
-                );
-
-
-            textarea.value = text;
-
-            textarea.style.position =
-                "fixed";
-
-            textarea.style.left =
-                "-9999px";
-
-
-            document.body.appendChild(
-                textarea
-            );
-
-
-            textarea.select();
-
-
-            const success =
-                document.execCommand(
-                    "copy"
-                );
-
-
-            textarea.remove();
-
-
-            return success;
-
-        } catch (error) {
-
-            console.error(
-                "COPY ERROR:",
-                error
-            );
-
-            return false;
 
         }
 
-    }
 
+        /* =================================================
+           TYPE LABEL
+        ================================================= */
 
-    // =====================================================
-    // LOADING
-    // =====================================================
-
-    function showLoading() {
-
-        if (!offersGrid) return;
-
-
-        offersGrid.innerHTML = `
-
-            <div class="offers-loading">
-
-                <div class="loading-spinner"></div>
-
-                <p>
-                    Finding the best offers for you...
-                </p>
-
-            </div>
-
-        `;
-
-    }
-
-
-    // =====================================================
-    // EMPTY
-    // =====================================================
-
-    function showEmpty() {
-
-        if (!offersGrid) return;
-
-
-        offersGrid.innerHTML = `
-
-            <div class="offers-empty">
-
-                <i
-                    class="fa-solid fa-ticket"
-                ></i>
-
-
-                <h3>
-                    No Offers Available
-                </h3>
-
-
-                <p>
-                    There are no offers in this category
-                    right now. Check again soon.
-                </p>
-
-            </div>
-
-        `;
-
-    }
-
-
-    // =====================================================
-    // ERROR
-    // =====================================================
-
-    function showError(
-        message
-    ) {
-
-        if (!offersGrid) return;
-
-
-        offersGrid.innerHTML = `
-
-            <div class="offers-empty">
-
-                <i
-                    class="fa-solid fa-triangle-exclamation"
-                ></i>
-
-
-                <h3>
-                    Unable To Load Offers
-                </h3>
-
-
-                <p>
-                    ${escapeHTML(
-                        message
-                    )}
-                </p>
-
-
-                <button
-                    type="button"
-                    id="retryOffers"
-                    class="filter-btn active"
-                    style="margin-top:15px;"
-                >
-
-                    Try Again
-
-                </button>
-
-            </div>
-
-        `;
-
-
-        const retry =
-            document.getElementById(
-                "retryOffers"
-            );
-
-
-        if (retry) {
-
-            retry.addEventListener(
-                "click",
-                loadOffers
-            );
-
-        }
-
-    }
-
-
-    // =====================================================
-    // OFFER TYPE LABEL
-    // =====================================================
-
-    function getOfferTypeLabel(
-        type,
-        discountType
-    ) {
-
-        if (
-            discountType ===
-            "free_delivery"
+        function getOfferTypeLabel(
+            type,
+            discountType
         ) {
 
-            return "Free Delivery";
-
-        }
-
-
-        switch (type) {
-
-            case "welcome":
-
-                return "New User";
-
-
-            case "restaurant":
-
-                return "Restaurant";
-
-
-            case "free_delivery":
+            if (
+                discountType ===
+                "free_delivery"
+            ) {
 
                 return "Free Delivery";
 
+            }
 
-            default:
 
-                return "Special Deal";
+            switch (type) {
+
+                case "welcome":
+
+                    return "New User";
+
+
+                case "free_delivery":
+
+                    return "Free Delivery";
+
+
+                case "discount":
+
+                    return "Discount";
+
+
+                default:
+
+                    return "Special Deal";
+
+            }
 
         }
 
-    }
 
+        /* =================================================
+           TYPE ICON
+        ================================================= */
 
-    // =====================================================
-    // OFFER TYPE ICON
-    // =====================================================
-
-    function getOfferTypeIcon(
-        type,
-        discountType
-    ) {
-
-        if (
-            discountType ===
-            "free_delivery"
+        function getOfferTypeIcon(
+            type,
+            discountType
         ) {
 
-            return "fa-solid fa-truck-fast";
+            if (
+                discountType ===
+                "free_delivery"
+            ) {
+
+                return "fa-solid fa-truck-fast";
+
+            }
+
+
+            switch (type) {
+
+                case "welcome":
+
+                    return "fa-solid fa-gift";
+
+
+                case "discount":
+
+                    return "fa-solid fa-percent";
+
+
+                default:
+
+                    return "fa-solid fa-tag";
+
+            }
 
         }
 
 
-        switch (type) {
+        /* =================================================
+           EXPIRY
+        ================================================= */
 
-            case "welcome":
-
-                return "fa-solid fa-gift";
-
-
-            case "restaurant":
-
-                return "fa-solid fa-store";
-
-
-            default:
-
-                return "fa-solid fa-percent";
-
-        }
-
-    }
-
-
-    // =====================================================
-    // EXPIRY FORMAT
-    // =====================================================
-
-    function formatExpiry(
-        date
-    ) {
-
-        if (!date) {
-
-            return "Limited time";
-
-        }
-
-
-        const end =
-            new Date(date);
-
-
-        if (
-            Number.isNaN(
-                end.getTime()
-            )
+        function formatExpiry(
+            date
         ) {
 
-            return "Limited time";
+            if (!date) {
 
-        }
+                return "Limited time";
 
-
-        const now =
-            new Date();
+            }
 
 
-        const difference =
-            end.getTime() -
-            now.getTime();
+            const end =
+                new Date(date);
 
 
-        if (
-            difference <= 0
-        ) {
-
-            return "Expired";
-
-        }
-
-
-        const days =
-            Math.ceil(
-                difference /
-                (
-                    1000 *
-                    60 *
-                    60 *
-                    24
+            if (
+                Number.isNaN(
+                    end.getTime()
                 )
+            ) {
+
+                return "Limited time";
+
+            }
+
+
+            const now =
+                new Date();
+
+
+            const difference =
+                end.getTime() -
+                now.getTime();
+
+
+            if (
+                difference <= 0
+            ) {
+
+                return "Expired";
+
+            }
+
+
+            const days =
+                Math.ceil(
+                    difference /
+                    (
+                        1000 *
+                        60 *
+                        60 *
+                        24
+                    )
+                );
+
+
+            if (days === 1) {
+
+                return "Ends tomorrow";
+
+            }
+
+
+            if (days <= 7) {
+
+                return `Ends in ${days} days`;
+
+            }
+
+
+            return `Valid till ${end.toLocaleDateString(
+                "en-IN",
+                {
+                    day: "numeric",
+                    month: "short"
+                }
+            )}`;
+
+        }
+
+
+        /* =================================================
+           NUMBER
+        ================================================= */
+
+        function formatNumber(
+            number
+        ) {
+
+            const value =
+                Number(number);
+
+
+            if (
+                !Number.isFinite(value)
+            ) {
+
+                return "0";
+
+            }
+
+
+            return Number.isInteger(value)
+                ? String(value)
+                : value.toFixed(2);
+
+        }
+
+
+        /* =================================================
+           ESCAPE
+        ================================================= */
+
+        function escapeHTML(
+            value
+        ) {
+
+            return String(
+                value ?? ""
+            )
+
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+
+            .replace(
+                /</g,
+                "&lt;"
+            )
+
+            .replace(
+                />/g,
+                "&gt;"
+            )
+
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+
+            .replace(
+                /'/g,
+                "&#039;"
             );
 
-
-        if (days === 1) {
-
-            return "Ends tomorrow";
-
         }
 
-
-        if (days <= 7) {
-
-            return `Ends in ${days} days`;
-
-        }
-
-
-        return `Valid till ${end.toLocaleDateString(
-            "en-IN",
-            {
-                day: "numeric",
-                month: "short"
-            }
-        )}`;
-
     }
-
-
-    // =====================================================
-    // NUMBER FORMAT
-    // =====================================================
-
-    function formatNumber(
-        number
-    ) {
-
-        const value =
-            Number(number);
-
-
-        if (
-            !Number.isFinite(value)
-        ) {
-
-            return "0";
-
-        }
-
-
-        return Number.isInteger(value)
-            ? String(value)
-            : value.toFixed(2);
-
-    }
-
-
-    // =====================================================
-    // ESCAPE HTML
-    // =====================================================
-
-    function escapeHTML(
-        value
-    ) {
-
-        return String(
-            value ?? ""
-        )
-
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-
-        .replace(
-            /</g,
-            "&lt;"
-        )
-
-        .replace(
-            />/g,
-            "&gt;"
-        )
-
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-
-        .replace(
-            /'/g,
-            "&#039;"
-        );
-
-    }
-
-});
+);

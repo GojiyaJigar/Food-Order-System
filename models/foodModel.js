@@ -1,35 +1,32 @@
 const db = require("../config/db");
 
-// Get Restaurant Details
-const getRestaurant = (restaurantId, callback) => {
 
-    const sql = "SELECT * FROM restaurants WHERE id = ?";
+/* =====================================================
+   GET ALL AVAILABLE FOODS
+===================================================== */
 
-    db.query(sql, [restaurantId], (err, result) => {
-        if (err) return callback(err, null);
-        callback(null, result);
-    });
-
-};
-
-// Get Foods By Restaurant
-const getFoodsByRestaurant = (restaurantId, callback) => {
+const getAllFoods = (callback) => {
 
     const sql = `
-        SELECT *
+        SELECT
+            id,
+            name,
+            description,
+            price,
+            category,
+            image,
+            is_available,
+            created_at
         FROM foods
-        WHERE restaurant_id = ?
-        ORDER BY category, name
+        WHERE is_available = 1
+        ORDER BY category ASC, name ASC
     `;
 
-    db.query(sql, [restaurantId], (err, result) => {
-        if (err) return callback(err, null);
-        callback(null, result);
-    });
+    db.query(sql, callback);
 
 };
 
+
 module.exports = {
-    getRestaurant,
-    getFoodsByRestaurant
+    getAllFoods
 };
