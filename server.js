@@ -7,27 +7,42 @@ const path = require("path");
 const app = express();
 
 
-// ================= DATABASE =================
+// =====================================================
+// DATABASE
+// =====================================================
 
 require("./config/db");
 
 
-// ================= MIDDLEWARE =================
+// =====================================================
+// MIDDLEWARE
+// =====================================================
 
-app.use(express.urlencoded({
-    extended: true
-}));
+const {
+    requireCustomer
+} = require("./middleware/adminMiddleware");
+
+
+app.use(
+    express.urlencoded({
+        extended: true
+    })
+);
 
 app.use(express.json());
 
 
-// ================= SESSION =================
+// =====================================================
+// SESSION
+// =====================================================
 
 app.use(
     session({
         name: "jigato.sid",
 
-        secret: "jigato_secret_key",
+        secret:
+            process.env.SESSION_SECRET ||
+            "jigato_secret_key",
 
         resave: false,
 
@@ -35,18 +50,17 @@ app.use(
 
         cookie: {
             maxAge: 1000 * 60 * 60 * 24,
-
             httpOnly: true,
-
             secure: false,
-
             sameSite: "lax"
         }
     })
 );
 
 
-// ================= STATIC =================
+// =====================================================
+// STATIC FILES
+// =====================================================
 
 app.use(
     express.static(
@@ -56,86 +70,174 @@ app.use(
 
 
 // =====================================================
-// PAGE ROUTES
+// CUSTOMER PAGE ROUTES
 // =====================================================
 
+
 // HOME
-app.get("/", (req, res) => {
-    res.sendFile(
-        path.join(__dirname, "views", "index.html")
-    );
-});
+app.get(
+    "/",
+    (req, res) => {
+
+        res.sendFile(
+            path.join(
+                __dirname,
+                "views",
+                "index.html"
+            )
+        );
+
+    }
+);
 
 
 // REGISTER
-app.get("/register", (req, res) => {
-    res.sendFile(
-        path.join(__dirname, "views", "register.html")
-    );
-});
+app.get(
+    "/register",
+    (req, res) => {
+
+        res.sendFile(
+            path.join(
+                __dirname,
+                "views",
+                "register.html"
+            )
+        );
+    }
+);
 
 
 // LOGIN
-app.get("/login", (req, res) => {
-    res.sendFile(
-        path.join(__dirname, "views", "login.html")
-    );
-});
+app.get(
+    "/login",
+    (req, res) => {
+
+        res.sendFile(
+            path.join(
+                __dirname,
+                "views",
+                "login.html"
+            )
+        );
+    }
+);
 
 
+// MENU
+app.get(
+    "/menu",
+    requireCustomer,
+    (req, res) => {
+
+        res.sendFile(
+            path.join(
+                __dirname,
+                "views",
+                "menu.html"
+            )
+        );
+    }
+);
 
 
+// CART
+app.get(
+    "/cart-page",
+    requireCustomer,
+    (req, res) => {
+
+        res.sendFile(
+            path.join(
+                __dirname,
+                "views",
+                "cart.html"
+            )
+        );
+    }
+);
 
 
-// MENU PAGE
-app.get("/menu", (req, res) => {
-    res.sendFile(
-        path.join(__dirname, "views", "menu.html")
-    );
-});
+// CHECKOUT
+app.get(
+    "/checkout",
+    requireCustomer,
+    (req, res) => {
+
+        res.sendFile(
+            path.join(
+                __dirname,
+                "views",
+                "checkout.html"
+            )
+        );
+    }
+);
 
 
-//CART PAGE
-app.get("/cart-page", (req, res) => {
-    res.sendFile(
-        path.join(__dirname, "views", "cart.html")
-    );
-});
+// OLD CHECKOUT URL
+app.get(
+    "/checkout-page",
+    requireCustomer,
+    (req, res) => {
+
+        res.redirect("/checkout");
+    }
+);
 
 
-//CHECKOUT PAGE
-app.get("/checkout", (req, res) => {
-    res.sendFile(
-        path.join(__dirname, "views", "checkout.html")
-    );
-});
+// PROFILE
+app.get(
+    "/profile",
+    requireCustomer,
+    (req, res) => {
+
+        res.sendFile(
+            path.join(
+                __dirname,
+                "views",
+                "profile.html"
+            )
+        );
+    }
+);
 
 
-// // // OLD CHECKOUT URL
-app.get("/checkout-page", (req, res) => {
-    res.redirect("/checkout");
-});
-// //PROFILE
-app.get("/profile", (req, res) => {
-    res.sendFile(
-        path.join(__dirname, "views", "profile.html")
-    );
-});
-//offers
-app.get("/offers", (req, res) => {
-    res.sendFile(
-         path.join(__dirname, "views", "offers.html")
-     );
- });
-//offers
- app.get("/orders", (req, res) => {
-     res.sendFile(
-       path.join(__dirname, "views", "my-orders.html")
-     );
- });
+// OFFERS
+app.get(
+    "/offers",
+    requireCustomer,
+    (req, res) => {
+
+        res.sendFile(
+            path.join(
+                __dirname,
+                "views",
+                "offers.html"
+            )
+        );
+    }
+);
+
+
+// MY ORDERS
+app.get(
+    "/orders",
+    requireCustomer,
+    (req, res) => {
+
+        res.sendFile(
+            path.join(
+                __dirname,
+                "views",
+                "my-orders.html"
+            )
+        );
+    }
+);
+
 
 // =====================================================
-// API ROUTES
+// CUSTOMER / GENERAL API ROUTES
 // =====================================================
 
 
@@ -151,6 +253,7 @@ const homeRoutes =
     require("./routes/homeRoutes");
 
 app.use(homeRoutes);
+
 
 // FOOD
 const foodRoutes =
@@ -174,41 +277,84 @@ app.use(checkoutRoutes);
 
 
 // ORDERS
-const orderRoutes =require("./routes/orderRoutes");
+const orderRoutes =
+    require("./routes/orderRoutes");
+
 app.use(orderRoutes);
-//PROFILE
-const profileRoutes = require("./routes/profileRoutes");
+
+
+// PROFILE
+const profileRoutes =
+    require("./routes/profileRoutes");
 
 app.use(profileRoutes);
-//address
-const addressRoutes = require("./routes/addressRoutes");
+
+
+// ADDRESS
+const addressRoutes =
+    require("./routes/addressRoutes");
+
 app.use(addressRoutes);
-//offers
-const offerRoutes = require("./routes/offerRoutes");
+
+
+// OFFERS
+const offerRoutes =
+    require("./routes/offerRoutes");
+
 app.use(offerRoutes);
+
+
 // =====================================================
-// HEADER
+// ADMIN ROUTES
 // =====================================================
 
+
+// MAIN ADMIN ROUTES
+
+const adminRoutes =
+    require("./routes/adminRoutes");
+
 app.use(
-    "/header",
-    express.static(
-        path.join(__dirname, "views", "header")
-    )
+    "/admin",
+    adminRoutes
 );
+
+
+
 
 
 // =====================================================
 // 404
 // =====================================================
 
-app.use((req, res) => {
+app.use(
+    (req, res) => {
 
-    res.status(404).send(
-        "404 - Page Not Found"
-    );
+        res.status(404).send(
+            "404 - Page Not Found"
+        );
+    }
+);
 
-});
+
+// =====================================================
+// ERROR HANDLER
+// =====================================================
+
+app.use(
+    (err, req, res, next) => {
+
+        console.error(
+            "SERVER ERROR:",
+            err
+        );
+
+        res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        });
+    }
+);
 
 
 // =====================================================
@@ -218,10 +364,13 @@ app.use((req, res) => {
 const PORT =
     process.env.PORT || 5000;
 
-app.listen(PORT, () => {
 
-    console.log(
-        `🚀 Server Running on http://localhost:${PORT}`
-    );
+app.listen(
+    PORT,
+    () => {
 
-});
+        console.log(
+            `🚀 Server Running on http://localhost:${PORT}`
+        );
+    }
+);

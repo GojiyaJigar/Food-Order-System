@@ -55,7 +55,6 @@ document.addEventListener(
             );
 
 
-
         /* ==================================================
            MESSAGE
         ================================================== */
@@ -84,7 +83,6 @@ document.addEventListener(
         }
 
 
-
         function hideMessage() {
 
             if (!message)
@@ -94,8 +92,10 @@ document.addEventListener(
             message.textContent =
                 "";
 
+
             message.className =
                 "login-message";
+
 
             message.style.display =
                 "none";
@@ -103,9 +103,8 @@ document.addEventListener(
         }
 
 
-
         /* ==================================================
-           PASSWORD SHOW / HIDE
+           PASSWORD TOGGLE
         ================================================== */
 
         togglePassword?.addEventListener(
@@ -123,19 +122,17 @@ document.addEventListener(
 
                     togglePassword.innerHTML =
                         `
-                        <i
-                            class="fa-solid fa-eye-slash"
-                        ></i>
+                        <i class="fa-solid fa-eye-slash"></i>
                         `;
 
 
-                    togglePassword
-                        .setAttribute(
-                            "aria-label",
-                            "Hide password"
-                        );
+                    togglePassword.setAttribute(
+                        "aria-label",
+                        "Hide password"
+                    );
 
-                } else {
+                }
+                else {
 
                     password.type =
                         "password";
@@ -143,23 +140,19 @@ document.addEventListener(
 
                     togglePassword.innerHTML =
                         `
-                        <i
-                            class="fa-solid fa-eye"
-                        ></i>
+                        <i class="fa-solid fa-eye"></i>
                         `;
 
 
-                    togglePassword
-                        .setAttribute(
-                            "aria-label",
-                            "Show password"
-                        );
+                    togglePassword.setAttribute(
+                        "aria-label",
+                        "Show password"
+                    );
 
                 }
 
             }
         );
-
 
 
         /* ==================================================
@@ -170,17 +163,11 @@ document.addEventListener(
             "click",
             () => {
 
-                /*
-                 * Agar previous page isi website
-                 * se hai to back.
-                 */
-
                 if (
                     document.referrer &&
-                    document.referrer
-                        .includes(
-                            window.location.host
-                        )
+                    document.referrer.includes(
+                        window.location.host
+                    )
                 ) {
 
                     window.history.back();
@@ -190,16 +177,11 @@ document.addEventListener(
                 }
 
 
-                /*
-                 * Otherwise Home
-                 */
-
                 window.location.href =
                     "/";
 
             }
         );
-
 
 
         /* ==================================================
@@ -224,9 +206,9 @@ document.addEventListener(
                     password.value;
 
 
-                /* ==========================
+                /* =========================================
                    VALIDATION
-                ========================== */
+                ========================================= */
 
                 if (!userEmail) {
 
@@ -256,10 +238,9 @@ document.addEventListener(
                 }
 
 
-
-                /* ==========================
+                /* =========================================
                    LOADING
-                ========================== */
+                ========================================= */
 
                 submit.disabled =
                     true;
@@ -271,11 +252,8 @@ document.addEventListener(
                         Logging in...
                     </span>
 
-                    <i
-                        class="fa-solid fa-spinner fa-spin"
-                    ></i>
+                    <i class="fa-solid fa-spinner fa-spin"></i>
                     `;
-
 
 
                 try {
@@ -292,6 +270,9 @@ document.addEventListener(
 
                                 headers: {
                                     "Content-Type":
+                                        "application/json",
+
+                                    "Accept":
                                         "application/json"
                                 },
 
@@ -320,10 +301,9 @@ document.addEventListener(
                     );
 
 
-
-                    /* ==========================
+                    /* =========================================
                        LOGIN FAILED
-                    ========================== */
+                    ========================================= */
 
                     if (
                         !response.ok ||
@@ -341,10 +321,9 @@ document.addEventListener(
                     }
 
 
-
-                    /* ==========================
-                       SUCCESS
-                    ========================== */
+                    /* =========================================
+                       ROLE BASED REDIRECT
+                    ========================================= */
 
                     showMessage(
                         "Login successful! Redirecting...",
@@ -352,23 +331,40 @@ document.addEventListener(
                     );
 
 
-                    /*
-                     * Small delay so user sees
-                     * success message.
-                     */
+                    const userRole =
+                        String(
+                            data.role || "customer"
+                        )
+                        .trim()
+                        .toLowerCase();
+
 
                     setTimeout(
                         () => {
+
+                            if (
+                                userRole ===
+                                "admin"
+                            ) {
+
+                                window.location.href =
+                                    "/admin/dashboard";
+
+                                return;
+
+                            }
+
 
                             window.location.href =
                                 "/";
 
                         },
-                        700
+                        500
                     );
 
 
-                } catch (error) {
+                }
+                catch (error) {
 
                     console.error(
                         "LOGIN ERROR:",
@@ -381,13 +377,8 @@ document.addEventListener(
                         "error"
                     );
 
-
-                } finally {
-
-                    /*
-                     * Agar redirect nahi hua,
-                     * button normal state mein.
-                     */
+                }
+                finally {
 
                     setTimeout(
                         () => {
@@ -402,20 +393,17 @@ document.addEventListener(
                                     Login
                                 </span>
 
-                                <i
-                                    class="fa-solid fa-arrow-right"
-                                ></i>
+                                <i class="fa-solid fa-arrow-right"></i>
                                 `;
 
                         },
-                        800
+                        700
                     );
 
                 }
 
             }
         );
-
 
 
         /* ==================================================
@@ -426,20 +414,11 @@ document.addEventListener(
             "click",
             () => {
 
-                /*
-                 * Google OAuth backend route.
-                 *
-                 * IMPORTANT:
-                 * Backend mein /auth/google
-                 * route configured hona chahiye.
-                 */
-
                 window.location.href =
                     "/auth/google";
 
             }
         );
-
 
     }
 );

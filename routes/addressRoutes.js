@@ -2,20 +2,18 @@ const express = require("express");
 
 const router = express.Router();
 
-
 const {
     getAddresses,
     createAddress,
     updateAddress,
     deleteAddress
-} = require(
-    "../controllers/addressController"
-);
+} = require("../controllers/addressController");
 
 
-// =====================================================
-// GET ADDRESSES
-// =====================================================
+/* =====================================================
+   GET ALL ADDRESSES
+   GET /api/addresses
+===================================================== */
 
 router.get(
     "/api/addresses",
@@ -23,9 +21,10 @@ router.get(
 );
 
 
-// =====================================================
-// CREATE ADDRESS
-// =====================================================
+/* =====================================================
+   CREATE ADDRESS
+   POST /api/addresses
+===================================================== */
 
 router.post(
     "/api/addresses",
@@ -33,9 +32,10 @@ router.post(
 );
 
 
-// =====================================================
-// UPDATE ADDRESS
-// =====================================================
+/* =====================================================
+   UPDATE ADDRESS
+   PUT /api/addresses/:id
+===================================================== */
 
 router.put(
     "/api/addresses/:id",
@@ -43,9 +43,10 @@ router.put(
 );
 
 
-// =====================================================
-// DELETE ADDRESS
-// =====================================================
+/* =====================================================
+   DELETE ADDRESS
+   DELETE /api/addresses/:id
+===================================================== */
 
 router.delete(
     "/api/addresses/:id",

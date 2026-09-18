@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Jigato | Customers</title>
+
+
+    <!-- ==================================================
+         GOOGLE FONT
+    =================================================== -->
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- ==================================================
+         FONT AWESOME
+    =================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    >
+
+
+    <!-- ==================================================
+         SWEET ALERT
+    =================================================== -->
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/sweetalert2@11"
+    ></script>
+
+
+    <!-- ==================================================
+         SHARED SIDEBAR CSS
+    =================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="/admin/sidebar/sidebar.css"
+    >
+
+
+    <!-- ==================================================
+         USERS CSS
+    =================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="/css/admin/users.css"
+    >
+
+</head>
+
+
+<body>
+
+
+<div class="admin-page">
+
+
+    <!-- ==================================================
+         SHARED SIDEBAR
+         sidebar.html sidebar.js se load hoga
+    ================================================== -->
+
+    <div
+        id="adminSidebarContainer"
+    ></div>
+
+
+
+    <!-- ==================================================
+         MAIN
+    ================================================== -->
+
+    <main class="users-main">
+
+
+        <!-- ==================================================
+             HEADER
+        ================================================== -->
+
+        <header class="users-header">
+
+
+            <div class="users-header-left">
+
+
+                <button
+                    type="button"
+                    id="sidebarToggle"
+                    class="mobile-menu-btn"
+                    aria-label="Open sidebar"
+                >
+
+                    <i class="fa-solid fa-bars"></i>
+
+                </button>
+
+
+                <div class="users-title">
+
+
+                    <span class="page-eyebrow">
+                        JIGATO ADMIN
+                    </span>
+
+
+                    <h1>
+                        Customers
+                    </h1>
+
+
+                    <p>
+                        Manage and view all registered customers.
+                    </p>
+
+
+                </div>
+
+
+            </div>
+
+
+            <div class="users-header-right">
+
+
+                <button
+                    type="button"
+                    id="refreshUsersBtn"
+                    class="refresh-btn"
+                    title="Refresh customers"
+                >
+
+                    <i class="fa-solid fa-arrows-rotate"></i>
+
+                </button>
+
+
+            </div>
+
+
+        </header>
+
+
+
+        <!-- ==================================================
+             STATUS BAR
+        ================================================== -->
+
+        <div class="users-status-bar">
+
+
+            <div class="status-left">
+
+
+                <span class="online-dot"></span>
+
+
+                <strong>
+                    User Management
+                </strong>
+
+
+                <span>
+                    Customer accounts only
+                </span>
+
+
+            </div>
+
+
+            <div class="status-right">
+
+
+                <span>
+                    Last updated
+                </span>
+
+
+                <strong id="usersLastUpdated">
+                    --
+                </strong>
+
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- ==================================================
+             USER STATISTICS
+        ================================================== -->
+
+        <section class="user-stats">
+
+
+            <article class="user-stat-card">
+
+
+                <div class="user-stat-icon total">
+
+                    <i class="fa-solid fa-users"></i>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Total Customers
+                    </span>
+
+
+                    <strong id="totalCustomers">
+                        0
+                    </strong>
+
+                </div>
+
+
+            </article>
+
+
+
+            <article class="user-stat-card">
+
+
+                <div class="user-stat-icon active">
+
+                    <i class="fa-solid fa-user-check"></i>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Active Customers
+                    </span>
+
+
+                    <strong id="activeCustomers">
+                        0
+                    </strong>
+
+                </div>
+
+
+            </article>
+
+
+
+            <article class="user-stat-card">
+
+
+                <div class="user-stat-icon new">
+
+                    <i class="fa-solid fa-user-plus"></i>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        New Customers
+                    </span>
+
+
+                    <strong id="newCustomers">
+                        0
+                    </strong>
+
+                </div>
+
+
+            </article>
+
+
+
+            <article class="user-stat-card">
+
+
+                <div class="user-stat-icon blocked">
+
+                    <i class="fa-solid fa-user-slash"></i>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Inactive
+                    </span>
+
+
+                    <strong id="inactiveCustomers">
+                        0
+                    </strong>
+
+                </div>
+
+
+            </article>
+
+
+        </section>
+
+
+
+        <!-- ==================================================
+             USERS CARD
+        ================================================== -->
+
+        <section class="users-card">
+
+
+            <!-- ==================================================
+                 CARD HEADER
+            ================================================== -->
+
+            <div class="users-card-header">
+
+
+                <div>
+
+
+                    <span class="card-eyebrow">
+                        CUSTOMER DIRECTORY
+                    </span>
+
+
+                    <h2>
+                        All Customers
+                    </h2>
+
+
+                </div>
+
+
+                <div class="users-count">
+
+
+                    <span id="visibleUsersCount">
+                        0
+                    </span>
+
+
+                    customers
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- ==================================================
+                 TOOLBAR
+            ================================================== -->
+
+            <div class="users-toolbar">
+
+
+                <!-- SEARCH -->
+
+                <div class="user-search">
+
+
+                    <i class="fa-solid fa-magnifying-glass"></i>
+
+
+                    <input
+                        type="search"
+                        id="userSearch"
+                        placeholder="Search name, email or phone..."
+                        autocomplete="off"
+                    >
+
+
+                </div>
+
+
+
+                <!-- STATUS FILTER -->
+
+                <select
+                    id="userStatusFilter"
+                    class="user-select"
+                >
+
+
+                    <option value="all">
+                        All Users
+                    </option>
+
+
+                    <option value="active">
+                        Active
+                    </option>
+
+
+                    <option value="inactive">
+                        Inactive
+                    </option>
+
+
+                </select>
+
+
+
+                <!-- SORT -->
+
+                <select
+                    id="userSort"
+                    class="user-select"
+                >
+
+
+                    <option value="newest">
+                        Newest
+                    </option>
+
+
+                    <option value="oldest">
+                        Oldest
+                    </option>
+
+
+                    <option value="name-asc">
+                        Name A-Z
+                    </option>
+
+
+                    <option value="name-desc">
+                        Name Z-A
+                    </option>
+
+
+                </select>
+
+
+            </div>
+
+
+
+            <!-- ==================================================
+                 TABLE
+            ================================================== -->
+
+            <div class="users-table-wrapper">
+
+
+                <table class="users-table">
+
+
+                    <thead>
+
+                        <tr>
+
+
+                            <th>
+                                Customer
+                            </th>
+
+
+                            <th>
+                                Phone
+                            </th>
+
+
+                            <th>
+                                City
+                            </th>
+
+
+                            <th>
+                                Joined
+                            </th>
+
+
+                            <th>
+                                Orders
+                            </th>
+
+
+                            <th>
+                                Status
+                            </th>
+
+
+                            <th>
+                                Action
+                            </th>
+
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="usersTableBody">
+
+
+                        <tr>
+
+
+                            <td
+                                colspan="7"
+                                class="users-loading"
+                            >
+
+
+                                <i class="fa-solid fa-spinner fa-spin"></i>
+
+
+                                Loading customers...
+
+
+                            </td>
+
+
+                        </tr>
+
+
+                    </tbody>
+
+
+                </table>
+
+
+            </div>
+
+
+
+            <!-- ==================================================
+                 TABLE FOOTER
+            ================================================== -->
+
+            <div class="users-table-footer">
+
+
+                <span id="usersResultText">
+                    Showing 0 customers
+                </span>
+
+
+                <div class="pagination">
+
+
+                    <button
+                        type="button"
+                        id="prevUsersBtn"
+                        class="page-btn"
+                        disabled
+                    >
+
+                        <i class="fa-solid fa-chevron-left"></i>
+
+                    </button>
+
+
+                    <div
+                        id="usersPages"
+                        class="page-numbers"
+                    ></div>
+
+
+                    <button
+                        type="button"
+                        id="nextUsersBtn"
+                        class="page-btn"
+                        disabled
+                    >
+
+                        <i class="fa-solid fa-chevron-right"></i>
+
+                    </button>
+
+
+                </div>
+
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- ==================================================
+             USER DETAILS MODAL
+        ================================================== -->
+
+        <div
+            class="user-modal"
+            id="userModal"
+        >
+
+
+            <div
+                class="user-modal-overlay"
+                id="userModalOverlay"
+            ></div>
+
+
+            <div class="user-modal-box">
+
+
+                <div class="user-modal-header">
+
+
+                    <div>
+
+
+                        <span>
+                            CUSTOMER DETAILS
+                        </span>
+
+
+                        <h2>
+                            Customer Profile
+                        </h2>
+
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        id="closeUserModal"
+                        class="modal-close"
+                        aria-label="Close"
+                    >
+
+                        <i class="fa-solid fa-xmark"></i>
+
+                    </button>
+
+
+                </div>
+
+
+
+                <div class="user-modal-body">
+
+
+                    <!-- PROFILE SUMMARY -->
+
+                    <div class="profile-summary">
+
+
+                        <div
+                            class="large-user-avatar"
+                            id="modalUserAvatar"
+                        >
+                            A
+                        </div>
+
+
+                        <div>
+
+
+                            <h3 id="modalUserName">
+                                Customer
+                            </h3>
+
+
+                            <p id="modalUserEmail">
+                                -
+                            </p>
+
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <!-- DETAILS -->
+
+                    <div class="user-detail-grid">
+
+
+                        <div class="detail-box">
+
+
+                            <span>
+                                Phone
+                            </span>
+
+
+                            <strong id="modalUserPhone">
+                                -
+                            </strong>
+
+
+                        </div>
+
+
+                        <div class="detail-box">
+
+
+                            <span>
+                                City
+                            </span>
+
+
+                            <strong id="modalUserCity">
+                                -
+                            </strong>
+
+
+                        </div>
+
+
+                        <div class="detail-box">
+
+
+                            <span>
+                                Joined
+                            </span>
+
+
+                            <strong id="modalUserJoined">
+                                -
+                            </strong>
+
+
+                        </div>
+
+
+                        <div class="detail-box">
+
+
+                            <span>
+                                Status
+                            </span>
+
+
+                            <strong id="modalUserStatus">
+                                -
+                            </strong>
+
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <!-- ORDER SUMMARY -->
+
+                    <div class="user-order-summary">
+
+
+                        <div>
+
+
+                            <span>
+                                Total Orders
+                            </span>
+
+
+                            <strong id="modalUserOrders">
+                                0
+                            </strong>
+
+
+                        </div>
+
+
+                        <div>
+
+
+                            <span>
+                                Total Spent
+                            </span>
+
+
+                            <strong id="modalUserSpent">
+                                ₹0.00
+                            </strong>
+
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <!-- ACTION -->
+
+                    <div class="modal-action-row">
+
+
+                        <button
+                            type="button"
+                            id="modalEditUserBtn"
+                            class="modal-primary-btn"
+                        >
+
+                            <i class="fa-solid fa-pen"></i>
+
+                            Edit Customer
+
+                        </button>
+
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- ==================================================
+             EDIT CUSTOMER MODAL
+        ================================================== -->
+
+        <div
+            class="user-modal"
+            id="editUserModal"
+        >
+
+
+            <div
+                class="user-modal-overlay"
+                id="editUserModalOverlay"
+            ></div>
+
+
+            <div
+                class="user-modal-box edit-user-modal-box"
+            >
+
+
+                <!-- HEADER -->
+
+                <div class="user-modal-header">
+
+
+                    <div>
+
+
+                        <span>
+                            CUSTOMER MANAGEMENT
+                        </span>
+
+
+                        <h2>
+                            Edit Customer
+                        </h2>
+
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        id="closeEditUserModal"
+                        class="modal-close"
+                        aria-label="Close"
+                    >
+
+                        <i class="fa-solid fa-xmark"></i>
+
+                    </button>
+
+
+                </div>
+
+
+
+                <!-- FORM -->
+
+                <form
+                    id="editUserForm"
+                    class="edit-user-form"
+                    autocomplete="off"
+                >
+
+
+                    <!-- HIDDEN ID -->
+
+                    <input
+                        type="hidden"
+                        id="editUserId"
+                    >
+
+
+
+                    <!-- PROFILE PREVIEW -->
+
+                    <div class="edit-profile-preview">
+
+
+                        <div
+                            class="large-user-avatar"
+                            id="editUserAvatar"
+                        >
+                            A
+                        </div>
+
+
+                        <div>
+
+
+                            <strong
+                                id="editUserPreviewName"
+                            >
+                                Customer
+                            </strong>
+
+
+                            <span>
+                                Customer Account
+                            </span>
+
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <!-- ==================================================
+                         PERSONAL INFORMATION
+                    ================================================== -->
+
+                    <div class="edit-section">
+
+
+                        <div class="edit-section-title">
+
+
+                            <i class="fa-solid fa-user"></i>
+
+
+                            <span>
+                                Personal Information
+                            </span>
+
+
+                        </div>
+
+
+
+                        <div class="edit-form-grid">
+
+
+                            <!-- NAME -->
+
+                            <div class="edit-field">
+
+
+                                <label for="editUserName">
+                                    Full Name
+                                </label>
+
+
+                                <div class="edit-input-wrap">
+
+
+                                    <i class="fa-solid fa-user"></i>
+
+
+                                    <input
+                                        type="text"
+                                        id="editUserName"
+                                        name="name"
+                                        placeholder="Enter customer name"
+                                        maxlength="100"
+                                        required
+                                    >
+
+
+                                </div>
+
+
+                            </div>
+
+
+
+                            <!-- EMAIL -->
+
+                            <div class="edit-field">
+
+
+                                <label for="editUserEmail">
+                                    Email
+                                </label>
+
+
+                                <div class="edit-input-wrap">
+
+
+                                    <i class="fa-solid fa-envelope"></i>
+
+
+                                    <input
+                                        type="email"
+                                        id="editUserEmail"
+                                        name="email"
+                                        placeholder="Enter email address"
+                                        maxlength="100"
+                                        required
+                                    >
+
+
+                                </div>
+
+
+                            </div>
+
+
+
+                            <!-- PHONE -->
+
+                            <div class="edit-field">
+
+
+                                <label for="editUserPhone">
+                                    Phone
+                                </label>
+
+
+                                <div class="edit-input-wrap">
+
+
+                                    <i class="fa-solid fa-phone"></i>
+
+
+                                    <input
+                                        type="tel"
+                                        id="editUserPhone"
+                                        name="phone"
+                                        placeholder="Enter phone number"
+                                        maxlength="15"
+                                        required
+                                    >
+
+
+                                </div>
+
+
+                            </div>
+
+
+
+                            <!-- CITY -->
+
+                            <div class="edit-field">
+
+
+                                <label for="editUserCity">
+                                    City
+                                </label>
+
+
+                                <div class="edit-input-wrap">
+
+
+                                    <i class="fa-solid fa-city"></i>
+
+
+                                    <input
+                                        type="text"
+                                        id="editUserCity"
+                                        name="city"
+                                        placeholder="Enter city"
+                                        maxlength="100"
+                                        required
+                                    >
+
+
+                                </div>
+
+
+                            </div>
+
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <!-- ==================================================
+                         LOCATION DETAILS
+                    ================================================== -->
+
+                    <div class="edit-section">
+
+
+                        <div class="edit-section-title">
+
+
+                            <i class="fa-solid fa-location-dot"></i>
+
+
+                            <span>
+                                Location Details
+                            </span>
+
+
+                        </div>
+
+
+
+                        <div class="edit-form-grid">
+
+
+                            <!-- STATE -->
+
+                            <div class="edit-field">
+
+
+                                <label for="editUserState">
+                                    State
+                                </label>
+
+
+                                <div class="edit-input-wrap">
+
+
+                                    <i class="fa-solid fa-map"></i>
+
+
+                                    <input
+                                        type="text"
+                                        id="editUserState"
+                                        name="state"
+                                        placeholder="Enter state"
+                                        maxlength="100"
+                                    >
+
+
+                                </div>
+
+
+                            </div>
+
+
+
+                            <!-- PINCODE -->
+
+                            <div class="edit-field">
+
+
+                                <label for="editUserPincode">
+                                    Pincode
+                                </label>
+
+
+                                <div class="edit-input-wrap">
+
+
+                                    <i class="fa-solid fa-location-crosshairs"></i>
+
+
+                                    <input
+                                        type="text"
+                                        id="editUserPincode"
+                                        name="pincode"
+                                        placeholder="Enter pincode"
+                                        maxlength="10"
+                                    >
+
+
+                                </div>
+
+
+                            </div>
+
+
+
+                            <!-- ADDRESS -->
+
+                            <div class="edit-field full-width">
+
+
+                                <label for="editUserAddress">
+                                    Address
+                                </label>
+
+
+                                <div class="edit-input-wrap textarea-wrap">
+
+
+                                    <i class="fa-solid fa-house"></i>
+
+
+                                    <textarea
+                                        id="editUserAddress"
+                                        name="address"
+                                        placeholder="Enter customer address"
+                                        rows="3"
+                                    ></textarea>
+
+
+                                </div>
+
+
+                            </div>
+
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <!-- ==================================================
+                         ACCOUNT STATUS
+                    ================================================== -->
+
+                    <div class="edit-section">
+
+
+                        <div class="edit-section-title">
+
+
+                            <i class="fa-solid fa-shield-halved"></i>
+
+
+                            <span>
+                                Account Status
+                            </span>
+
+
+                        </div>
+
+
+
+                        <div class="edit-status-box">
+
+
+                            <div class="edit-status-info">
+
+
+                                <span
+                                    class="status-indicator"
+                                    id="editUserStatusIndicator"
+                                ></span>
+
+
+                                <div>
+
+
+                                    <strong
+                                        id="editUserStatusText"
+                                    >
+                                        Active
+                                    </strong>
+
+
+                                    <small>
+                                        Customer can use the account.
+                                    </small>
+
+
+                                </div>
+
+
+                            </div>
+
+
+
+                            <button
+                                type="button"
+                                id="editUserStatusBtn"
+                                class="edit-status-btn"
+                            >
+
+                                <i class="fa-solid fa-user-lock"></i>
+
+                                Block Customer
+
+                            </button>
+
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <!-- ==================================================
+                         ACTIONS
+                    ================================================== -->
+
+                    <div class="edit-form-actions">
+
+
+                        <button
+                            type="button"
+                            id="cancelEditUserBtn"
+                            class="edit-cancel-btn"
+                        >
+
+                            Cancel
+
+                        </button>
+
+
+                        <button
+                            type="submit"
+                            id="saveUserBtn"
+                            class="edit-save-btn"
+                        >
+
+                            <i class="fa-solid fa-floppy-disk"></i>
+
+                            Save Changes
+
+                        </button>
+
+
+                    </div>
+
+
+                </form>
+
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- ==================================================
+             FOOTER
+        ================================================== -->
+
+        <footer class="users-footer">
+
+
+            <span>
+                © 2026 Jigato
+            </span>
+
+
+            <span>
+                Admin Panel
+            </span>
+
+
+        </footer>
+
+
+    </main>
+
+
+</div>
+
+
+
+<!-- ==================================================
+     SHARED SIDEBAR JS
+================================================== -->
+
+<script
+    src="/admin/sidebar/sidebar.js"
+></script>
+
+
+
+<!-- ==================================================
+     USERS JS
+================================================== -->
+
+<script
+    src="/js/admin/users.js"
+></script>
+
+
+</body>
+
+</html>

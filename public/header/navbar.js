@@ -228,31 +228,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (logged) {
 
-                /*
-                 * check-auth ka data initially show karenge.
-                 */
-
                 updateNavbarUser(
-
                     data.name ||
                     "Profile",
 
                     data.city ||
                     "Your City"
-
                 );
 
 
-                /*
-                 * IMPORTANT:
-                 *
-                 * Fresh profile data database se lenge.
-                 *
-                 * Isse agar profile me name/city change
-                 * hua hai to navbar old session value
-                 * nahi dikhayega.
-                 */
-
+                // Fresh database profile
                 loadFreshProfile();
 
             }
@@ -286,10 +271,8 @@ document.addEventListener("DOMContentLoaded", () => {
             cache: "no-store",
 
             headers: {
-
                 "Accept":
                     "application/json"
-
             }
 
         })
@@ -485,7 +468,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const count =
                 Array.isArray(data.cart)
-                    ? data.cart.length
+                    ? data.cart.reduce(
+                        (
+                            total,
+                            item
+                        ) => {
+
+                            return (
+                                total +
+                                Number(
+                                    item.quantity || 0
+                                )
+                            );
+
+                        },
+                        0
+                    )
                     : 0;
 
 
@@ -513,18 +511,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function updateCartCount(count) {
 
-
         const cart =
             document.getElementById(
                 "headerCartCount"
             );
 
-
         const mobileCart =
             document.getElementById(
                 "mobileCartCount"
             );
-
 
         const floatingCart =
             document.getElementById(
@@ -569,12 +564,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 "headerMobileMenu"
             );
 
-
         const open =
             document.getElementById(
                 "headerMenuBtn"
             );
-
 
         const close =
             document.getElementById(
@@ -617,10 +610,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
 
-        /*
-         * Mobile menu ke kisi link par click
-         * karne par menu close.
-         */
+        // Close after clicking links
 
         menu
             .querySelectorAll("a")
@@ -655,7 +645,6 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById(
                 "headerLogout"
             );
-
 
         const mobileLogout =
             document.getElementById(
@@ -726,15 +715,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // PROFILE UPDATED EVENT
     // =====================================================
 
-    /*
-     * Profile page se Save Changes hone ke baad
-     * profile.js ye event bhejega:
-     *
-     * profileUpdated
-     *
-     * Yahan hum database se FRESH profile lenge.
-     */
-
     window.addEventListener(
         "profileUpdated",
         () => {
@@ -743,7 +723,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 "Profile updated → refreshing navbar..."
             );
 
-
             loadFreshProfile();
 
         }
@@ -751,7 +730,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     // =====================================================
-    // OPTIONAL: REFRESH NAVBAR WHEN TAB BECOMES ACTIVE
+    // REFRESH NAVBAR WHEN TAB BECOMES ACTIVE
     // =====================================================
 
     document.addEventListener(
@@ -763,14 +742,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 "visible"
             ) {
 
-                /*
-                 * Page dobara active hone par
-                 * fresh user data.
-                 */
-
-                loadFreshProfile();
-
                 loadCart();
+
+                // Auth state refresh
+                checkAuth();
 
             }
 

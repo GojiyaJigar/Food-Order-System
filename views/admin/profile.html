@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Jigato | Admin Profile</title>
+
+
+    <!-- ==================================================
+         GOOGLE FONT
+    =================================================== -->
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- ==================================================
+         FONT AWESOME
+    =================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    >
+
+
+    <!-- ==================================================
+         SWEET ALERT
+    =================================================== -->
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/sweetalert2@11"
+    ></script>
+
+
+    <!-- ==================================================
+         SHARED SIDEBAR CSS
+    =================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="/admin/sidebar/sidebar.css"
+    >
+
+
+    <!-- ==================================================
+         PROFILE CSS
+    =================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="/css/admin/profile.css"
+    >
+
+</head>
+
+
+<body>
+
+
+<div class="admin-page">
+
+
+    <!-- ==================================================
+         SHARED SIDEBAR
+         sidebar.html will be loaded by sidebar.js
+    =================================================== -->
+
+    <div
+        id="adminSidebarContainer"
+    ></div>
+
+
+
+    <!-- ==================================================
+         MAIN CONTENT
+    =================================================== -->
+
+    <main class="profile-main">
+
+
+        <!-- ==================================================
+             HEADER
+        =================================================== -->
+
+        <header class="profile-header">
+
+
+            <div class="profile-header-left">
+
+
+                <!-- MOBILE MENU -->
+
+                <button
+                    type="button"
+                    id="sidebarToggle"
+                    class="mobile-menu-btn"
+                    aria-label="Open sidebar"
+                >
+
+                    <i class="fa-solid fa-bars"></i>
+
+                </button>
+
+
+                <!-- TITLE -->
+
+                <div class="profile-title">
+
+
+                    <span class="page-eyebrow">
+                        JIGATO ADMIN
+                    </span>
+
+
+                    <h1>
+                        Admin Profile
+                    </h1>
+
+
+                    <p>
+                        Manage your administrator account information and security.
+                    </p>
+
+
+                </div>
+
+
+            </div>
+
+
+            <!-- RIGHT -->
+
+            <div class="profile-header-right">
+
+
+                <div class="profile-status">
+
+                    <span class="profile-status-dot"></span>
+
+                    <span>
+                        Administrator
+                    </span>
+
+                </div>
+
+
+            </div>
+
+
+        </header>
+
+
+
+        <!-- ==================================================
+             PROFILE OVERVIEW
+        =================================================== -->
+
+        <section class="profile-overview">
+
+
+            <!-- ==================================================
+                 PERSONAL INFORMATION
+            =================================================== -->
+
+            <article class="profile-card profile-main-card">
+
+
+                <div class="profile-card-header">
+
+
+                    <div>
+
+                        <span class="card-eyebrow">
+                            ACCOUNT
+                        </span>
+
+
+                        <h2>
+                            Personal Information
+                        </h2>
+
+
+                        <p>
+                            Update your administrator profile details.
+                        </p>
+
+                    </div>
+
+
+                    <div class="profile-card-icon">
+
+                        <i class="fa-solid fa-user"></i>
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- AVATAR -->
+
+                <div class="profile-avatar-section">
+
+
+                    <div
+                        class="profile-avatar"
+                        id="profileAvatar"
+                    >
+                        A
+                    </div>
+
+
+                    <div class="profile-avatar-info">
+
+
+                        <strong
+                            id="profileDisplayName"
+                        >
+                            Admin
+                        </strong>
+
+
+                        <span>
+                            Administrator Account
+                        </span>
+
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- FORM -->
+
+                <form
+                    id="adminProfileForm"
+                    autocomplete="off"
+                >
+
+
+                    <!-- NAME -->
+
+                    <div class="profile-form-group">
+
+
+                        <label for="profileName">
+                            Full Name
+                        </label>
+
+
+                        <div class="profile-input-wrap">
+
+
+                            <i class="fa-solid fa-user"></i>
+
+
+                            <input
+                                type="text"
+                                id="profileName"
+                                name="name"
+                                placeholder="Enter your full name"
+                                autocomplete="name"
+                                required
+                            >
+
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <!-- EMAIL -->
+
+                    <div class="profile-form-group">
+
+
+                        <label for="profileEmail">
+                            Email Address
+                        </label>
+
+
+                        <div class="profile-input-wrap">
+
+
+                            <i class="fa-solid fa-envelope"></i>
+
+
+                            <input
+                                type="email"
+                                id="profileEmail"
+                                name="email"
+                                placeholder="Enter your email"
+                                autocomplete="email"
+                                required
+                            >
+
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <!-- PHONE -->
+
+                    <div class="profile-form-group">
+
+
+                        <label for="profilePhone">
+                            Phone Number
+                        </label>
+
+
+                        <div class="profile-input-wrap">
+
+
+                            <i class="fa-solid fa-phone"></i>
+
+
+                            <input
+                                type="tel"
+                                id="profilePhone"
+                                name="phone"
+                                placeholder="Enter phone number"
+                                maxlength="15"
+                                autocomplete="tel"
+                            >
+
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <!-- CITY -->
+
+                    <div class="profile-form-group">
+
+
+                        <label for="profileCity">
+                            City
+                        </label>
+
+
+                        <div class="profile-input-wrap">
+
+
+                            <i class="fa-solid fa-location-dot"></i>
+
+
+                            <input
+                                type="text"
+                                id="profileCity"
+                                name="city"
+                                placeholder="Enter city"
+                            >
+
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <!-- ROLE + JOINED -->
+
+                    <div class="profile-two-column">
+
+
+                        <div class="profile-info-box">
+
+
+                            <span>
+                                Role
+                            </span>
+
+
+                            <strong id="profileRole">
+                                Admin
+                            </strong>
+
+
+                        </div>
+
+
+                        <div class="profile-info-box">
+
+
+                            <span>
+                                Joined
+                            </span>
+
+
+                            <strong id="profileJoined">
+                                --
+                            </strong>
+
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <!-- SAVE -->
+
+                    <div class="profile-form-actions">
+
+
+                        <button
+                            type="submit"
+                            class="profile-save-btn"
+                            id="saveProfileBtn"
+                        >
+
+                            <i class="fa-solid fa-check"></i>
+
+
+                            <span>
+                                Save Changes
+                            </span>
+
+
+                        </button>
+
+
+                    </div>
+
+
+                </form>
+
+
+            </article>
+
+
+
+            <!-- ==================================================
+                 SECURITY
+            =================================================== -->
+
+            <article class="profile-card security-card">
+
+
+                <div class="profile-card-header">
+
+
+                    <div>
+
+                        <span class="card-eyebrow">
+                            SECURITY
+                        </span>
+
+
+                        <h2>
+                            Change Password
+                        </h2>
+
+
+                        <p>
+                            Keep your administrator account secure.
+                        </p>
+
+
+                    </div>
+
+
+                    <div class="profile-card-icon security">
+
+                        <i class="fa-solid fa-shield-halved"></i>
+
+                    </div>
+
+
+                </div>
+
+
+
+                <form
+                    id="changePasswordForm"
+                    autocomplete="off"
+                >
+
+
+                    <!-- CURRENT PASSWORD -->
+
+                    <div class="profile-form-group">
+
+
+                        <label for="currentPassword">
+                            Current Password
+                        </label>
+
+
+                        <div class="profile-input-wrap password-wrap">
+
+
+                            <i class="fa-solid fa-lock"></i>
+
+
+                            <input
+                                type="password"
+                                id="currentPassword"
+                                name="currentPassword"
+                                placeholder="Enter current password"
+                                autocomplete="current-password"
+                                required
+                            >
+
+
+                            <button
+                                type="button"
+                                class="password-toggle"
+                                id="toggleCurrentPassword"
+                                aria-label="Show current password"
+                            >
+
+                                <i class="fa-solid fa-eye"></i>
+
+                            </button>
+
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <!-- NEW PASSWORD -->
+
+                    <div class="profile-form-group">
+
+
+                        <label for="newPassword">
+                            New Password
+                        </label>
+
+
+                        <div class="profile-input-wrap password-wrap">
+
+
+                            <i class="fa-solid fa-key"></i>
+
+
+                            <input
+                                type="password"
+                                id="newPassword"
+                                name="newPassword"
+                                placeholder="Enter new password"
+                                autocomplete="new-password"
+                                minlength="8"
+                                required
+                            >
+
+
+                            <button
+                                type="button"
+                                class="password-toggle"
+                                id="toggleNewPassword"
+                                aria-label="Show new password"
+                            >
+
+                                <i class="fa-solid fa-eye"></i>
+
+                            </button>
+
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <!-- CONFIRM PASSWORD -->
+
+                    <div class="profile-form-group">
+
+
+                        <label for="confirmPassword">
+                            Confirm New Password
+                        </label>
+
+
+                        <div class="profile-input-wrap password-wrap">
+
+
+                            <i class="fa-solid fa-key"></i>
+
+
+                            <input
+                                type="password"
+                                id="confirmPassword"
+                                name="confirmPassword"
+                                placeholder="Confirm new password"
+                                autocomplete="new-password"
+                                minlength="8"
+                                required
+                            >
+
+
+                            <button
+                                type="button"
+                                class="password-toggle"
+                                id="toggleConfirmPassword"
+                                aria-label="Show confirm password"
+                            >
+
+                                <i class="fa-solid fa-eye"></i>
+
+                            </button>
+
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <!-- PASSWORD RULES -->
+
+                    <div class="password-rules">
+
+
+                        <div class="password-rule">
+
+                            <i class="fa-solid fa-circle-check"></i>
+
+                            <span>
+                                Minimum 8 characters
+                            </span>
+
+                        </div>
+
+
+                        <div class="password-rule">
+
+                            <i class="fa-solid fa-circle-check"></i>
+
+                            <span>
+                                Use a strong password
+                            </span>
+
+                        </div>
+
+
+                        <div class="password-rule">
+
+                            <i class="fa-solid fa-circle-check"></i>
+
+                            <span>
+                                Do not share your password
+                            </span>
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <!-- CHANGE PASSWORD -->
+
+                    <div class="profile-form-actions">
+
+
+                        <button
+                            type="submit"
+                            class="profile-password-btn"
+                            id="changePasswordBtn"
+                        >
+
+                            <i class="fa-solid fa-lock"></i>
+
+
+                            <span>
+                                Update Password
+                            </span>
+
+
+                        </button>
+
+
+                    </div>
+
+
+                </form>
+
+
+            </article>
+
+
+        </section>
+
+
+
+        <!-- ==================================================
+             SECURITY INFO
+        =================================================== -->
+
+        <section class="profile-security-info">
+
+
+            <div class="security-info-icon">
+
+                <i class="fa-solid fa-circle-info"></i>
+
+            </div>
+
+
+            <div class="security-info-content">
+
+
+                <strong>
+                    Account Security
+                </strong>
+
+
+                <p>
+                    Your administrator account is protected by session-based authentication and password hashing.
+                </p>
+
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- ==================================================
+             FOOTER
+        =================================================== -->
+
+        <footer class="profile-footer">
+
+
+            <span>
+                © 2026 Jigato
+            </span>
+
+
+            <span>
+                Admin Panel
+            </span>
+
+
+        </footer>
+
+
+    </main>
+
+
+</div>
+
+
+
+<!-- ==================================================
+     SHARED SIDEBAR JS
+=================================================== -->
+
+<script
+    src="/admin/sidebar/sidebar.js"
+></script>
+
+
+
+<!-- ==================================================
+     PROFILE JS
+=================================================== -->
+
+<script
+    src="/js/admin/profile.js"
+></script>
+
+
+</body>
+
+</html>

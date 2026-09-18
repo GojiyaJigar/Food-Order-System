@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Jigato | Admin Reports</title>
+
+
+    <!-- ==================================================
+         GOOGLE FONT
+    ================================================== -->
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- ==================================================
+         FONT AWESOME
+    ================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    >
+
+
+    <!-- ==================================================
+         SHARED SIDEBAR CSS
+    ================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="/admin/sidebar/sidebar.css"
+    >
+
+
+    <!-- ==================================================
+         REPORTS CSS
+    ================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="/css/admin/reports.css"
+    >
+
+</head>
+
+
+<body>
+
+
+<div class="admin-page">
+
+
+    <!-- ==================================================
+         SHARED SIDEBAR
+         Loaded by sidebar.js
+    ================================================== -->
+
+    <div
+        id="adminSidebarContainer"
+    ></div>
+
+
+
+    <!-- ==================================================
+         MAIN
+    ================================================== -->
+
+    <main class="reports-main">
+
+
+        <!-- ==================================================
+             HEADER
+        ================================================== -->
+
+        <header class="reports-header">
+
+
+            <div class="reports-header-left">
+
+
+                <button
+                    id="sidebarToggle"
+                    class="mobile-menu-btn"
+                    type="button"
+                    aria-label="Open sidebar"
+                >
+
+                    <i class="fa-solid fa-bars"></i>
+
+                </button>
+
+
+                <div>
+
+
+                    <span class="reports-eyebrow">
+                        JIGATO ADMIN
+                    </span>
+
+
+                    <h1>
+                        Reports
+                    </h1>
+
+
+                    <p>
+                        Track sales, orders, customers and business performance.
+                    </p>
+
+
+                </div>
+
+
+            </div>
+
+
+            <div class="reports-actions">
+
+
+                <select id="reportRange">
+
+
+                    <option value="today">
+                        Today
+                    </option>
+
+
+                    <option value="week">
+                        This Week
+                    </option>
+
+
+                    <option
+                        value="month"
+                        selected
+                    >
+                        This Month
+                    </option>
+
+
+                    <option value="custom">
+                        Custom Range
+                    </option>
+
+
+                </select>
+
+
+                <button
+                    id="refreshReportsBtn"
+                    class="refresh-btn"
+                    type="button"
+                    title="Refresh reports"
+                >
+
+                    <i class="fa-solid fa-arrows-rotate"></i>
+
+                </button>
+
+
+            </div>
+
+
+        </header>
+
+
+
+        <!-- ==================================================
+             CUSTOM RANGE
+        ================================================== -->
+
+        <div
+            id="customRange"
+            class="custom-range"
+            hidden
+        >
+
+
+            <input
+                id="reportStartDate"
+                type="date"
+            >
+
+
+            <span>
+                to
+            </span>
+
+
+            <input
+                id="reportEndDate"
+                type="date"
+            >
+
+
+            <button
+                id="applyCustomRange"
+                type="button"
+            >
+
+                Apply
+
+            </button>
+
+
+        </div>
+
+
+
+        <!-- ==================================================
+             OVERVIEW
+        ================================================== -->
+
+        <section class="report-stats">
+
+
+            <!-- REVENUE -->
+
+            <div class="report-stat">
+
+
+                <div class="report-icon">
+
+                    <i class="fa-solid fa-indian-rupee-sign"></i>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Revenue
+                    </span>
+
+
+                    <strong id="reportRevenue">
+                        ₹0.00
+                    </strong>
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- ORDERS -->
+
+            <div class="report-stat">
+
+
+                <div class="report-icon">
+
+                    <i class="fa-solid fa-bag-shopping"></i>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Orders
+                    </span>
+
+
+                    <strong id="reportOrders">
+                        0
+                    </strong>
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- CUSTOMERS -->
+
+            <div class="report-stat">
+
+
+                <div class="report-icon">
+
+                    <i class="fa-solid fa-users"></i>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Customers
+                    </span>
+
+
+                    <strong id="reportCustomers">
+                        0
+                    </strong>
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- AVERAGE ORDER -->
+
+            <div class="report-stat">
+
+
+                <div class="report-icon">
+
+                    <i class="fa-solid fa-calculator"></i>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Average Order
+                    </span>
+
+
+                    <strong id="reportAverage">
+                        ₹0.00
+                    </strong>
+
+
+                </div>
+
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- ==================================================
+             CHARTS
+        ================================================== -->
+
+        <section class="reports-grid">
+
+
+            <!-- REVENUE -->
+
+            <div class="report-card">
+
+
+                <div class="report-card-head">
+
+
+                    <div>
+
+                        <span>
+                            SALES
+                        </span>
+
+
+                        <h2>
+                            Revenue Overview
+                        </h2>
+
+
+                    </div>
+
+
+                </div>
+
+
+                <div
+                    id="revenueChart"
+                    class="simple-chart"
+                ></div>
+
+
+            </div>
+
+
+
+            <!-- ORDER STATUS -->
+
+            <div class="report-card">
+
+
+                <div class="report-card-head">
+
+
+                    <div>
+
+                        <span>
+                            ORDERS
+                        </span>
+
+
+                        <h2>
+                            Order Status
+                        </h2>
+
+
+                    </div>
+
+
+                </div>
+
+
+                <div
+                    id="statusChart"
+                    class="status-chart"
+                ></div>
+
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- ==================================================
+             TABLES
+        ================================================== -->
+
+        <section class="reports-grid">
+
+
+            <!-- TOP SELLING FOODS -->
+
+            <div class="report-card">
+
+
+                <div class="report-card-head">
+
+
+                    <div>
+
+                        <span>
+                            TOP PRODUCTS
+                        </span>
+
+
+                        <h2>
+                            Top Selling Foods
+                        </h2>
+
+
+                    </div>
+
+
+                </div>
+
+
+                <div class="report-table-wrap">
+
+
+                    <table class="report-table">
+
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Food
+                                </th>
+
+                                <th>
+                                    Sold
+                                </th>
+
+                                <th>
+                                    Revenue
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody
+                            id="topFoodsBody"
+                        ></tbody>
+
+
+                    </table>
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- PAYMENT METHODS -->
+
+            <div class="report-card">
+
+
+                <div class="report-card-head">
+
+
+                    <div>
+
+                        <span>
+                            PAYMENTS
+                        </span>
+
+
+                        <h2>
+                            Payment Methods
+                        </h2>
+
+
+                    </div>
+
+
+                </div>
+
+
+                <div
+                    id="paymentReport"
+                ></div>
+
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- ==================================================
+             CUSTOMER + OFFERS
+        ================================================== -->
+
+        <section class="reports-grid">
+
+
+            <!-- CUSTOMER INSIGHTS -->
+
+            <div class="report-card">
+
+
+                <div class="report-card-head">
+
+
+                    <div>
+
+                        <span>
+                            CUSTOMERS
+                        </span>
+
+
+                        <h2>
+                            Customer Insights
+                        </h2>
+
+
+                    </div>
+
+
+                </div>
+
+
+                <div class="insight-list">
+
+
+                    <div>
+
+                        <span>
+                            Total Customers
+                        </span>
+
+
+                        <strong id="customerTotal">
+                            0
+                        </strong>
+
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            New Customers
+                        </span>
+
+
+                        <strong id="newCustomers">
+                            0
+                        </strong>
+
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Active Customers
+                        </span>
+
+
+                        <strong id="activeCustomers">
+                            0
+                        </strong>
+
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- OFFER PERFORMANCE -->
+
+            <div class="report-card">
+
+
+                <div class="report-card-head">
+
+
+                    <div>
+
+                        <span>
+                            OFFERS
+                        </span>
+
+
+                        <h2>
+                            Offer Performance
+                        </h2>
+
+
+                    </div>
+
+
+                </div>
+
+
+                <div class="insight-list">
+
+
+                    <div>
+
+                        <span>
+                            Total Offers
+                        </span>
+
+
+                        <strong id="offerTotal">
+                            0
+                        </strong>
+
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Active Offers
+                        </span>
+
+
+                        <strong id="offerActive">
+                            0
+                        </strong>
+
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Coupons Used
+                        </span>
+
+
+                        <strong id="couponUsed">
+                            0
+                        </strong>
+
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Discount Given
+                        </span>
+
+
+                        <strong id="discountGiven">
+                            ₹0.00
+                        </strong>
+
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- ==================================================
+             FOOTER
+        ================================================== -->
+
+        <footer class="reports-footer">
+
+
+            <span>
+                © 2026 Jigato
+            </span>
+
+
+            <span>
+                Admin Panel
+            </span>
+
+
+        </footer>
+
+
+    </main>
+
+
+</div>
+
+
+
+<!-- ==================================================
+     SHARED SIDEBAR JS
+================================================== -->
+
+<script
+    src="/admin/sidebar/sidebar.js"
+></script>
+
+
+
+<!-- ==================================================
+     REPORTS JS
+================================================== -->
+
+<script
+    src="/js/admin/reports.js"
+></script>
+
+
+</body>
+
+</html>

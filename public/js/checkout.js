@@ -26,97 +26,179 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function loadCheckout() {
 
-        try {
+    try {
 
-            const [cartRes, addressRes] = await Promise.all([
+        const [cartRes, addressRes] = await Promise.all([
 
-                fetch("/api/checkout", {
-                    credentials: "include",
-                    cache: "no-store"
-                }),
+            fetch("/cart", {
+                method: "GET",
+                credentials: "include",
+                cache: "no-store",
+                headers: {
+                    "Accept": "application/json"
+                }
+            }),
 
-                fetch("/api/addresses", {
-                    credentials: "include",
-                    cache: "no-store"
-                })
+            fetch("/api/addresses", {
+                method: "GET",
+                credentials: "include",
+                cache: "no-store",
+                headers: {
+                    "Accept": "application/json"
+                }
+            })
 
-            ]);
-
-
-            if (
-                cartRes.status === 401 ||
-                addressRes.status === 401
-            ) {
-
-                location.href = "/login";
-                return;
-
-            }
+        ]);
 
 
-            const cartData =
-                await cartRes.json();
+        /* ================= AUTH ================= */
 
-            const addressData =
-                await addressRes.json();
-
-
-            if (!cartData.success) {
-
-                showError(
-                    cartData.message ||
-                    "Unable to load cart."
-                );
-
-                return;
-
-            }
-
-
-            if (!addressData.success) {
-
-                showError(
-                    addressData.message ||
-                    "Unable to load addresses."
-                );
-
-                return;
-
-            }
-
-
-            cartItems =
-                cartData.items || [];
-
-            addresses =
-                addressData.addresses || [];
-
-
-            renderAddresses();
-
-            renderItems();
-
-            updateSummary();
-
-            loadSavedCoupon();
-
+        if (
+            cartRes.status === 401 ||
+            addressRes.status === 401
+        ) {
+            window.location.href = "/login";
+            return;
         }
 
-        catch (error) {
+
+        /* ================= READ RESPONSE ================= */
+
+        const cartText =
+            await cartRes.text();
+
+        const addressText =
+            await addressRes.text();
+
+
+        console.log("CART STATUS:", cartRes.status);
+        console.log("CART RAW RESPONSE:", cartText);
+
+        console.log(
+            "ADDRESS STATUS:",
+            addressRes.status
+        );
+
+        console.log(
+            "ADDRESS RAW RESPONSE:",
+            addressText
+        );
+
+
+        /* ================= PARSE CART ================= */
+
+        let cartData;
+
+        try {
+
+            cartData =
+                JSON.parse(cartText);
+
+        } catch (error) {
 
             console.error(
-                "CHECKOUT LOAD ERROR:",
+                "CART JSON ERROR:",
                 error
             );
 
-            showError(
-                "Unable to load checkout."
+            throw new Error(
+                "Cart API returned invalid JSON. Check server response."
+            );
+        }
+
+
+        /* ================= PARSE ADDRESS ================= */
+
+        let addressData;
+
+        try {
+
+            addressData =
+                JSON.parse(addressText);
+
+        } catch (error) {
+
+            console.error(
+                "ADDRESS JSON ERROR:",
+                error
+            );
+
+            throw new Error(
+                "Address API returned invalid JSON. Check server response."
+            );
+        }
+
+
+        /* ================= CART ================= */
+
+        if (
+            !cartRes.ok ||
+            !cartData.success
+        ) {
+
+            throw new Error(
+                cartData.message ||
+                "Unable to load cart."
             );
 
         }
 
+
+        /* ================= ADDRESS ================= */
+
+        if (
+            !addressRes.ok ||
+            !addressData.success
+        ) {
+
+            throw new Error(
+                addressData.message ||
+                "Unable to load addresses."
+            );
+
+        }
+
+
+        /* ================= SAVE DATA ================= */
+
+        cartItems =
+            Array.isArray(cartData.cart)
+                ? cartData.cart
+                : [];
+
+
+        addresses =
+            Array.isArray(addressData.addresses)
+                ? addressData.addresses
+                : [];
+
+
+        /* ================= RENDER ================= */
+
+        renderAddresses();
+
+        renderItems();
+
+        updateSummary();
+
+        loadSavedCoupon();
+
+    }
+    catch (error) {
+
+        console.error(
+            "CHECKOUT LOAD ERROR:",
+            error
+        );
+
+        showError(
+            error.message ||
+            "Unable to load checkout."
+        );
+
     }
 
+}
 
     // =====================================================
     // ADDRESS

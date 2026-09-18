@@ -49,12 +49,6 @@ document.addEventListener(
             );
 
 
-        const role =
-            document.getElementById(
-                "role"
-            );
-
-
         const terms =
             document.getElementById(
                 "terms"
@@ -97,7 +91,6 @@ document.addEventListener(
             );
 
 
-
         /* ==================================================
            MESSAGE
         ================================================== */
@@ -126,7 +119,6 @@ document.addEventListener(
         }
 
 
-
         function hideMessage() {
 
             if (!message)
@@ -136,14 +128,49 @@ document.addEventListener(
             message.textContent =
                 "";
 
+
             message.className =
                 "register-message";
+
 
             message.style.display =
                 "none";
 
         }
 
+
+        /* ==================================================
+           CLEAR ERROR WHEN USER STARTS TYPING
+        ================================================== */
+
+        email?.addEventListener(
+            "input",
+            () => {
+
+                if (
+                    message &&
+                    message.classList.contains("error")
+                ) {
+                    hideMessage();
+                }
+
+            }
+        );
+
+
+        phone?.addEventListener(
+            "input",
+            () => {
+
+                if (
+                    message &&
+                    message.classList.contains("error")
+                ) {
+                    hideMessage();
+                }
+
+            }
+        );
 
 
         /* ==================================================
@@ -165,12 +192,11 @@ document.addEventListener(
 
                     togglePassword.innerHTML =
                         `
-                        <i
-                            class="fa-solid fa-eye-slash"
-                        ></i>
+                        <i class="fa-solid fa-eye-slash"></i>
                         `;
 
-                } else {
+                }
+                else {
 
                     password.type =
                         "password";
@@ -178,16 +204,13 @@ document.addEventListener(
 
                     togglePassword.innerHTML =
                         `
-                        <i
-                            class="fa-solid fa-eye"
-                        ></i>
+                        <i class="fa-solid fa-eye"></i>
                         `;
 
                 }
 
             }
         );
-
 
 
         /* ==================================================
@@ -209,12 +232,11 @@ document.addEventListener(
 
                     toggleConfirm.innerHTML =
                         `
-                        <i
-                            class="fa-solid fa-eye-slash"
-                        ></i>
+                        <i class="fa-solid fa-eye-slash"></i>
                         `;
 
-                } else {
+                }
+                else {
 
                     confirmPassword.type =
                         "password";
@@ -222,16 +244,13 @@ document.addEventListener(
 
                     toggleConfirm.innerHTML =
                         `
-                        <i
-                            class="fa-solid fa-eye"
-                        ></i>
+                        <i class="fa-solid fa-eye"></i>
                         `;
 
                 }
 
             }
         );
-
 
 
         /* ==================================================
@@ -248,10 +267,9 @@ document.addEventListener(
 
                     if (
                         document.referrer &&
-                        document.referrer
-                            .includes(
-                                window.location.host
-                            )
+                        document.referrer.includes(
+                            window.location.host
+                        )
                     ) {
 
                         window.history.back();
@@ -268,9 +286,8 @@ document.addEventListener(
             );
 
 
-
         /* ==================================================
-           PHONE ONLY NUMBERS
+           PHONE
         ================================================== */
 
         phone?.addEventListener(
@@ -290,7 +307,6 @@ document.addEventListener(
 
             }
         );
-
 
 
         /* ==================================================
@@ -315,31 +331,28 @@ document.addEventListener(
 
 
                 if (
-                    /[A-Z]/.test(
-                        value
-                    )
+                    /[A-Z]/.test(value)
                 )
                     score++;
 
 
                 if (
-                    /[0-9]/.test(
-                        value
-                    )
+                    /[0-9]/.test(value)
                 )
                     score++;
 
 
                 if (
-                    /[^A-Za-z0-9]/.test(
-                        value
-                    )
+                    /[^A-Za-z0-9]/.test(value)
                 )
                     score++;
 
 
                 strengthBars.forEach(
-                    (bar, index) => {
+                    (
+                        bar,
+                        index
+                    ) => {
 
                         bar.style.background =
                             index < score
@@ -361,28 +374,32 @@ document.addEventListener(
                     strengthText.textContent =
                         "Use 8+ characters";
 
-                } else if (
+                }
+                else if (
                     score <= 1
                 ) {
 
                     strengthText.textContent =
                         "Weak password";
 
-                } else if (
+                }
+                else if (
                     score === 2
                 ) {
 
                     strengthText.textContent =
                         "Medium password";
 
-                } else if (
+                }
+                else if (
                     score === 3
                 ) {
 
                     strengthText.textContent =
                         "Good password";
 
-                } else {
+                }
+                else {
 
                     strengthText.textContent =
                         "Strong password";
@@ -391,7 +408,6 @@ document.addEventListener(
 
             }
         );
-
 
 
         /* ==================================================
@@ -408,21 +424,18 @@ document.addEventListener(
                 hideMessage();
 
 
-
-                /* ==========================
-                   VALUES
-                ========================== */
-
                 const userName =
                     name.value.trim();
 
 
                 const userEmail =
-                    email.value.trim();
+                    email.value.trim().toLowerCase();
 
 
                 const userPhone =
-                    phone.value.trim();
+                    phone.value
+                        .replace(/\D/g, "")
+                        .trim();
 
 
                 const userCity =
@@ -437,14 +450,9 @@ document.addEventListener(
                     confirmPassword.value;
 
 
-                const userRole =
-                    role.value;
-
-
-
-                /* ==========================
+                /* =========================================
                    NAME
-                ========================== */
+                ========================================= */
 
                 if (
                     userName.length < 2
@@ -462,10 +470,9 @@ document.addEventListener(
                 }
 
 
-
-                /* ==========================
+                /* =========================================
                    EMAIL
-                ========================== */
+                ========================================= */
 
                 const emailPattern =
                     /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -489,10 +496,9 @@ document.addEventListener(
                 }
 
 
-
-                /* ==========================
+                /* =========================================
                    PHONE
-                ========================== */
+                ========================================= */
 
                 if (
                     userPhone.length !== 10
@@ -510,10 +516,9 @@ document.addEventListener(
                 }
 
 
-
-                /* ==========================
+                /* =========================================
                    CITY
-                ========================== */
+                ========================================= */
 
                 if (
                     userCity.length < 2
@@ -531,10 +536,9 @@ document.addEventListener(
                 }
 
 
-
-                /* ==========================
+                /* =========================================
                    PASSWORD
-                ========================== */
+                ========================================= */
 
                 if (
                     userPassword.length < 8
@@ -552,10 +556,9 @@ document.addEventListener(
                 }
 
 
-
-                /* ==========================
-                   CONFIRM
-                ========================== */
+                /* =========================================
+                   CONFIRM PASSWORD
+                ========================================= */
 
                 if (
                     userPassword !==
@@ -574,10 +577,9 @@ document.addEventListener(
                 }
 
 
-
-                /* ==========================
+                /* =========================================
                    TERMS
-                ========================== */
+                ========================================= */
 
                 if (
                     !terms.checked
@@ -593,10 +595,9 @@ document.addEventListener(
                 }
 
 
-
-                /* ==========================
+                /* =========================================
                    LOADING
-                ========================== */
+                ========================================= */
 
                 submit.disabled =
                     true;
@@ -608,18 +609,15 @@ document.addEventListener(
                         Creating Account...
                     </span>
 
-                    <i
-                        class="fa-solid fa-spinner fa-spin"
-                    ></i>
+                    <i class="fa-solid fa-spinner fa-spin"></i>
                     `;
-
 
 
                 try {
 
-                    /* ==========================
-                       BACKEND REQUEST
-                    ========================== */
+                    /* =====================================
+                       REGISTER REQUEST
+                    ===================================== */
 
                     const response =
                         await fetch(
@@ -633,6 +631,9 @@ document.addEventListener(
 
                                 headers: {
                                     "Content-Type":
+                                        "application/json",
+
+                                    "Accept":
                                         "application/json"
                                 },
 
@@ -652,16 +653,17 @@ document.addEventListener(
                                             userCity,
 
                                         password:
-                                            userPassword,
-
-                                        role:
-                                            userRole
+                                            userPassword
 
                                     })
 
                             }
                         );
 
+
+                    /* =====================================
+                       READ RESPONSE
+                    ===================================== */
 
                     const data =
                         await response.json();
@@ -673,15 +675,60 @@ document.addEventListener(
                     );
 
 
-
-                    /* ==========================
-                       FAILED
-                    ========================== */
+                    /* =====================================
+                       REGISTRATION ERROR
+                    ===================================== */
 
                     if (
                         !response.ok ||
                         data.success !== true
                     ) {
+
+                        /*
+                         * MOBILE DUPLICATE
+                         */
+
+                        if (
+                            data.field === "phone"
+                        ) {
+
+                            showMessage(
+                                "This mobile number is already registered.",
+                                "error"
+                            );
+
+
+                            phone.focus();
+
+                            return;
+
+                        }
+
+
+                        /*
+                         * EMAIL DUPLICATE
+                         */
+
+                        if (
+                            data.field === "email"
+                        ) {
+
+                            showMessage(
+                                "This email is already registered.",
+                                "error"
+                            );
+
+
+                            email.focus();
+
+                            return;
+
+                        }
+
+
+                        /*
+                         * OTHER ERROR
+                         */
 
                         showMessage(
                             data.message ||
@@ -689,25 +736,21 @@ document.addEventListener(
                             "error"
                         );
 
+
                         return;
 
                     }
 
 
-
-                    /* ==========================
+                    /* =====================================
                        SUCCESS
-                    ========================== */
+                    ===================================== */
 
                     showMessage(
                         "🎉 Account created successfully! Redirecting to login...",
                         "success"
                     );
 
-
-                    /*
-                     * Redirect login
-                     */
 
                     setTimeout(
                         () => {
@@ -716,11 +759,12 @@ document.addEventListener(
                                 "/login";
 
                         },
-                        1200
+                        1000
                     );
 
 
-                } catch (error) {
+                }
+                catch (error) {
 
                     console.error(
                         "REGISTER ERROR:",
@@ -733,8 +777,8 @@ document.addEventListener(
                         "error"
                     );
 
-
-                } finally {
+                }
+                finally {
 
                     setTimeout(
                         () => {
@@ -749,20 +793,17 @@ document.addEventListener(
                                     Create Account
                                 </span>
 
-                                <i
-                                    class="fa-solid fa-arrow-right"
-                                ></i>
+                                <i class="fa-solid fa-arrow-right"></i>
                                 `;
 
                         },
-                        1300
+                        1100
                     );
 
                 }
 
             }
         );
-
 
 
         /* ==================================================
@@ -776,11 +817,6 @@ document.addEventListener(
             ?.addEventListener(
                 "click",
                 () => {
-
-                    /*
-                     * Actual Google OAuth backend
-                     * route required.
-                     */
 
                     window.location.href =
                         "/auth/google";

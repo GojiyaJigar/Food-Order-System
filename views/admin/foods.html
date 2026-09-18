@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Jigato | Menu</title>
+
+
+    <!-- ==================================================
+         GOOGLE FONT
+    =================================================== -->
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- ==================================================
+         FONT AWESOME
+    =================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    >
+
+
+    <!-- ==================================================
+         SWEET ALERT
+    =================================================== -->
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/sweetalert2@11"
+    ></script>
+
+
+    <!-- ==================================================
+         SHARED SIDEBAR CSS
+    =================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="/admin/sidebar/sidebar.css"
+    >
+
+
+    <!-- ==================================================
+         MENU CSS
+    =================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="/css/admin/foods.css"
+    >
+
+</head>
+
+
+<body>
+
+
+<div class="admin-page">
+
+
+    <!-- ==================================================
+         SHARED SIDEBAR
+    ================================================== -->
+
+    <div
+        id="adminSidebarContainer"
+    ></div>
+
+
+
+    <!-- ==================================================
+         MAIN
+    ================================================== -->
+
+    <main class="foods-main">
+
+
+        <!-- ==================================================
+             HEADER
+        ================================================== -->
+
+        <header class="foods-header">
+
+
+            <div class="foods-header-left">
+
+
+                <button
+                    type="button"
+                    id="sidebarToggle"
+                    class="mobile-menu-btn"
+                    aria-label="Open sidebar"
+                >
+
+                    <i class="fa-solid fa-bars"></i>
+
+                </button>
+
+
+                <div class="foods-title">
+
+
+                    <span class="page-eyebrow">
+                        JIGATO ADMIN
+                    </span>
+
+
+                    <h1>
+                        Menu
+                    </h1>
+
+
+                    <p>
+                        Manage food items, prices, photos and availability.
+                    </p>
+
+
+                </div>
+
+
+            </div>
+
+
+            <div class="foods-header-right">
+
+
+                <button
+                    type="button"
+                    id="refreshFoodsBtn"
+                    class="refresh-btn"
+                    title="Refresh"
+                >
+
+                    <i class="fa-solid fa-arrows-rotate"></i>
+
+                </button>
+
+
+                <button
+                    type="button"
+                    id="addFoodBtn"
+                    class="add-food-btn"
+                >
+
+                    <i class="fa-solid fa-plus"></i>
+
+                    Add Food
+
+                </button>
+
+
+            </div>
+
+
+        </header>
+
+
+
+        <!-- ==================================================
+             STATS
+        ================================================== -->
+
+        <section class="food-stats">
+
+
+            <div class="food-stat">
+
+                <i class="fa-solid fa-bowl-food"></i>
+
+                <div>
+
+                    <span>
+                        Total Foods
+                    </span>
+
+                    <strong id="totalFoods">
+                        0
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="food-stat">
+
+                <i class="fa-solid fa-circle-check"></i>
+
+                <div>
+
+                    <span>
+                        Available
+                    </span>
+
+                    <strong id="availableFoods">
+                        0
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="food-stat">
+
+                <i class="fa-solid fa-circle-pause"></i>
+
+                <div>
+
+                    <span>
+                        Unavailable
+                    </span>
+
+                    <strong id="unavailableFoods">
+                        0
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="food-stat">
+
+                <i class="fa-solid fa-layer-group"></i>
+
+                <div>
+
+                    <span>
+                        Categories
+                    </span>
+
+                    <strong id="categoryCount">
+                        0
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- ==================================================
+             MENU CARD
+        ================================================== -->
+
+        <section class="foods-card">
+
+
+            <div class="card-heading">
+
+
+                <div>
+
+                    <span>
+                        MENU MANAGEMENT
+                    </span>
+
+                    <h2>
+                        All Foods
+                    </h2>
+
+                </div>
+
+
+                <small id="foodsLastUpdated">
+                    --
+                </small>
+
+
+            </div>
+
+
+
+            <!-- ==================================================
+                 FILTERS
+            ================================================== -->
+
+            <div class="food-filters">
+
+
+                <div class="food-search">
+
+
+                    <i class="fa-solid fa-magnifying-glass"></i>
+
+
+                    <input
+                        type="search"
+                        id="foodSearch"
+                        placeholder="Search food..."
+                    >
+
+
+                    <button
+                        type="button"
+                        id="clearFoodSearch"
+                    >
+
+                        <i class="fa-solid fa-xmark"></i>
+
+                    </button>
+
+
+                </div>
+
+
+                <select id="foodCategoryFilter">
+
+                    <option value="all">
+                        All Categories
+                    </option>
+
+                </select>
+
+
+                <select id="foodAvailabilityFilter">
+
+                    <option value="all">
+                        All Status
+                    </option>
+
+                    <option value="available">
+                        Available
+                    </option>
+
+                    <option value="unavailable">
+                        Unavailable
+                    </option>
+
+                </select>
+
+
+                <select id="foodSort">
+
+                    <option value="newest">
+                        Newest First
+                    </option>
+
+                    <option value="oldest">
+                        Oldest First
+                    </option>
+
+                    <option value="name-asc">
+                        Name A-Z
+                    </option>
+
+                    <option value="name-desc">
+                        Name Z-A
+                    </option>
+
+                    <option value="price-low">
+                        Price Low-High
+                    </option>
+
+                    <option value="price-high">
+                        Price High-Low
+                    </option>
+
+                </select>
+
+
+            </div>
+
+
+
+            <!-- ==================================================
+                 QUICK FILTER
+            ================================================== -->
+
+            <div class="quick-filters">
+
+
+                <button
+                    type="button"
+                    class="quick-filter-btn active"
+                    data-filter="all"
+                >
+
+                    All
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="quick-filter-btn"
+                    data-filter="available"
+                >
+
+                    Available
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="quick-filter-btn"
+                    data-filter="unavailable"
+                >
+
+                    Unavailable
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="quick-filter-btn"
+                    data-filter="recent"
+                >
+
+                    Recently Added
+
+                </button>
+
+
+            </div>
+
+
+
+            <!-- ==================================================
+                 TABLE
+            ================================================== -->
+
+            <div class="foods-table-wrap">
+
+
+                <table class="foods-table">
+
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Food
+                            </th>
+
+                            <th>
+                                Category
+                            </th>
+
+                            <th>
+                                Price
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                            <th>
+                                Added
+                            </th>
+
+                            <th>
+                                Action
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="foodsTableBody">
+
+
+                        <tr>
+
+                            <td
+                                colspan="6"
+                                class="loading"
+                            >
+
+                                <i class="fa-solid fa-spinner fa-spin"></i>
+
+                                Loading menu...
+
+                            </td>
+
+                        </tr>
+
+
+                    </tbody>
+
+
+                </table>
+
+
+            </div>
+
+
+
+            <!-- ==================================================
+                 EMPTY
+            ================================================== -->
+
+            <div
+                id="foodsEmptyState"
+                class="food-empty"
+                hidden
+            >
+
+                <i class="fa-solid fa-bowl-food"></i>
+
+
+                <h3>
+                    No food found
+                </h3>
+
+
+                <p id="foodsEmptyText">
+                    Try changing your filters.
+                </p>
+
+
+                <button
+                    type="button"
+                    id="resetFoodFiltersBtn"
+                >
+
+                    Reset Filters
+
+                </button>
+
+
+            </div>
+
+
+
+            <!-- ==================================================
+                 FOOTER / PAGINATION
+            ================================================== -->
+
+            <div class="foods-footer">
+
+
+                <span id="visibleFoodsCount">
+                    Showing 0 foods
+                </span>
+
+
+                <div class="pagination">
+
+
+                    <button
+                        type="button"
+                        id="prevFoodsBtn"
+                    >
+
+                        <i class="fa-solid fa-chevron-left"></i>
+
+                    </button>
+
+
+                    <div
+                        id="foodsPages"
+                    ></div>
+
+
+                    <button
+                        type="button"
+                        id="nextFoodsBtn"
+                    >
+
+                        <i class="fa-solid fa-chevron-right"></i>
+
+                    </button>
+
+
+                </div>
+
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- ==================================================
+             PAGE FOOTER
+        ================================================== -->
+
+        <footer class="foods-footer-page">
+
+            © 2026 Jigato • Admin Panel
+
+        </footer>
+
+
+    </main>
+
+
+</div>
+
+
+
+<!-- =========================================================
+     ADD / EDIT MODAL
+========================================================= -->
+
+<div
+    class="food-modal"
+    id="foodModal"
+>
+
+
+    <div
+        class="food-modal-overlay"
+        id="foodModalOverlay"
+    ></div>
+
+
+    <div class="food-modal-box">
+
+
+        <!-- =================================================
+             MODAL HEADER
+        ================================================== -->
+
+        <div class="modal-header">
+
+
+            <div>
+
+                <span>
+                    MENU MANAGEMENT
+                </span>
+
+
+                <h2 id="foodModalTitle">
+                    Add New Food
+                </h2>
+
+
+                <p id="foodModalSubtitle">
+                    Add a new food item.
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                id="closeFoodModal"
+                aria-label="Close"
+            >
+
+                <i class="fa-solid fa-xmark"></i>
+
+            </button>
+
+
+        </div>
+
+
+
+        <!-- =================================================
+             FORM
+        ================================================== -->
+
+        <form
+            id="foodForm"
+            autocomplete="off"
+        >
+
+
+            <input
+                type="hidden"
+                id="foodId"
+            >
+
+
+
+            <div class="form-grid">
+
+
+                <!-- FOOD NAME -->
+
+                <div class="form-group full">
+
+
+                    <label>
+                        Food Name *
+                    </label>
+
+
+                    <input
+                        id="foodName"
+                        maxlength="100"
+                        placeholder="Margherita Pizza"
+                        required
+                    >
+
+
+                </div>
+
+
+
+                <!-- CATEGORY -->
+
+                <div class="form-group">
+
+
+                    <label>
+                        Category *
+                    </label>
+
+
+                    <input
+                        id="foodCategory"
+                        list="foodCategorySuggestions"
+                        maxlength="50"
+                        placeholder="Pizza"
+                        required
+                    >
+
+
+                    <datalist
+                        id="foodCategorySuggestions"
+                    >
+
+                        <option value="Burger"></option>
+
+                        <option value="Pizza"></option>
+
+                        <option value="Snacks"></option>
+
+                        <option value="Drinks"></option>
+
+                        <option value="Pasta"></option>
+
+                        <option value="Wrap"></option>
+
+                        <option value="Dessert"></option>
+
+                    </datalist>
+
+
+                </div>
+
+
+
+                <!-- PRICE -->
+
+                <div class="form-group">
+
+
+                    <label>
+                        Price *
+                    </label>
+
+
+                    <input
+                        type="number"
+                        id="foodPrice"
+                        min="0"
+                        step="0.01"
+                        placeholder="199"
+                        required
+                    >
+
+
+                </div>
+
+
+
+                <!-- DESCRIPTION -->
+
+                <div class="form-group full">
+
+
+                    <label>
+                        Description
+                    </label>
+
+
+                    <textarea
+                        id="foodDescription"
+                        maxlength="500"
+                        rows="4"
+                        placeholder="Describe this food..."
+                    ></textarea>
+
+
+                    <small>
+
+                        <span id="foodDescriptionCount">
+                            0
+                        </span>
+
+                        /500
+
+                    </small>
+
+
+                </div>
+
+
+
+                <!-- IMAGE -->
+
+                <div class="form-group full">
+
+
+                    <label>
+                        Food Photo *
+                    </label>
+
+
+                    <div
+                        class="image-upload"
+                        id="foodImageDropzone"
+                    >
+
+
+                        <input
+                            type="file"
+                            id="foodImage"
+                            accept="image/jpeg,image/png,image/webp"
+                            hidden
+                        >
+
+
+                        <!-- IMAGE PLACEHOLDER -->
+
+                        <div
+                            id="foodImagePlaceholder"
+                        >
+
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+
+
+                            <h3>
+                                Upload Food Photo
+                            </h3>
+
+
+                            <p>
+                                Drag & drop or choose image
+                            </p>
+
+
+                            <button
+                                type="button"
+                                id="chooseFoodImageBtn"
+                            >
+
+                                Choose Photo
+
+                            </button>
+
+
+                            <small>
+                                JPG, PNG, WEBP • Max 5 MB
+                            </small>
+
+
+                        </div>
+
+
+
+                        <!-- IMAGE PREVIEW -->
+
+                        <div
+                            id="foodImagePreviewContainer"
+                            hidden
+                        >
+
+
+                            <img
+                                id="foodImagePreview"
+                                alt="Food preview"
+                            >
+
+
+                            <div class="image-actions">
+
+
+                                <button
+                                    type="button"
+                                    id="changeFoodImageBtn"
+                                >
+
+                                    Change
+
+                                </button>
+
+
+                                <button
+                                    type="button"
+                                    id="removeFoodImageBtn"
+                                >
+
+                                    Remove
+
+                                </button>
+
+
+                            </div>
+
+
+                            <strong
+                                id="foodImageName"
+                            ></strong>
+
+
+                            <small
+                                id="foodImageSize"
+                            ></small>
+
+
+                        </div>
+
+
+                    </div>
+
+
+                    <small id="foodImageHelp">
+                        Use a clear food image.
+                    </small>
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- =================================================
+                 AVAILABILITY
+            ================================================== -->
+
+            <div class="availability-box">
+
+
+                <div>
+
+                    <strong>
+                        Food Availability
+                    </strong>
+
+
+                    <p>
+                        Available food is visible for customers.
+                    </p>
+
+                </div>
+
+
+                <label class="switch">
+
+
+                    <input
+                        type="checkbox"
+                        id="foodAvailability"
+                        checked
+                    >
+
+
+                    <span></span>
+
+
+                </label>
+
+
+                <b id="foodAvailabilityText">
+                    Available
+                </b>
+
+
+            </div>
+
+
+
+            <!-- =================================================
+                 MODAL ACTIONS
+            ================================================== -->
+
+            <div class="modal-actions">
+
+
+                <button
+                    type="button"
+                    id="cancelFoodBtn"
+                    class="cancel-btn"
+                >
+
+                    Cancel
+
+                </button>
+
+
+                <button
+                    type="submit"
+                    id="saveFoodBtn"
+                    class="save-btn"
+                >
+
+                    <i class="fa-solid fa-plus"></i>
+
+
+                    <span id="saveFoodBtnText">
+                        Add Food
+                    </span>
+
+
+                </button>
+
+
+            </div>
+
+
+        </form>
+
+
+    </div>
+
+
+</div>
+
+
+
+<!-- =========================================================
+     SHARED SIDEBAR JS
+========================================================= -->
+
+<script
+    src="/admin/sidebar/sidebar.js"
+></script>
+
+
+<!-- =========================================================
+     MENU JS
+========================================================= -->
+
+<script
+    src="/js/admin/foods.js"
+></script>
+
+
+</body>
+
+</html>

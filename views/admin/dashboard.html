@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Jigato | Admin Dashboard</title>
+
+
+    <!-- ==================================================
+         GOOGLE FONT
+    =================================================== -->
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- ==================================================
+         FONT AWESOME
+    =================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    >
+
+
+    <!-- ==================================================
+         SHARED ADMIN SIDEBAR CSS
+    =================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="/admin/sidebar/sidebar.css"
+    >
+
+
+    <!-- ==================================================
+         DASHBOARD CSS
+    =================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="/css/admin/dashboard.css"
+    >
+
+</head>
+
+
+<body>
+
+
+<div class="admin-page">
+
+
+    <!-- ==================================================
+         SHARED SIDEBAR
+         sidebar.html sidebar.js ke through load hoga
+    =================================================== -->
+
+    <div
+        id="adminSidebarContainer"
+    ></div>
+
+
+    <!-- ==================================================
+         MAIN CONTENT
+    =================================================== -->
+
+    <main class="dashboard-main">
+
+
+        <!-- ==================================================
+             HEADER
+        =================================================== -->
+
+        <header class="dashboard-header">
+
+
+            <div class="header-left">
+
+
+                <button
+                    type="button"
+                    id="sidebarToggle"
+                    class="mobile-menu-btn"
+                    aria-label="Open sidebar"
+                >
+
+                    <i class="fa-solid fa-bars"></i>
+
+                </button>
+
+
+                <div class="header-content">
+
+                    <span class="header-eyebrow">
+                        JIGATO ADMIN
+                    </span>
+
+                    <h1>
+                        Dashboard
+                    </h1>
+
+                    <p>
+                        Manage your food ordering system from one place.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="header-right">
+
+
+                <button
+                    type="button"
+                    id="refreshBtn"
+                    class="refresh-btn"
+                    title="Refresh dashboard"
+                >
+
+                    <i class="fa-solid fa-arrows-rotate"></i>
+
+                </button>
+
+
+                <div class="header-user">
+
+                    <div
+                        class="header-avatar"
+                        id="adminAvatar"
+                    >
+                        A
+                    </div>
+
+
+                    <div class="header-user-text">
+
+                        <strong id="adminName">
+                            Admin
+                        </strong>
+
+                        <span>
+                            Administrator
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+
+        <!-- ==================================================
+             SYSTEM STATUS
+        =================================================== -->
+
+        <div class="system-bar">
+
+
+            <div class="system-left">
+
+                <span class="system-dot"></span>
+
+                <strong>
+                    System Online
+                </strong>
+
+                <span class="system-separator"></span>
+
+                <span>
+                    Database Connected
+                </span>
+
+            </div>
+
+
+            <div class="system-right">
+
+                Updated:
+
+                <strong id="lastUpdated">
+                    --
+                </strong>
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- ==================================================
+             MAIN STATS
+        =================================================== -->
+
+        <section class="stats-section">
+
+
+            <!-- CUSTOMERS -->
+
+            <article class="stat-card customer-card">
+
+                <div class="stat-card-top">
+
+                    <div>
+
+                        <span class="stat-label">
+                            CUSTOMERS
+                        </span>
+
+                        <h2 id="totalUsers">
+                            0
+                        </h2>
+
+                    </div>
+
+
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card-bottom">
+
+                    <span>
+                        Registered customers
+                    </span>
+
+                    <i class="fa-solid fa-arrow-right"></i>
+
+                </div>
+
+            </article>
+
+
+
+            <!-- MENU -->
+
+            <article class="stat-card menu-card">
+
+                <div class="stat-card-top">
+
+                    <div>
+
+                        <span class="stat-label">
+                            MENU ITEMS
+                        </span>
+
+                        <h2 id="totalFoods">
+                            0
+                        </h2>
+
+                    </div>
+
+
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-bowl-food"></i>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card-bottom">
+
+                    <span>
+                        Available foods
+                    </span>
+
+                    <i class="fa-solid fa-arrow-right"></i>
+
+                </div>
+
+            </article>
+
+
+
+            <!-- ORDERS -->
+
+            <article class="stat-card order-card">
+
+                <div class="stat-card-top">
+
+                    <div>
+
+                        <span class="stat-label">
+                            ORDERS
+                        </span>
+
+                        <h2 id="totalOrders">
+                            0
+                        </h2>
+
+                    </div>
+
+
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-bag-shopping"></i>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card-bottom">
+
+                    <span>
+                        Total orders
+                    </span>
+
+                    <i class="fa-solid fa-arrow-right"></i>
+
+                </div>
+
+            </article>
+
+
+
+            <!-- REVENUE -->
+
+            <article class="stat-card revenue-card">
+
+                <div class="stat-card-top">
+
+                    <div>
+
+                        <span class="stat-label">
+                            REVENUE
+                        </span>
+
+                        <h2 id="totalRevenue">
+                            ₹0
+                        </h2>
+
+                    </div>
+
+
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-indian-rupee-sign"></i>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card-bottom">
+
+                    <span>
+                        Non-cancelled orders
+                    </span>
+
+                    <i class="fa-solid fa-arrow-right"></i>
+
+                </div>
+
+            </article>
+
+
+        </section>
+
+
+
+        <!-- ==================================================
+             SECONDARY STATS
+        =================================================== -->
+
+        <section class="small-stats">
+
+
+            <div class="small-stat">
+
+                <div class="small-stat-icon pending">
+                    <i class="fa-regular fa-clock"></i>
+                </div>
+
+                <div>
+
+                    <span>
+                        Pending Orders
+                    </span>
+
+                    <strong id="pendingOrders">
+                        0
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="small-stat">
+
+                <div class="small-stat-icon delivered">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+
+                <div>
+
+                    <span>
+                        Delivered
+                    </span>
+
+                    <strong id="deliveredOrders">
+                        0
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="small-stat">
+
+                <div class="small-stat-icon offers">
+                    <i class="fa-solid fa-tags"></i>
+                </div>
+
+                <div>
+
+                    <span>
+                        Active Offers
+                    </span>
+
+                    <strong id="activeOffers">
+                        0
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- ==================================================
+             CONTENT
+        =================================================== -->
+
+        <section class="content-grid">
+
+
+            <!-- ==================================================
+                 RECENT ORDERS
+            =================================================== -->
+
+            <div class="dashboard-card recent-orders-card">
+
+
+                <div class="card-header">
+
+
+                    <div>
+
+                        <span class="card-label">
+                            ORDERS
+                        </span>
+
+                        <h2>
+                            Recent Orders
+                        </h2>
+
+                    </div>
+
+
+                    <a
+                        href="/admin/orders"
+                        class="card-link"
+                    >
+
+                        View All
+
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+
+                    </a>
+
+
+                </div>
+
+
+                <div class="orders-table-container">
+
+                    <table class="orders-table">
+
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Order
+                                </th>
+
+                                <th>
+                                    Customer
+                                </th>
+
+                                <th>
+                                    Amount
+                                </th>
+
+                                <th>
+                                    Payment
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th>
+                                    Date
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody
+                            id="recentOrdersBody"
+                        >
+
+                            <tr>
+
+                                <td
+                                    colspan="6"
+                                    class="table-state"
+                                >
+
+                                    <i
+                                        class="fa-solid fa-spinner fa-spin"
+                                    ></i>
+
+                                    Loading orders...
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+
+                    </table>
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- ==================================================
+                 ORDER STATUS
+            =================================================== -->
+
+            <div class="dashboard-card order-flow-card">
+
+
+                <div class="card-header">
+
+
+                    <div>
+
+                        <span class="card-label">
+                            ORDER FLOW
+                        </span>
+
+                        <h2>
+                            Order Status
+                        </h2>
+
+                    </div>
+
+
+                    <span class="flow-icon">
+
+                        <i class="fa-solid fa-chart-simple"></i>
+
+                    </span>
+
+
+                </div>
+
+
+                <div class="flow-list">
+
+
+                    <!-- PENDING -->
+
+                    <div class="flow-item">
+
+
+                        <div class="flow-head">
+
+                            <span>
+
+                                <i class="flow-dot pending"></i>
+
+                                Pending
+
+                            </span>
+
+                            <strong id="statusPending">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="flow-track">
+
+                            <span
+                                id="progressPending"
+                                class="flow-progress pending"
+                            ></span>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- CONFIRMED -->
+
+                    <div class="flow-item">
+
+
+                        <div class="flow-head">
+
+                            <span>
+
+                                <i class="flow-dot confirmed"></i>
+
+                                Confirmed
+
+                            </span>
+
+                            <strong id="statusConfirmed">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="flow-track">
+
+                            <span
+                                id="progressConfirmed"
+                                class="flow-progress confirmed"
+                            ></span>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- PREPARING -->
+
+                    <div class="flow-item">
+
+
+                        <div class="flow-head">
+
+                            <span>
+
+                                <i class="flow-dot preparing"></i>
+
+                                Preparing
+
+                            </span>
+
+                            <strong id="statusPreparing">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="flow-track">
+
+                            <span
+                                id="progressPreparing"
+                                class="flow-progress preparing"
+                            ></span>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- DELIVERY -->
+
+                    <div class="flow-item">
+
+
+                        <div class="flow-head">
+
+                            <span>
+
+                                <i class="flow-dot delivery"></i>
+
+                                Out For Delivery
+
+                            </span>
+
+                            <strong id="statusOutForDelivery">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="flow-track">
+
+                            <span
+                                id="progressOutForDelivery"
+                                class="flow-progress delivery"
+                            ></span>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- DELIVERED -->
+
+                    <div class="flow-item">
+
+
+                        <div class="flow-head">
+
+                            <span>
+
+                                <i class="flow-dot delivered"></i>
+
+                                Delivered
+
+                            </span>
+
+                            <strong id="statusDelivered">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="flow-track">
+
+                            <span
+                                id="progressDelivered"
+                                class="flow-progress delivered"
+                            ></span>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- CANCELLED -->
+
+                    <div class="flow-item">
+
+
+                        <div class="flow-head">
+
+                            <span>
+
+                                <i class="flow-dot cancelled"></i>
+
+                                Cancelled
+
+                            </span>
+
+                            <strong id="statusCancelled">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="flow-track">
+
+                            <span
+                                id="progressCancelled"
+                                class="flow-progress cancelled"
+                            ></span>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- ==================================================
+             QUICK ACCESS + SUMMARY
+        =================================================== -->
+
+        <section class="bottom-grid">
+
+
+            <!-- QUICK ACCESS -->
+
+            <div class="dashboard-card">
+
+
+                <div class="card-header">
+
+                    <div>
+
+                        <span class="card-label">
+                            QUICK ACCESS
+                        </span>
+
+                        <h2>
+                            Manage
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="quick-access-grid">
+
+
+                    <a
+                        href="/admin/users"
+                        class="quick-item"
+                    >
+
+                        <span class="quick-icon users">
+                            <i class="fa-solid fa-users"></i>
+                        </span>
+
+                        <span class="quick-copy">
+
+                            <strong>
+                                Users
+                            </strong>
+
+                            <small>
+                                Customer accounts
+                            </small>
+
+                        </span>
+
+                        <i class="fa-solid fa-arrow-right"></i>
+
+                    </a>
+
+
+                    <a
+                        href="/admin/foods"
+                        class="quick-item"
+                    >
+
+                        <span class="quick-icon foods">
+                            <i class="fa-solid fa-bowl-food"></i>
+                        </span>
+
+                        <span class="quick-copy">
+
+                            <strong>
+                                Menu
+                            </strong>
+
+                            <small>
+                                Food items
+                            </small>
+
+                        </span>
+
+                        <i class="fa-solid fa-arrow-right"></i>
+
+                    </a>
+
+
+                    <a
+                        href="/admin/orders"
+                        class="quick-item"
+                    >
+
+                        <span class="quick-icon orders">
+                            <i class="fa-solid fa-bag-shopping"></i>
+                        </span>
+
+                        <span class="quick-copy">
+
+                            <strong>
+                                Orders
+                            </strong>
+
+                            <small>
+                                Manage orders
+                            </small>
+
+                        </span>
+
+                        <i class="fa-solid fa-arrow-right"></i>
+
+                    </a>
+
+
+                    <a
+                        href="/admin/offers"
+                        class="quick-item"
+                    >
+
+                        <span class="quick-icon offers">
+                            <i class="fa-solid fa-tags"></i>
+                        </span>
+
+                        <span class="quick-copy">
+
+                            <strong>
+                                Offers
+                            </strong>
+
+                            <small>
+                                Coupons & deals
+                            </small>
+
+                        </span>
+
+                        <i class="fa-solid fa-arrow-right"></i>
+
+                    </a>
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- SUMMARY -->
+
+            <div class="dashboard-card">
+
+
+                <div class="card-header">
+
+                    <div>
+
+                        <span class="card-label">
+                            SNAPSHOT
+                        </span>
+
+                        <h2>
+                            Overview
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="summary-list">
+
+
+                    <div class="summary-row">
+
+                        <span>
+
+                            <i class="fa-solid fa-bag-shopping"></i>
+
+                            Total Orders
+
+                        </span>
+
+
+                        <strong id="summaryOrders">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="summary-row">
+
+                        <span>
+
+                            <i class="fa-regular fa-clock"></i>
+
+                            Awaiting Action
+
+                        </span>
+
+
+                        <strong id="summaryAwaiting">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="summary-row">
+
+                        <span>
+
+                            <i class="fa-solid fa-circle-check"></i>
+
+                            Completed
+
+                        </span>
+
+
+                        <strong id="summaryDelivered">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="summary-row">
+
+                        <span>
+
+                            <i class="fa-solid fa-tags"></i>
+
+                            Active Offers
+
+                        </span>
+
+
+                        <strong id="summaryOffers">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- ==================================================
+             FOOTER
+        =================================================== -->
+
+        <footer class="dashboard-footer">
+
+            <span>
+                © 2026 Jigato
+            </span>
+
+            <span>
+                Admin Panel
+            </span>
+
+        </footer>
+
+
+    </main>
+
+
+</div>
+
+
+<!-- ==================================================
+     SHARED SIDEBAR JS
+=================================================== -->
+
+<script
+    src="/admin/sidebar/sidebar.js"
+></script>
+
+
+<!-- ==================================================
+     DASHBOARD JS
+=================================================== -->
+
+<script
+    src="/js/admin/dashboard.js"
+></script>
+
+
+</body>
+
+</html>

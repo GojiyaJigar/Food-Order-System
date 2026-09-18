@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Jigato | Admin Orders</title>
+
+
+    <!-- ==================================================
+         GOOGLE FONT
+    =================================================== -->
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- ==================================================
+         FONT AWESOME
+    =================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    >
+
+
+    <!-- ==================================================
+         SHARED SIDEBAR CSS
+    =================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="/admin/sidebar/sidebar.css"
+    >
+
+
+    <!-- ==================================================
+         ORDERS CSS
+    =================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="/css/admin/orders.css"
+    >
+
+</head>
+
+
+<body>
+
+
+<div class="admin-page">
+
+
+    <!-- ==================================================
+         SHARED SIDEBAR
+         Loaded automatically by sidebar.js
+    ================================================== -->
+
+    <div
+        id="adminSidebarContainer"
+    ></div>
+
+
+    <!-- ==================================================
+         MAIN
+    ================================================== -->
+
+    <main class="orders-main">
+
+
+        <!-- ==================================================
+             HEADER
+        ================================================== -->
+
+        <header class="orders-header">
+
+
+            <div class="orders-header-left">
+
+
+                <button
+                    type="button"
+                    id="sidebarToggle"
+                    class="mobile-menu-btn"
+                    aria-label="Open sidebar"
+                >
+
+                    <i class="fa-solid fa-bars"></i>
+
+                </button>
+
+
+                <div>
+
+                    <span class="orders-eyebrow">
+                        JIGATO ADMIN
+                    </span>
+
+
+                    <h1>
+                        Orders
+                    </h1>
+
+
+                    <p>
+                        Manage customer orders and delivery status.
+                    </p>
+
+                </div>
+
+
+            </div>
+
+
+            <button
+                type="button"
+                id="refreshOrdersBtn"
+                class="refresh-btn"
+                title="Refresh orders"
+            >
+
+                <i class="fa-solid fa-arrows-rotate"></i>
+
+            </button>
+
+
+        </header>
+
+
+
+        <!-- ==================================================
+             STATUS BAR
+        ================================================== -->
+
+        <div class="orders-status-bar">
+
+
+            <div>
+
+                <span class="status-dot"></span>
+
+
+                <strong>
+                    Order Management
+                </strong>
+
+
+                <span>
+                    Live customer orders
+                </span>
+
+            </div>
+
+
+            <div class="last-updated">
+
+                <span>
+                    Last updated
+                </span>
+
+
+                <strong
+                    id="ordersLastUpdated"
+                >
+                    --
+                </strong>
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- ==================================================
+             STATS
+        ================================================== -->
+
+        <section class="order-stats">
+
+
+            <article class="order-stat-card">
+
+                <div class="order-stat-icon">
+
+                    <i class="fa-solid fa-bag-shopping"></i>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Total Orders
+                    </span>
+
+
+                    <strong id="totalOrders">
+                        0
+                    </strong>
+
+                </div>
+
+            </article>
+
+
+
+            <article class="order-stat-card">
+
+                <div class="order-stat-icon">
+
+                    <i class="fa-solid fa-clock"></i>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Pending
+                    </span>
+
+
+                    <strong id="pendingOrders">
+                        0
+                    </strong>
+
+                </div>
+
+            </article>
+
+
+
+            <article class="order-stat-card">
+
+                <div class="order-stat-icon">
+
+                    <i class="fa-solid fa-box-open"></i>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Active Orders
+                    </span>
+
+
+                    <strong id="activeOrders">
+                        0
+                    </strong>
+
+                </div>
+
+            </article>
+
+
+
+            <article class="order-stat-card">
+
+                <div class="order-stat-icon">
+
+                    <i class="fa-solid fa-circle-check"></i>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Delivered
+                    </span>
+
+
+                    <strong id="deliveredOrders">
+                        0
+                    </strong>
+
+                </div>
+
+            </article>
+
+
+
+            <article class="order-stat-card">
+
+                <div class="order-stat-icon">
+
+                    <i class="fa-solid fa-ban"></i>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Cancelled
+                    </span>
+
+
+                    <strong id="cancelledOrders">
+                        0
+                    </strong>
+
+                </div>
+
+            </article>
+
+
+
+            <article class="order-stat-card">
+
+                <div class="order-stat-icon">
+
+                    <i class="fa-solid fa-indian-rupee-sign"></i>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Revenue
+                    </span>
+
+
+                    <strong id="totalOrderRevenue">
+                        ₹0.00
+                    </strong>
+
+                </div>
+
+            </article>
+
+
+        </section>
+
+
+
+        <!-- ==================================================
+             ORDERS CARD
+        ================================================== -->
+
+        <section class="orders-card">
+
+
+            <div class="orders-card-head">
+
+
+                <div>
+
+                    <span>
+                        Customer Orders
+                    </span>
+
+
+                    <h2 id="ordersTitle">
+                        All Orders
+                    </h2>
+
+                </div>
+
+
+                <strong
+                    id="ordersVisibleCount"
+                    class="orders-count"
+                >
+                    0 orders
+                </strong>
+
+
+            </div>
+
+
+
+            <!-- ==================================================
+                 TOOLBAR
+            ================================================== -->
+
+            <div class="orders-toolbar">
+
+
+                <div class="order-search">
+
+
+                    <i
+                        class="fa-solid fa-magnifying-glass"
+                    ></i>
+
+
+                    <input
+                        type="search"
+                        id="orderSearch"
+                        placeholder="Search order or customer..."
+                        autocomplete="off"
+                    >
+
+
+                    <button
+                        type="button"
+                        id="clearOrderSearch"
+                        title="Clear"
+                    >
+
+                        <i class="fa-solid fa-xmark"></i>
+
+                    </button>
+
+
+                </div>
+
+
+                <select
+                    id="orderStatusFilter"
+                    class="order-select"
+                >
+
+                    <option value="all">
+                        All Orders
+                    </option>
+
+                    <option value="Pending">
+                        Pending
+                    </option>
+
+                    <option value="Confirmed">
+                        Confirmed
+                    </option>
+
+                    <option value="Preparing">
+                        Preparing
+                    </option>
+
+                    <option value="Out For Delivery">
+                        Out For Delivery
+                    </option>
+
+                    <option value="Delivered">
+                        Delivered
+                    </option>
+
+                    <option value="Cancelled">
+                        Cancelled
+                    </option>
+
+                </select>
+
+
+                <select
+                    id="orderSort"
+                    class="order-select"
+                >
+
+                    <option value="latest">
+                        Newest
+                    </option>
+
+                    <option value="oldest">
+                        Oldest
+                    </option>
+
+                    <option value="amount-high">
+                        Amount High
+                    </option>
+
+                    <option value="amount-low">
+                        Amount Low
+                    </option>
+
+                    <option value="customer-az">
+                        Customer A–Z
+                    </option>
+
+                    <option value="customer-za">
+                        Customer Z–A
+                    </option>
+
+                </select>
+
+
+            </div>
+
+
+
+            <!-- ==================================================
+                 TABLE
+            ================================================== -->
+
+            <div class="orders-table-wrap">
+
+
+                <table class="orders-table">
+
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Order
+                            </th>
+
+                            <th>
+                                Customer
+                            </th>
+
+                            <th>
+                                Items
+                            </th>
+
+                            <th>
+                                Amount
+                            </th>
+
+                            <th>
+                                Payment
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                            <th>
+                                Date
+                            </th>
+
+                            <th>
+                                Action
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody
+                        id="ordersTableBody"
+                    >
+
+                        <tr>
+
+                            <td
+                                colspan="8"
+                            >
+
+                                <div class="orders-loading">
+
+                                    <i
+                                        class="fa-solid fa-spinner fa-spin"
+                                    ></i>
+
+                                    Loading orders...
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+
+                </table>
+
+
+            </div>
+
+
+
+            <!-- ==================================================
+                 EMPTY
+            ================================================== -->
+
+            <div
+                class="orders-empty"
+                id="ordersEmptyState"
+                hidden
+            >
+
+
+                <div class="empty-icon">
+
+                    <i class="fa-solid fa-bag-shopping"></i>
+
+                </div>
+
+
+                <h3>
+                    No orders found
+                </h3>
+
+
+                <p id="ordersEmptyText">
+                    No orders match your current filters.
+                </p>
+
+
+                <button
+                    type="button"
+                    id="resetOrderFiltersBtn"
+                >
+                    Reset Filters
+                </button>
+
+
+            </div>
+
+
+
+            <!-- ==================================================
+                 FOOTER / PAGINATION
+            ================================================== -->
+
+            <div class="orders-footer">
+
+
+                <span id="ordersResultText">
+
+                    Showing 0-0 of 0 orders
+
+                </span>
+
+
+                <div class="orders-pagination">
+
+
+                    <button
+                        type="button"
+                        id="prevOrdersBtn"
+                        class="page-btn"
+                        disabled
+                    >
+
+                        <i
+                            class="fa-solid fa-chevron-left"
+                        ></i>
+
+                    </button>
+
+
+                    <div
+                        id="ordersPages"
+                        class="page-numbers"
+                    ></div>
+
+
+                    <button
+                        type="button"
+                        id="nextOrdersBtn"
+                        class="page-btn"
+                        disabled
+                    >
+
+                        <i
+                            class="fa-solid fa-chevron-right"
+                        ></i>
+
+                    </button>
+
+
+                </div>
+
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- ==================================================
+             PAGE FOOTER
+        ================================================== -->
+
+        <footer class="orders-page-footer">
+
+            <span>
+                © 2026 Jigato
+            </span>
+
+
+            <span>
+                Admin Panel
+            </span>
+
+        </footer>
+
+
+    </main>
+
+
+</div>
+
+
+
+<!-- =========================================================
+     ORDER MODAL
+========================================================= -->
+
+<div
+    class="order-modal"
+    id="orderModal"
+    hidden
+>
+
+
+    <div
+        class="order-modal-overlay"
+        id="orderModalOverlay"
+    ></div>
+
+
+    <div class="order-modal-box">
+
+
+        <!-- =================================================
+             MODAL HEADER
+        ================================================== -->
+
+        <div class="order-modal-head">
+
+
+            <div>
+
+                <span>
+                    ORDER DETAILS
+                </span>
+
+
+                <h2 id="modalOrderTitle">
+                    Order #-
+                </h2>
+
+
+                <small id="modalOrderDate">
+                    -
+                </small>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="modal-close-btn"
+                id="closeOrderModal"
+                aria-label="Close"
+            >
+
+                <i class="fa-solid fa-xmark"></i>
+
+            </button>
+
+
+        </div>
+
+
+
+        <!-- =================================================
+             ORDER CONTENT
+        ================================================== -->
+
+        <div
+            id="orderModalContent"
+            class="order-modal-content"
+        ></div>
+
+
+
+        <!-- =================================================
+             STATUS UPDATE
+        ================================================== -->
+
+        <div class="order-modal-status">
+
+
+            <div>
+
+                <span>
+                    Order Status
+                </span>
+
+
+                <select
+                    id="modalOrderStatus"
+                >
+
+                    <option value="Pending">
+                        Pending
+                    </option>
+
+                    <option value="Confirmed">
+                        Confirmed
+                    </option>
+
+                    <option value="Preparing">
+                        Preparing
+                    </option>
+
+                    <option value="Out For Delivery">
+                        Out For Delivery
+                    </option>
+
+                    <option value="Delivered">
+                        Delivered
+                    </option>
+
+                    <option value="Cancelled">
+                        Cancelled
+                    </option>
+
+                </select>
+
+
+            </div>
+
+
+            <button
+                type="button"
+                id="updateOrderStatusBtn"
+                class="update-status-btn"
+            >
+
+                Update Status
+
+            </button>
+
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+
+<!-- =========================================================
+     SWEET ALERT
+========================================================= -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/sweetalert2@11"
+></script>
+
+
+
+<!-- =========================================================
+     SHARED SIDEBAR JS
+========================================================= -->
+
+<script
+    src="/admin/sidebar/sidebar.js"
+></script>
+
+
+
+<!-- =========================================================
+     ORDERS JS
+========================================================= -->
+
+<script
+    src="/js/admin/orders.js"
+></script>
+
+
+</body>
+
+</html>
