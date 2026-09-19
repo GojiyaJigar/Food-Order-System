@@ -21,7 +21,7 @@ button{
 }
 
 .orders-main{
-    margin-left:250px;
+    margin-left:235px;
     padding:28px;
     min-height:100vh;
 }
@@ -701,7 +701,7 @@ button{
     }
 }
 
-@media (max-width:768px){
+@media (max-width:900px){
 
     .orders-main{
         margin-left:0;
@@ -746,7 +746,6 @@ button{
         gap:12px;
     }
 }
-
 @media (max-width:480px){
 
     .order-stats{

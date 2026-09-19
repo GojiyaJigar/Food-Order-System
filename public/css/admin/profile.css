@@ -82,7 +82,7 @@ body {
 
     min-width: 0;
 
-    margin-left: 270px;
+   margin-left:235px;
 
     padding: 28px 30px 24px;
 
@@ -1000,15 +1000,7 @@ body {
 }
 
 
-/* =========================================================
-   SIDEBAR OVERLAY
-========================================================= */
 
-.sidebar-overlay {
-
-    display: none;
-
-}
 
 
 /* =========================================================
@@ -1019,7 +1011,7 @@ body {
 
     .profile-main {
 
-        margin-left: 250px;
+        margin-left:235px;
 
         padding:
             24px 22px 22px;

@@ -103,6 +103,7 @@ app.get(
                 "register.html"
             )
         );
+
     }
 );
 
@@ -119,6 +120,7 @@ app.get(
                 "login.html"
             )
         );
+
     }
 );
 
@@ -136,6 +138,7 @@ app.get(
                 "menu.html"
             )
         );
+
     }
 );
 
@@ -153,6 +156,7 @@ app.get(
                 "cart.html"
             )
         );
+
     }
 );
 
@@ -170,6 +174,7 @@ app.get(
                 "checkout.html"
             )
         );
+
     }
 );
 
@@ -181,6 +186,7 @@ app.get(
     (req, res) => {
 
         res.redirect("/checkout");
+
     }
 );
 
@@ -198,6 +204,7 @@ app.get(
                 "profile.html"
             )
         );
+
     }
 );
 
@@ -215,6 +222,7 @@ app.get(
                 "offers.html"
             )
         );
+
     }
 );
 
@@ -232,6 +240,7 @@ app.get(
                 "my-orders.html"
             )
         );
+
     }
 );
 
@@ -305,11 +314,18 @@ app.use(offerRoutes);
 
 
 // =====================================================
-// ADMIN ROUTES
+// PUBLIC SETTINGS API
 // =====================================================
 
+const settingsRoutes =
+    require("./routes/settingsRoutes");
 
-// MAIN ADMIN ROUTES
+app.use(settingsRoutes);
+
+
+// =====================================================
+// ADMIN ROUTES
+// =====================================================
 
 const adminRoutes =
     require("./routes/adminRoutes");
@@ -318,9 +334,6 @@ app.use(
     "/admin",
     adminRoutes
 );
-
-
-
 
 
 // =====================================================
@@ -333,6 +346,7 @@ app.use(
         res.status(404).send(
             "404 - Page Not Found"
         );
+
     }
 );
 
@@ -350,9 +364,14 @@ app.use(
         );
 
         res.status(500).json({
+
             success: false,
-            message: "Internal Server Error"
+
+            message:
+                "Internal Server Error"
+
         });
+
     }
 );
 
@@ -372,5 +391,6 @@ app.listen(
         console.log(
             `🚀 Server Running on http://localhost:${PORT}`
         );
+
     }
 );

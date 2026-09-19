@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Jigato - Admin Settings</title>
+
+
+    <!-- =====================================================
+         FONT
+    ====================================================== -->
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- =====================================================
+         FONT AWESOME
+    ====================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    >
+
+
+    <!-- =====================================================
+         SWEETALERT2
+    ====================================================== -->
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/sweetalert2@11"
+    ></script>
+
+
+    <!-- =====================================================
+         SHARED SIDEBAR CSS
+    ====================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="/admin/sidebar/sidebar.css"
+    >
+
+
+    <!-- =====================================================
+         SETTINGS CSS
+    ====================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="/css/admin/settings.css"
+    >
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         ADMIN PAGE
+    ====================================================== -->
+
+    <div class="admin-page">
+
+
+        <!-- =================================================
+             SHARED SIDEBAR
+        ================================================== -->
+
+        <div id="adminSidebarContainer"></div>
+
+
+        <!-- =================================================
+             MAIN
+        ================================================== -->
+
+        <main class="settings-main">
+
+
+            <!-- =============================================
+                 HEADER
+            ============================================== -->
+
+            <header class="settings-header">
+
+
+                <div class="settings-header-left">
+
+
+                    <!-- MOBILE SIDEBAR BUTTON -->
+
+                    <button
+                        type="button"
+                        class="mobile-menu-btn"
+                        id="sidebarToggle"
+                        aria-label="Open menu"
+                    >
+
+                        <i class="fa-solid fa-bars"></i>
+
+                    </button>
+
+
+                    <!-- TITLE -->
+
+                    <div class="settings-title">
+
+                        <span class="page-eyebrow">
+                            ADMIN SETTINGS
+                        </span>
+
+                        <h1>
+                            Settings
+                        </h1>
+
+                        <p>
+                            Manage your Jigato application settings.
+                        </p>
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- STATUS -->
+
+                <div class="settings-header-right">
+
+                    <span
+                        class="settings-status"
+                        id="settingsStatus"
+                    >
+
+                        <i class="fa-solid fa-circle-check"></i>
+
+                        Ready
+
+                    </span>
+
+                </div>
+
+
+            </header>
+
+
+
+            <!-- =================================================
+                 SETTINGS FORM
+            ================================================== -->
+
+            <form
+                id="settingsForm"
+                novalidate
+            >
+
+
+                <!-- =============================================
+                     GENERAL
+                ============================================== -->
+
+                <section class="settings-card">
+
+
+                    <div class="settings-card-header">
+
+
+                        <div>
+
+                            <span class="card-eyebrow">
+                                GENERAL
+                            </span>
+
+                            <h2>
+                                Application Information
+                            </h2>
+
+                            <p>
+                                Basic information used across Jigato.
+                            </p>
+
+                        </div>
+
+
+                        <div class="settings-card-icon">
+
+                            <i class="fa-solid fa-sliders"></i>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <div class="settings-grid">
+
+
+                        <!-- APP NAME -->
+
+                        <div class="settings-field">
+
+                            <label for="appName">
+                                App Name
+                            </label>
+
+                            <input
+                                type="text"
+                                id="appName"
+                                name="app_name"
+                                placeholder="Jigato"
+                                maxlength="100"
+                                required
+                            >
+
+                        </div>
+
+
+                        <!-- DEFAULT CITY -->
+
+                        <div class="settings-field">
+
+                            <label for="defaultCity">
+                                Default City
+                            </label>
+
+                            <input
+                                type="text"
+                                id="defaultCity"
+                                name="default_city"
+                                placeholder="India"
+                                maxlength="100"
+                                required
+                            >
+
+                        </div>
+
+
+                        <!-- SUPPORT EMAIL -->
+
+                        <div class="settings-field">
+
+                            <label for="supportEmail">
+                                Support Email
+                            </label>
+
+                            <input
+                                type="email"
+                                id="supportEmail"
+                                name="support_email"
+                                placeholder="support@jigato.com"
+                                maxlength="150"
+                            >
+
+                        </div>
+
+
+                        <!-- SUPPORT PHONE -->
+
+                        <div class="settings-field">
+
+                            <label for="supportPhone">
+                                Support Phone
+                            </label>
+
+                            <input
+                                type="text"
+                                id="supportPhone"
+                                name="support_phone"
+                                placeholder="+91 XXXXX XXXXX"
+                                maxlength="20"
+                            >
+
+                        </div>
+
+
+                    </div>
+
+
+                </section>
+
+
+
+                <!-- =============================================
+                     DELIVERY
+                ============================================== -->
+
+                <section class="settings-card">
+
+
+                    <div class="settings-card-header">
+
+
+                        <div>
+
+                            <span class="card-eyebrow">
+                                DELIVERY
+                            </span>
+
+                            <h2>
+                                Delivery & Order Rules
+                            </h2>
+
+                            <p>
+                                Control delivery charges and order limits.
+                            </p>
+
+                        </div>
+
+
+                        <div class="settings-card-icon">
+
+                            <i class="fa-solid fa-truck-fast"></i>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <div class="settings-grid four-column">
+
+
+                        <!-- DELIVERY FEE -->
+
+                        <div class="settings-field">
+
+                            <label for="deliveryFee">
+                                Delivery Fee (₹)
+                            </label>
+
+                            <input
+                                type="number"
+                                id="deliveryFee"
+                                name="delivery_fee"
+                                min="0"
+                                step="0.01"
+                                placeholder="40"
+                                required
+                            >
+
+                        </div>
+
+
+                        <!-- FREE DELIVERY -->
+
+                        <div class="settings-field">
+
+                            <label for="freeDeliveryAbove">
+                                Free Delivery Above (₹)
+                            </label>
+
+                            <input
+                                type="number"
+                                id="freeDeliveryAbove"
+                                name="free_delivery_above"
+                                min="0"
+                                step="0.01"
+                                placeholder="500"
+                                required
+                            >
+
+                        </div>
+
+
+                        <!-- GST -->
+
+                        <div class="settings-field">
+
+                            <label for="gstRate">
+                                GST Rate (%)
+                            </label>
+
+                            <input
+                                type="number"
+                                id="gstRate"
+                                name="gst_rate"
+                                min="0"
+                                max="100"
+                                step="0.01"
+                                placeholder="5"
+                                required
+                            >
+
+                        </div>
+
+
+                        <!-- MINIMUM ORDER -->
+
+                        <div class="settings-field">
+
+                            <label for="minimumOrder">
+                                Minimum Order (₹)
+                            </label>
+
+                            <input
+                                type="number"
+                                id="minimumOrder"
+                                name="minimum_order"
+                                min="0"
+                                step="0.01"
+                                placeholder="100"
+                                required
+                            >
+
+                        </div>
+
+
+                    </div>
+
+
+                </section>
+
+
+
+                <!-- =============================================
+                     PAYMENTS
+                ============================================== -->
+
+                <section class="settings-card">
+
+
+                    <div class="settings-card-header">
+
+
+                        <div>
+
+                            <span class="card-eyebrow">
+                                PAYMENTS
+                            </span>
+
+                            <h2>
+                                Payment Methods
+                            </h2>
+
+                            <p>
+                                Choose which payment methods customers can use.
+                            </p>
+
+                        </div>
+
+
+                        <div class="settings-card-icon">
+
+                            <i class="fa-solid fa-credit-card"></i>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <div class="settings-options">
+
+
+                        <!-- COD -->
+
+                        <label class="settings-option">
+
+
+                            <div class="settings-option-info">
+
+
+                                <div class="settings-option-icon">
+
+                                    <i class="fa-solid fa-money-bill-wave"></i>
+
+                                </div>
+
+
+                                <div>
+
+                                    <strong>
+                                        Cash on Delivery
+                                    </strong>
+
+                                    <span>
+                                        Allow customers to pay when the order is delivered.
+                                    </span>
+
+                                </div>
+
+
+                            </div>
+
+
+                            <span class="switch">
+
+                                <input
+                                    type="checkbox"
+                                    id="paymentCOD"
+                                    name="payment_cod"
+                                >
+
+                                <span></span>
+
+                            </span>
+
+
+                        </label>
+
+
+
+                        <!-- UPI -->
+
+                        <label class="settings-option">
+
+
+                            <div class="settings-option-info">
+
+
+                                <div class="settings-option-icon">
+
+                                    <i class="fa-solid fa-mobile-screen-button"></i>
+
+                                </div>
+
+
+                                <div>
+
+                                    <strong>
+                                        UPI
+                                    </strong>
+
+                                    <span>
+                                        Allow customers to pay using UPI.
+                                    </span>
+
+                                </div>
+
+
+                            </div>
+
+
+                            <span class="switch">
+
+                                <input
+                                    type="checkbox"
+                                    id="paymentUPI"
+                                    name="payment_upi"
+                                >
+
+                                <span></span>
+
+                            </span>
+
+
+                        </label>
+
+
+
+                        <!-- CARD -->
+
+                        <label class="settings-option">
+
+
+                            <div class="settings-option-info">
+
+
+                                <div class="settings-option-icon">
+
+                                    <i class="fa-solid fa-credit-card"></i>
+
+                                </div>
+
+
+                                <div>
+
+                                    <strong>
+                                        Card
+                                    </strong>
+
+                                    <span>
+                                        Allow customers to pay using cards.
+                                    </span>
+
+                                </div>
+
+
+                            </div>
+
+
+                            <span class="switch">
+
+                                <input
+                                    type="checkbox"
+                                    id="paymentCard"
+                                    name="payment_card"
+                                >
+
+                                <span></span>
+
+                            </span>
+
+
+                        </label>
+
+
+                    </div>
+
+
+                </section>
+
+
+
+                <!-- =============================================
+                     FEATURES
+                ============================================== -->
+
+                <section class="settings-card">
+
+
+                    <div class="settings-card-header">
+
+
+                        <div>
+
+                            <span class="card-eyebrow">
+                                FEATURES
+                            </span>
+
+                            <h2>
+                                Application Features
+                            </h2>
+
+                            <p>
+                                Control customer-facing features.
+                            </p>
+
+                        </div>
+
+
+                        <div class="settings-card-icon">
+
+                            <i class="fa-solid fa-toggle-on"></i>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <div class="settings-options">
+
+
+                        <!-- OFFERS -->
+
+                        <label class="settings-option">
+
+
+                            <div class="settings-option-info">
+
+
+                                <div class="settings-option-icon">
+
+                                    <i class="fa-solid fa-tags"></i>
+
+                                </div>
+
+
+                                <div>
+
+                                    <strong>
+                                        Offers
+                                    </strong>
+
+                                    <span>
+                                        Show active offers to customers.
+                                    </span>
+
+                                </div>
+
+
+                            </div>
+
+
+                            <span class="switch">
+
+                                <input
+                                    type="checkbox"
+                                    id="offersEnabled"
+                                    name="offers_enabled"
+                                >
+
+                                <span></span>
+
+                            </span>
+
+
+                        </label>
+
+
+
+                        <!-- COUPONS -->
+
+                        <label class="settings-option">
+
+
+                            <div class="settings-option-info">
+
+
+                                <div class="settings-option-icon">
+
+                                    <i class="fa-solid fa-ticket"></i>
+
+                                </div>
+
+
+                                <div>
+
+                                    <strong>
+                                        Coupons
+                                    </strong>
+
+                                    <span>
+                                        Allow customers to use coupon codes.
+                                    </span>
+
+                                </div>
+
+
+                            </div>
+
+
+                            <span class="switch">
+
+                                <input
+                                    type="checkbox"
+                                    id="couponsEnabled"
+                                    name="coupons_enabled"
+                                >
+
+                                <span></span>
+
+                            </span>
+
+
+                        </label>
+
+
+
+                        <!-- FREE DELIVERY OFFERS -->
+
+                        <label class="settings-option">
+
+
+                            <div class="settings-option-info">
+
+
+                                <div class="settings-option-icon">
+
+                                    <i class="fa-solid fa-truck"></i>
+
+                                </div>
+
+
+                                <div>
+
+                                    <strong>
+                                        Free Delivery Offers
+                                    </strong>
+
+                                    <span>
+                                        Allow free-delivery offers for customers.
+                                    </span>
+
+                                </div>
+
+
+                            </div>
+
+
+                            <span class="switch">
+
+                                <input
+                                    type="checkbox"
+                                    id="freeDeliveryOffers"
+                                    name="free_delivery_offers"
+                                >
+
+                                <span></span>
+
+                            </span>
+
+
+                        </label>
+
+
+                    </div>
+
+
+                </section>
+
+
+
+                <!-- =============================================
+                     ALERTS
+                ============================================== -->
+
+                <section class="settings-card">
+
+
+                    <div class="settings-card-header">
+
+
+                        <div>
+
+                            <span class="card-eyebrow">
+                                ALERTS
+                            </span>
+
+                            <h2>
+                                Admin Notifications
+                            </h2>
+
+                            <p>
+                                Control admin notification preferences.
+                            </p>
+
+                        </div>
+
+
+                        <div class="settings-card-icon">
+
+                            <i class="fa-solid fa-bell"></i>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <div class="settings-options">
+
+
+                        <!-- NEW ORDER -->
+
+                        <label class="settings-option">
+
+
+                            <div class="settings-option-info">
+
+
+                                <div class="settings-option-icon">
+
+                                    <i class="fa-solid fa-bag-shopping"></i>
+
+                                </div>
+
+
+                                <div>
+
+                                    <strong>
+                                        New Order Alert
+                                    </strong>
+
+                                    <span>
+                                        Notify admin when a new order is placed.
+                                    </span>
+
+                                </div>
+
+
+                            </div>
+
+
+                            <span class="switch">
+
+                                <input
+                                    type="checkbox"
+                                    id="newOrderAlert"
+                                    name="new_order_alert"
+                                >
+
+                                <span></span>
+
+                            </span>
+
+
+                        </label>
+
+
+
+                        <!-- ORDER STATUS -->
+
+                        <label class="settings-option">
+
+
+                            <div class="settings-option-info">
+
+
+                                <div class="settings-option-icon">
+
+                                    <i class="fa-solid fa-arrows-rotate"></i>
+
+                                </div>
+
+
+                                <div>
+
+                                    <strong>
+                                        Order Status Alert
+                                    </strong>
+
+                                    <span>
+                                        Notify admin when order status changes.
+                                    </span>
+
+                                </div>
+
+
+                            </div>
+
+
+                            <span class="switch">
+
+                                <input
+                                    type="checkbox"
+                                    id="orderStatusAlert"
+                                    name="order_status_alert"
+                                >
+
+                                <span></span>
+
+                            </span>
+
+
+                        </label>
+
+
+
+                        <!-- NEW CUSTOMER -->
+
+                        <label class="settings-option">
+
+
+                            <div class="settings-option-info">
+
+
+                                <div class="settings-option-icon">
+
+                                    <i class="fa-solid fa-user-plus"></i>
+
+                                </div>
+
+
+                                <div>
+
+                                    <strong>
+                                        New Customer Alert
+                                    </strong>
+
+                                    <span>
+                                        Notify admin when a customer registers.
+                                    </span>
+
+                                </div>
+
+
+                            </div>
+
+
+                            <span class="switch">
+
+                                <input
+                                    type="checkbox"
+                                    id="newCustomerAlert"
+                                    name="new_customer_alert"
+                                >
+
+                                <span></span>
+
+                            </span>
+
+
+                        </label>
+
+
+
+                        <!-- OFFER EXPIRY -->
+
+                        <label class="settings-option">
+
+
+                            <div class="settings-option-info">
+
+
+                                <div class="settings-option-icon">
+
+                                    <i class="fa-solid fa-clock"></i>
+
+                                </div>
+
+
+                                <div>
+
+                                    <strong>
+                                        Offer Expiry Alert
+                                    </strong>
+
+                                    <span>
+                                        Notify admin about expiring offers.
+                                    </span>
+
+                                </div>
+
+
+                            </div>
+
+
+                            <span class="switch">
+
+                                <input
+                                    type="checkbox"
+                                    id="offerExpiryAlert"
+                                    name="offer_expiry_alert"
+                                >
+
+                                <span></span>
+
+                            </span>
+
+
+                        </label>
+
+
+                    </div>
+
+
+                </section>
+
+
+
+                <!-- =============================================
+                     SAVE AREA
+                ============================================== -->
+
+                <div class="settings-save-area">
+
+
+                    <div>
+
+                        <strong>
+                            Save Settings
+                        </strong>
+
+                        <span>
+                            Changes will be saved to the database.
+                        </span>
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        class="save-settings-btn"
+                        id="saveSettingsBtn"
+                    >
+
+                        <i class="fa-solid fa-floppy-disk"></i>
+
+                        <span>
+                            Save Changes
+                        </span>
+
+                    </button>
+
+
+                </div>
+
+
+            </form>
+
+
+
+            <!-- =============================================
+                 FOOTER
+            ============================================== -->
+
+            <footer class="settings-footer">
+
+                <span>
+                    Jigato Admin Panel
+                </span>
+
+                <span>
+                    Settings
+                </span>
+
+            </footer>
+
+
+        </main>
+
+
+    </div>
+
+
+    <!-- =====================================================
+         SHARED SIDEBAR JS
+    ====================================================== -->
+
+    <script src="/admin/sidebar/sidebar.js"></script>
+
+
+    <!-- =====================================================
+         SETTINGS JS
+    ====================================================== -->
+
+    <script src="/js/admin/settings.js"></script>
+
+
+</body>
+
+</html>

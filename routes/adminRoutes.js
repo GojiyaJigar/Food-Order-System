@@ -3,9 +3,9 @@ const express = require("express");
 const router = express.Router();
 
 
-/* =========================================================
-   ADMIN ROUTES
-========================================================= */
+// =====================================================
+// ADMIN ROUTES
+// =====================================================
 
 const dashboardRoutes =
     require("./admin/dashboardRoutes");
@@ -25,13 +25,16 @@ const offersRoutes =
 const reportsRoutes =
     require("./admin/reportsRoutes");
 
+const settingsRoutes =
+    require("./admin/settingsRoutes");
+
 const profileRoutes =
     require("./admin/profileRoutes");
 
 
-/* =========================================================
-   MOUNT ROUTES
-========================================================= */
+// =====================================================
+// MOUNT ADMIN ROUTES
+// =====================================================
 
 router.use(dashboardRoutes);
 
@@ -45,11 +48,13 @@ router.use(offersRoutes);
 
 router.use(reportsRoutes);
 
+router.use(settingsRoutes);
+
 router.use(profileRoutes);
 
 
-/* =========================================================
-   EXPORT
-========================================================= */
+// =====================================================
+// EXPORT
+// =====================================================
 
 module.exports = router;

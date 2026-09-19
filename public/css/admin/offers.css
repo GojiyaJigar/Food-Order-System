@@ -22,7 +22,7 @@ button{
 }
 
 .offers-main{
-    margin-left:250px;
+    margin-left:235px;
     min-height:100vh;
     padding:28px;
 }
@@ -546,7 +546,7 @@ button{
     }
 }
 
-@media(max-width:768px){
+@media(max-width:900px){
 
     .offers-main{
         margin-left:0;

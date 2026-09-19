@@ -3,202 +3,119 @@ document.addEventListener("DOMContentLoaded", () => {
     let cartItems = [];
     let addresses = [];
     let selectedAddress = null;
-
-    // =====================================================
-    // COUPON
-    // =====================================================
-
     let appliedCoupon = null;
-
-    // =====================================================
-    // CONSTANTS
-    // =====================================================
-
-    const DELIVERY_FEE = 40;
-    const GST_RATE = 0.05;
 
     const $ = id => document.getElementById(id);
 
+    let settings = {
+        delivery_fee: 40,
+        free_delivery_above: 500,
+        gst_rate: 5,
+        minimum_order: 100,
+        payment_cod: true,
+        payment_upi: true,
+        payment_card: true,
+        offers_enabled: true,
+        coupons_enabled: true,
+        free_delivery_offers: true
+    };
+
+    const bool = v => v === true || Number(v) === 1;
+
 
     // =====================================================
-    // LOAD CHECKOUT
+    // SETTINGS
+    // =====================================================
+
+    async function loadSettings() {
+
+        const res = await fetch("/api/settings", {
+            credentials: "include",
+            cache: "no-store"
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.success)
+            throw new Error(
+                data.message || "Unable to load settings."
+            );
+
+        settings = {
+            ...settings,
+            ...data.settings
+        };
+
+        applyPaymentSettings();
+    }
+
+
+    // =====================================================
+    // CHECKOUT LOAD
     // =====================================================
 
     async function loadCheckout() {
 
-    try {
-
-        const [cartRes, addressRes] = await Promise.all([
-
-            fetch("/cart", {
-                method: "GET",
-                credentials: "include",
-                cache: "no-store",
-                headers: {
-                    "Accept": "application/json"
-                }
-            }),
-
-            fetch("/api/addresses", {
-                method: "GET",
-                credentials: "include",
-                cache: "no-store",
-                headers: {
-                    "Accept": "application/json"
-                }
-            })
-
-        ]);
-
-
-        /* ================= AUTH ================= */
-
-        if (
-            cartRes.status === 401 ||
-            addressRes.status === 401
-        ) {
-            window.location.href = "/login";
-            return;
-        }
-
-
-        /* ================= READ RESPONSE ================= */
-
-        const cartText =
-            await cartRes.text();
-
-        const addressText =
-            await addressRes.text();
-
-
-        console.log("CART STATUS:", cartRes.status);
-        console.log("CART RAW RESPONSE:", cartText);
-
-        console.log(
-            "ADDRESS STATUS:",
-            addressRes.status
-        );
-
-        console.log(
-            "ADDRESS RAW RESPONSE:",
-            addressText
-        );
-
-
-        /* ================= PARSE CART ================= */
-
-        let cartData;
-
         try {
 
-            cartData =
-                JSON.parse(cartText);
+            await loadSettings();
 
-        } catch (error) {
+            const [cartRes, addressRes] =
+                await Promise.all([
+                    fetch("/cart", {
+                        credentials: "include",
+                        cache: "no-store"
+                    }),
+                    fetch("/api/addresses", {
+                        credentials: "include",
+                        cache: "no-store"
+                    })
+                ]);
 
-            console.error(
-                "CART JSON ERROR:",
-                error
-            );
+            if (
+                cartRes.status === 401 ||
+                addressRes.status === 401
+            ) {
+                location.href = "/login";
+                return;
+            }
 
-            throw new Error(
-                "Cart API returned invalid JSON. Check server response."
-            );
-        }
+            const cartData = await cartRes.json();
+            const addressData = await addressRes.json();
 
+            if (!cartRes.ok || !cartData.success)
+                throw new Error(
+                    cartData.message || "Unable to load cart."
+                );
 
-        /* ================= PARSE ADDRESS ================= */
+            if (!addressRes.ok || !addressData.success)
+                throw new Error(
+                    addressData.message ||
+                    "Unable to load addresses."
+                );
 
-        let addressData;
-
-        try {
-
-            addressData =
-                JSON.parse(addressText);
-
-        } catch (error) {
-
-            console.error(
-                "ADDRESS JSON ERROR:",
-                error
-            );
-
-            throw new Error(
-                "Address API returned invalid JSON. Check server response."
-            );
-        }
-
-
-        /* ================= CART ================= */
-
-        if (
-            !cartRes.ok ||
-            !cartData.success
-        ) {
-
-            throw new Error(
-                cartData.message ||
-                "Unable to load cart."
-            );
-
-        }
-
-
-        /* ================= ADDRESS ================= */
-
-        if (
-            !addressRes.ok ||
-            !addressData.success
-        ) {
-
-            throw new Error(
-                addressData.message ||
-                "Unable to load addresses."
-            );
-
-        }
-
-
-        /* ================= SAVE DATA ================= */
-
-        cartItems =
-            Array.isArray(cartData.cart)
+            cartItems = Array.isArray(cartData.cart)
                 ? cartData.cart
                 : [];
 
-
-        addresses =
-            Array.isArray(addressData.addresses)
+            addresses = Array.isArray(addressData.addresses)
                 ? addressData.addresses
                 : [];
 
+            renderAddresses();
+            renderItems();
+            loadSavedCoupon();
+            applyPaymentSettings();
+            updateSummary();
 
-        /* ================= RENDER ================= */
+        } catch (error) {
 
-        renderAddresses();
+            console.error("CHECKOUT LOAD ERROR:", error);
+            showError(error.message);
 
-        renderItems();
-
-        updateSummary();
-
-        loadSavedCoupon();
-
-    }
-    catch (error) {
-
-        console.error(
-            "CHECKOUT LOAD ERROR:",
-            error
-        );
-
-        showError(
-            error.message ||
-            "Unable to load checkout."
-        );
-
+        }
     }
 
-}
 
     // =====================================================
     // ADDRESS
@@ -206,552 +123,399 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderAddresses() {
 
-        const box =
-            $("addressList");
-
+        const box = $("addressList");
         if (!box) return;
-
 
         if (!addresses.length) {
 
             box.innerHTML = `
-
                 <div class="no-address">
-
                     <div>📍</div>
-
-                    <strong>
-                        No Saved Address
-                    </strong>
-
-                    <p>
-                        Please add an address
-                        from your profile.
-                    </p>
-
+                    <strong>No Saved Address</strong>
+                    <p>Please add an address from your profile.</p>
                 </div>
-
             `;
 
             selectedAddress = null;
-
             return;
-
         }
 
-
         selectedAddress =
-            addresses.find(
-                address =>
-                    Number(address.is_default) === 1
-            ) || addresses[0];
+            addresses.find(x => Number(x.is_default) === 1) ||
+            addresses[0];
 
+        box.innerHTML = addresses.map(address => {
 
-        box.innerHTML =
-            addresses.map(address => {
+            const selected =
+                Number(address.id) ===
+                Number(selectedAddress.id);
 
-                const selected =
-                    Number(address.id) ===
-                    Number(selectedAddress.id);
+            return `
+                <div class="checkout-address ${selected ? "selected" : ""}"
+                     data-id="${address.id}">
 
-
-                return `
-
-                    <div
-                        class="checkout-address
-                        ${selected ? "selected" : ""}"
-                        data-id="${address.id}"
-                    >
-
-                        <div class="radio">
-
-                            <input
-                                type="radio"
-                                name="address"
-                                ${selected ? "checked" : ""}
-                            >
-
-                        </div>
-
-
-                        <div class="address-info">
-
-                            <div class="address-title">
-
-                                <strong>
-                                    ${escapeHTML(
-                                        address.full_name
-                                    )}
-                                </strong>
-
-                                <span>
-
-                                    ${getIcon(
-                                        address.address_label
-                                    )}
-
-                                    ${escapeHTML(
-                                        address.address_label ||
-                                        "Home"
-                                    )}
-
-                                </span>
-
-                            </div>
-
-
-                            <p>
-                                📞
-                                ${escapeHTML(
-                                    address.phone
-                                )}
-                            </p>
-
-
-                            <p>
-                                ${escapeHTML(
-                                    address.address
-                                )}
-                            </p>
-
-
-                            <p>
-
-                                ${escapeHTML(
-                                    address.city
-                                )},
-
-                                ${escapeHTML(
-                                    address.state
-                                )}
-
-                                -
-
-                                ${escapeHTML(
-                                    address.pincode
-                                )}
-
-                            </p>
-
-                        </div>
-
+                    <div class="radio">
+                        <input type="radio"
+                               name="address"
+                               ${selected ? "checked" : ""}>
                     </div>
 
-                `;
+                    <div class="address-info">
+                        <div class="address-title">
+                            <strong>
+                                ${escapeHTML(address.full_name)}
+                            </strong>
 
-            }).join("");
+                            <span>
+                                ${getIcon(address.address_label)}
+                                ${escapeHTML(
+                                    address.address_label || "Home"
+                                )}
+                            </span>
+                        </div>
 
+                        <p>📞 ${escapeHTML(address.phone)}</p>
+                        <p>${escapeHTML(address.address)}</p>
+                        <p>
+                            ${escapeHTML(address.city)},
+                            ${escapeHTML(address.state)}
+                            -
+                            ${escapeHTML(address.pincode)}
+                        </p>
+                    </div>
 
-        document
-            .querySelectorAll(
-                ".checkout-address"
-            )
-            .forEach(card => {
+                </div>
+            `;
 
-                card.addEventListener(
-                    "click",
-                    () => {
+        }).join("");
 
-                        const id =
-                            Number(
-                                card.dataset.id
-                            );
+        box.querySelectorAll(".checkout-address").forEach(card => {
 
+            card.addEventListener("click", () => {
 
-                        selectedAddress =
-                            addresses.find(
-                                address =>
-                                    Number(address.id) === id
-                            );
+                const id = Number(card.dataset.id);
 
+                selectedAddress =
+                    addresses.find(
+                        x => Number(x.id) === id
+                    );
 
-                        document
-                            .querySelectorAll(
-                                ".checkout-address"
-                            )
-                            .forEach(item =>
-                                item.classList.remove(
-                                    "selected"
-                                )
-                            );
+                box.querySelectorAll(".checkout-address")
+                    .forEach(x =>
+                        x.classList.remove("selected")
+                    );
 
+                card.classList.add("selected");
 
-                        card.classList.add(
-                            "selected"
-                        );
+                const radio = card.querySelector("input");
 
-
-                        const radio =
-                            card.querySelector(
-                                "input"
-                            );
-
-
-                        if (radio) {
-
-                            radio.checked = true;
-
-                        }
-
-                    }
-                );
-
+                if (radio)
+                    radio.checked = true;
             });
 
+        });
     }
 
 
     // =====================================================
-    // CART ITEMS
+    // ITEMS
     // =====================================================
 
     function renderItems() {
 
-        const box =
-            $("checkoutItems");
-
+        const box = $("checkoutItems");
         if (!box) return;
-
 
         if (!cartItems.length) {
 
             box.innerHTML = `
-
                 <div class="no-address">
-
                     🛒 Your cart is empty.
-
                 </div>
-
             `;
 
             return;
-
         }
 
+        box.innerHTML = cartItems.map(item => {
 
-        box.innerHTML =
-            cartItems.map(item => {
+            const price = Number(item.price) || 0;
+            const quantity = Number(item.quantity) || 1;
 
-                const price =
-                    Number(item.price) || 0;
+            return `
+                <div class="checkout-item">
 
-                const quantity =
-                    Number(item.quantity) || 1;
+                    <img
+                        src="/images/foods/${escapeHTML(item.image)}"
+                        alt="${escapeHTML(item.food_name)}"
+                        onerror="
+                            this.src='/images/foods/default-food.jpg'
+                        "
+                    >
 
-                const itemTotal =
-                    price * quantity;
+                    <div class="checkout-item-info">
 
-
-                return `
-
-                    <div class="checkout-item">
-
-                        <img
-                            src="/images/foods/${escapeHTML(
-                                item.image
-                            )}"
-                            alt="${escapeHTML(
-                                item.food_name
-                            )}"
-                            onerror="
-                                this.src='/images/foods/default-food.jpg'
-                            "
-                        >
-
-
-                        <div
-                            class="checkout-item-info"
-                        >
-
-                            <h3>
-                                ${escapeHTML(
-                                    item.food_name
-                                )}
-                            </h3>
-
-                            <p>
-                                ${escapeHTML(
-                                    item.restaurant_name ||
-                                    "Jigato"
-                                )}
-                            </p>
-
-                            <span>
-
-                                ₹${price.toFixed(2)}
-                                ×
-                                ${quantity}
-
-                            </span>
-
-                        </div>
-
-
-                        <strong>
-
-                            ₹${itemTotal.toFixed(2)}
-
-                        </strong>
+                        <h3>${escapeHTML(item.food_name)}</h3>
+                        <p>Jigato</p>
+                        <span>
+                            ₹${price.toFixed(2)} × ${quantity}
+                        </span>
 
                     </div>
 
-                `;
+                    <strong>
+                        ₹${(price * quantity).toFixed(2)}
+                    </strong>
 
-            }).join("");
+                </div>
+            `;
 
+        }).join("");
     }
 
 
     // =====================================================
-    // SUBTOTAL
+    // TOTALS
     // =====================================================
 
     function getSubtotal() {
 
         return cartItems.reduce(
-            (total, item) => {
-
-                return total +
-                    (
-                        (Number(item.price) || 0) *
-                        (Number(item.quantity) || 0)
-                    );
-
-            },
+            (sum, item) =>
+                sum +
+                (Number(item.price) || 0) *
+                (Number(item.quantity) || 0),
             0
         );
-
     }
 
-
-    // =====================================================
-    // DELIVERY FEE
-    // =====================================================
 
     function getDeliveryFee(subtotal) {
 
-        if (subtotal <= 0) {
-            return 0;
-        }
+        if (subtotal <= 0) return 0;
 
-
-        // FREE DELIVERY COUPON
+        const couponType =
+            String(
+                appliedCoupon?.discountType ||
+                appliedCoupon?.discount_type ||
+                ""
+            ).toLowerCase();
 
         if (
-            appliedCoupon &&
-            appliedCoupon.discountType ===
-            "free_delivery"
-        ) {
-
+            bool(settings.free_delivery_offers) &&
+            couponType === "free_delivery"
+        )
             return 0;
 
-        }
+        const freeAbove =
+            Number(settings.free_delivery_above || 0);
 
+        if (freeAbove > 0 && subtotal >= freeAbove)
+            return 0;
 
-        return DELIVERY_FEE;
-
+        return Number(settings.delivery_fee || 0);
     }
 
 
-    // =====================================================
-    // DISCOUNT
-    // =====================================================
+    function getGST(subtotal) {
+
+        return subtotal *
+            Number(settings.gst_rate || 0) / 100;
+    }
+
 
     function getDiscount() {
 
-        if (!appliedCoupon) {
-            return 0;
-        }
-
-
         return Number(
-            appliedCoupon.discount || 0
+            appliedCoupon?.discount || 0
         );
-
     }
 
-
-    // =====================================================
-    // UPDATE SUMMARY
-    // =====================================================
 
     function updateSummary() {
 
-        const subtotal =
-            getSubtotal();
+        const subtotal = getSubtotal();
+        const delivery = getDeliveryFee(subtotal);
+        const gst = getGST(subtotal);
+        const discount = getDiscount();
 
+        const total = Math.max(
+            0,
+            subtotal + delivery + gst - discount
+        );
 
-        const delivery =
-            getDeliveryFee(
-                subtotal
-            );
+        const values = {
+            subtotal,
+            delivery,
+            gst,
+            discount
+        };
 
+        Object.entries(values).forEach(([id, value]) => {
 
-        const gst =
-            subtotal * GST_RATE;
+            const el = $(id);
 
+            if (el)
+                el.textContent =
+                    id === "discount"
+                        ? `- ₹${value.toFixed(2)}`
+                        : `₹${value.toFixed(2)}`;
+        });
 
-        const discount =
-            getDiscount();
-
-
-        const total =
-            Math.max(
-                0,
-                subtotal +
-                delivery +
-                gst -
-                discount
-            );
-
-
-        const subtotalBox =
-            $("subtotal");
-
-        const deliveryBox =
-            $("delivery");
-
-        const gstBox =
-            $("gst");
-
-        const discountBox =
-            $("discount");
-
-        const grandTotalBox =
-            $("grandTotal");
-
-
-        if (subtotalBox) {
-
-            subtotalBox.textContent =
-                `₹${subtotal.toFixed(2)}`;
-
-        }
-
-
-        if (deliveryBox) {
-
-            deliveryBox.textContent =
-                `₹${delivery.toFixed(2)}`;
-
-        }
-
-
-        if (gstBox) {
-
-            gstBox.textContent =
-                `₹${gst.toFixed(2)}`;
-
-        }
-
-
-        if (discountBox) {
-
-            discountBox.textContent =
-                `- ₹${discount.toFixed(2)}`;
-
-        }
-
-
-        if (grandTotalBox) {
-
-            grandTotalBox.textContent =
+        if ($("grandTotal"))
+            $("grandTotal").textContent =
                 `₹${total.toFixed(2)}`;
+    }
 
+
+    // =====================================================
+    // PAYMENT
+    // =====================================================
+
+    function applyPaymentSettings() {
+
+        const allowed = {
+            COD: bool(settings.payment_cod),
+            UPI: bool(settings.payment_upi),
+            CARD: bool(settings.payment_card)
+        };
+
+        document
+            .querySelectorAll(".payment-option")
+            .forEach(option => {
+
+                const radio =
+                    option.querySelector(
+                        'input[name="payment"]'
+                    );
+
+                if (!radio) return;
+
+                const enabled =
+                    allowed[
+                        radio.value.trim().toUpperCase()
+                    ] !== false;
+
+                radio.disabled = !enabled;
+                option.style.display =
+                    enabled ? "" : "none";
+
+                if (!enabled) {
+                    radio.checked = false;
+                    option.classList.remove("active");
+                }
+            });
+
+        let checked =
+            document.querySelector(
+                'input[name="payment"]:checked:not(:disabled)'
+            );
+
+        if (!checked) {
+
+            checked =
+                document.querySelector(
+                    'input[name="payment"]:not(:disabled)'
+                );
+
+            if (checked)
+                checked.checked = true;
         }
 
+        document
+            .querySelectorAll(".payment-option")
+            .forEach(x =>
+                x.classList.remove("active")
+            );
+
+        checked
+            ?.closest(".payment-option")
+            ?.classList.add("active");
     }
 
 
-    // =====================================================
-    // COUPON ELEMENTS
-    // =====================================================
+    document
+        .querySelectorAll(".payment-option")
+        .forEach(option => {
 
-    const couponInput =
-        $("couponCode");
+            option.addEventListener("click", () => {
 
-    const applyCouponButton =
-        $("applyCouponBtn");
+                const radio =
+                    option.querySelector(
+                        'input[name="payment"]'
+                    );
 
-    const removeCouponButton =
-        $("removeCouponBtn");
+                if (!radio || radio.disabled) return;
 
-    const couponMessage =
-        $("couponMessage");
+                document
+                    .querySelectorAll(".payment-option")
+                    .forEach(x =>
+                        x.classList.remove("active")
+                    );
 
-    const appliedCouponBox =
-        $("appliedCoupon");
-
-
-    // =====================================================
-    // APPLY COUPON BUTTON
-    // =====================================================
-
-    if (applyCouponButton) {
-
-        applyCouponButton.addEventListener(
-            "click",
-            applyCoupon
-        );
-
-    }
+                option.classList.add("active");
+                radio.checked = true;
+            });
+        });
 
 
     // =====================================================
-    // ENTER KEY
+    // COUPON
     // =====================================================
 
-    if (couponInput) {
-
-        couponInput.addEventListener(
-            "keydown",
-            event => {
-
-                if (
-                    event.key === "Enter"
-                ) {
-
-                    event.preventDefault();
-
-                    applyCoupon();
-
-                }
-
-            }
-        );
-
-    }
+    const couponInput = $("couponCode");
+    const applyCouponButton = $("applyCouponBtn");
+    const removeCouponButton = $("removeCouponBtn");
+    const couponMessage = $("couponMessage");
+    const appliedCouponBox = $("appliedCoupon");
 
 
-    // =====================================================
-    // REMOVE COUPON
-    // =====================================================
-
-    if (removeCouponButton) {
-
-        removeCouponButton.addEventListener(
-            "click",
-            removeCoupon
-        );
-
-    }
+    applyCouponButton?.addEventListener(
+        "click",
+        applyCoupon
+    );
 
 
-    // =====================================================
-    // APPLY COUPON
-    // =====================================================
+    couponInput?.addEventListener("keydown", e => {
+
+        if (e.key === "Enter") {
+            e.preventDefault();
+            applyCoupon();
+        }
+
+    });
+
+
+    removeCouponButton?.addEventListener(
+        "click",
+        removeCoupon
+    );
+
 
     async function applyCoupon() {
 
-        if (!couponInput) return;
+        if (!bool(settings.offers_enabled)) {
 
+            showCouponMessage(
+                "Offers are currently disabled.",
+                "error"
+            );
+
+            return;
+        }
+
+        if (!bool(settings.coupons_enabled)) {
+
+            showCouponMessage(
+                "Coupons are currently disabled.",
+                "error"
+            );
+
+            return;
+        }
 
         const code =
-            couponInput.value
-                .trim()
-                .toUpperCase();
-
+            couponInput?.value.trim().toUpperCase();
 
         if (!code) {
 
@@ -761,13 +525,9 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
             return;
-
         }
 
-
-        const subtotal =
-            getSubtotal();
-
+        const subtotal = getSubtotal();
 
         if (subtotal <= 0) {
 
@@ -777,154 +537,53 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
             return;
-
         }
-
-
-        // ---------------------------------------------
-        // BUTTON LOADING
-        // ---------------------------------------------
-
-        const oldButtonHTML =
-            applyCouponButton
-                ? applyCouponButton.innerHTML
-                : "";
-
-
-        if (applyCouponButton) {
-
-            applyCouponButton.disabled =
-                true;
-
-            applyCouponButton.innerHTML = `
-
-                <i class="fa-solid fa-spinner fa-spin"></i>
-
-            `;
-
-        }
-
 
         try {
 
-            const response =
-                await fetch(
-                    "/api/offers/apply",
-                    {
+            if (applyCouponButton)
+                applyCouponButton.disabled = true;
 
-                        method: "POST",
-
-                        credentials: "include",
-
-                        headers: {
-
-                            "Content-Type":
-                                "application/json",
-
-                            "Accept":
-                                "application/json"
-
-                        },
-
-                        body:
-                            JSON.stringify({
-
-                                code:
-                                    code,
-
-                                subtotal:
-                                    Number(
-                                        subtotal.toFixed(2)
-                                    )
-
-                            })
-
-                    }
-                );
-
-
-            const raw =
-                await response.text();
-
-
-            console.log(
-                "COUPON STATUS:",
-                response.status
+            const res = await fetch(
+                "/api/offers/apply",
+                {
+                    method: "POST",
+                    credentials: "include",
+                    headers: {
+                        "Content-Type":
+                            "application/json",
+                        "Accept":
+                            "application/json"
+                    },
+                    body: JSON.stringify({
+                        code,
+                        subtotal:
+                            Number(subtotal.toFixed(2))
+                    })
+                }
             );
 
-
-            console.log(
-                "COUPON RESPONSE:",
-                raw
-            );
-
-
-            let data;
-
-
-            try {
-
-                data =
-                    JSON.parse(raw);
-
+            if (res.status === 401) {
+                location.href = "/login";
+                return;
             }
 
-            catch (error) {
+            const data = await res.json();
 
-                console.error(
-                    "INVALID COUPON JSON:",
-                    error
-                );
-
+            if (!res.ok || !data.success)
                 throw new Error(
-                    "Server returned an invalid coupon response."
+                    data.message || "Invalid coupon."
                 );
 
-            }
-
-
-            if (
-                !response.ok ||
-                !data.success
-            ) {
-
-                throw new Error(
-                    data.message ||
-                    "Invalid coupon."
-                );
-
-            }
-
-
-            // =============================================
-            // SAVE COUPON
-            // =============================================
-
-            appliedCoupon =
-                data.coupon;
-
-
-            // =============================================
-            // SAVE LOCALLY
-            // =============================================
+            appliedCoupon = data.coupon;
 
             localStorage.setItem(
                 "jigatoAppliedCoupon",
-                JSON.stringify(
-                    appliedCoupon
-                )
+                JSON.stringify(appliedCoupon)
             );
 
-
-            // =============================================
-            // UPDATE UI
-            // =============================================
-
             showAppliedCoupon();
-
-
             updateSummary();
-
 
             showCouponMessage(
                 data.message ||
@@ -932,217 +591,118 @@ document.addEventListener("DOMContentLoaded", () => {
                 "success"
             );
 
-
-            if (
-                typeof Swal !==
-                "undefined"
-            ) {
+            if (typeof Swal !== "undefined") {
 
                 Swal.fire({
-
                     toast: true,
-
-                    position:
-                        "top-end",
-
-                    icon:
-                        "success",
-
-                    title:
-                        `${code} applied!`,
-
-                    text:
-                        `You saved ₹${Number(
-                            appliedCoupon.discount || 0
-                        ).toFixed(2)}`,
-
-                    showConfirmButton:
-                        false,
-
-                    timer:
-                        1800
-
+                    position: "top-end",
+                    icon: "success",
+                    title: `${code} applied!`,
+                    showConfirmButton: false,
+                    timer: 1600
                 });
-
             }
 
-        }
+        } catch (error) {
 
-        catch (error) {
-
-            console.error(
-                "APPLY COUPON ERROR:",
-                error
-            );
-
-
-            appliedCoupon =
-                null;
-
+            appliedCoupon = null;
 
             localStorage.removeItem(
                 "jigatoAppliedCoupon"
             );
 
-
             updateSummary();
 
-
             showCouponMessage(
-                error.message ||
-                "Unable to apply coupon.",
+                error.message,
                 "error"
             );
 
-        }
-
-        finally {
+        } finally {
 
             if (applyCouponButton) {
 
                 applyCouponButton.disabled =
-                    false;
-
-                applyCouponButton.innerHTML =
-                    oldButtonHTML ||
-                    "Apply";
-
+                    !bool(settings.coupons_enabled);
             }
-
         }
-
     }
 
 
-    // =====================================================
-    // SHOW APPLIED COUPON
-    // =====================================================
-
     function showAppliedCoupon() {
 
-        if (
-            !appliedCouponBox ||
-            !appliedCoupon
-        ) {
-
+        if (!appliedCoupon || !appliedCouponBox)
             return;
 
-        }
+        appliedCouponBox.style.display = "flex";
 
+        const span =
+            appliedCouponBox.querySelector("span");
 
-        appliedCouponBox.style.display =
-            "flex";
-
-
-        const code =
-            appliedCoupon.code ||
-            "";
-
-
-        const couponSpan =
-            appliedCouponBox.querySelector(
-                "span"
-            );
-
-
-        if (couponSpan) {
-
-            couponSpan.textContent =
-                `${code} Applied`;
-
-        }
-
+        if (span)
+            span.textContent =
+                `${appliedCoupon.code || ""} Applied`;
 
         if (couponInput) {
 
             couponInput.value =
-                code;
+                appliedCoupon.code || "";
 
-            couponInput.disabled =
-                true;
-
+            couponInput.disabled = true;
         }
 
-
-        if (applyCouponButton) {
-
-            applyCouponButton.disabled =
-                true;
-
-        }
-
+        if (applyCouponButton)
+            applyCouponButton.disabled = true;
     }
 
 
-    // =====================================================
-    // REMOVE COUPON
-    // =====================================================
-
     function removeCoupon() {
 
-        appliedCoupon =
-            null;
-
+        appliedCoupon = null;
 
         localStorage.removeItem(
             "jigatoAppliedCoupon"
         );
 
-
-        // Remove old coupon from offers flow too
-
         localStorage.removeItem(
             "jigatoCoupon"
         );
 
-
         if (couponInput) {
 
-            couponInput.value =
-                "";
+            couponInput.value = "";
 
             couponInput.disabled =
-                false;
-
+                !bool(settings.coupons_enabled);
         }
-
 
         if (applyCouponButton) {
 
             applyCouponButton.disabled =
-                false;
-
+                !bool(settings.coupons_enabled);
         }
 
+        if (appliedCouponBox)
+            appliedCouponBox.style.display = "none";
 
-        if (appliedCouponBox) {
+        if (couponMessage) {
 
-            appliedCouponBox.style.display =
-                "none";
-
+            couponMessage.textContent = "";
+            couponMessage.className =
+                "coupon-message";
         }
-
-
-        clearCouponMessage();
-
 
         updateSummary();
-
     }
 
 
-    // =====================================================
-    // LOAD SAVED COUPON
-    // =====================================================
-
     function loadSavedCoupon() {
 
-        let savedCoupon = null;
-
-
-        // ---------------------------------------------
-        // FIRST: already applied coupon
-        // ---------------------------------------------
+        if (
+            !bool(settings.offers_enabled) ||
+            !bool(settings.coupons_enabled)
+        )
+            return;
 
         try {
 
@@ -1151,177 +711,60 @@ document.addEventListener("DOMContentLoaded", () => {
                     "jigatoAppliedCoupon"
                 );
 
-
             if (saved) {
 
-                savedCoupon =
+                const coupon =
                     JSON.parse(saved);
 
+                const type =
+                    String(
+                        coupon.discountType ||
+                        coupon.discount_type ||
+                        ""
+                    ).toLowerCase();
+
+                if (
+                    type !== "free_delivery" ||
+                    bool(settings.free_delivery_offers)
+                ) {
+
+                    appliedCoupon = coupon;
+                    showAppliedCoupon();
+
+                } else {
+
+                    localStorage.removeItem(
+                        "jigatoAppliedCoupon"
+                    );
+                }
             }
 
-        }
-
-        catch (error) {
-
-            console.error(
-                "SAVED COUPON ERROR:",
-                error
-            );
+        } catch {
 
             localStorage.removeItem(
                 "jigatoAppliedCoupon"
             );
-
         }
 
+        const code =
+            localStorage.getItem("jigatoCoupon");
 
-        // ---------------------------------------------
-        // SECOND: coupon from Offers page
-        // ---------------------------------------------
-
-        if (!savedCoupon) {
-
-            const offerCode =
-                localStorage.getItem(
-                    "jigatoCoupon"
-                );
-
-
-            if (offerCode) {
-
-                if (couponInput) {
-
-                    couponInput.value =
-                        offerCode;
-
-                }
-
-                // We don't apply automatically
-                // until user clicks Apply.
-
-                return;
-
-            }
-
-        }
-
-
-        // ---------------------------------------------
-        // RESTORE APPLIED COUPON
-        // ---------------------------------------------
-
-        if (savedCoupon) {
-
-            appliedCoupon =
-                savedCoupon;
-
-
-            showAppliedCoupon();
-
-            updateSummary();
-
-        }
-
+        if (
+            code &&
+            couponInput &&
+            !appliedCoupon
+        )
+            couponInput.value = code;
     }
 
 
-    // =====================================================
-    // COUPON MESSAGE
-    // =====================================================
-
-    function showCouponMessage(
-        message,
-        type
-    ) {
+    function showCouponMessage(message, type) {
 
         if (!couponMessage) return;
 
-
-        couponMessage.textContent =
-            message;
-
-
+        couponMessage.textContent = message;
         couponMessage.className =
             `coupon-message ${type}`;
-
-    }
-
-
-    function clearCouponMessage() {
-
-        if (!couponMessage) return;
-
-
-        couponMessage.textContent =
-            "";
-
-        couponMessage.className =
-            "coupon-message";
-
-    }
-
-
-    // =====================================================
-    // PAYMENT
-    // =====================================================
-
-    document
-        .querySelectorAll(".payment-option")
-        .forEach(option => {
-
-            option.addEventListener(
-                "click",
-                () => {
-
-                    document
-                        .querySelectorAll(
-                            ".payment-option"
-                        )
-                        .forEach(item =>
-                            item.classList.remove(
-                                "active"
-                            )
-                        );
-
-
-                    option.classList.add(
-                        "active"
-                    );
-
-
-                    const radio =
-                        option.querySelector(
-                            'input[name="payment"]'
-                        );
-
-
-                    if (radio) {
-
-                        radio.checked = true;
-
-                    }
-
-                }
-            );
-
-        });
-
-
-    // =====================================================
-    // PLACE ORDER BUTTON
-    // =====================================================
-
-    const placeOrderButton =
-        $("placeOrderBtn");
-
-
-    if (placeOrderButton) {
-
-        placeOrderButton.addEventListener(
-            "click",
-            placeOrder
-        );
-
     }
 
 
@@ -1329,75 +772,84 @@ document.addEventListener("DOMContentLoaded", () => {
     // PLACE ORDER
     // =====================================================
 
+    $("placeOrderBtn")?.addEventListener(
+        "click",
+        placeOrder
+    );
+
+
     async function placeOrder() {
 
-        // ---------------------------------------------
-        // ADDRESS CHECK
-        // ---------------------------------------------
-
         if (!selectedAddress) {
-
             showError(
                 "Please select a delivery address."
             );
-
             return;
-
         }
 
-
-        // ---------------------------------------------
-        // CART CHECK
-        // ---------------------------------------------
-
         if (!cartItems.length) {
+            showError("Your cart is empty.");
+            return;
+        }
+
+        const subtotal = getSubtotal();
+
+        const minimum =
+            Number(settings.minimum_order || 0);
+
+        if (
+            minimum > 0 &&
+            subtotal < minimum
+        ) {
 
             showError(
-                "Your cart is empty."
+                `Minimum order amount is ₹${minimum.toFixed(2)}.`
             );
 
             return;
-
         }
-
-
-        // ---------------------------------------------
-        // PAYMENT
-        // ---------------------------------------------
 
         const payment =
             document.querySelector(
                 'input[name="payment"]:checked'
             );
 
+        if (!payment || payment.disabled) {
 
-        const paymentMethod =
-            payment
-                ? payment.value
-                : "COD";
-
-
-        // ---------------------------------------------
-        // TOTALS
-        // ---------------------------------------------
-
-        const subtotal =
-            getSubtotal();
-
-
-        const delivery =
-            getDeliveryFee(
-                subtotal
+            showError(
+                "Please select an available payment method."
             );
 
+            return;
+        }
+
+        const method =
+            payment.value.trim().toUpperCase();
+
+        const allowed = {
+            COD: bool(settings.payment_cod),
+            UPI: bool(settings.payment_upi),
+            CARD: bool(settings.payment_card)
+        };
+
+        if (!allowed[method]) {
+
+            showError(
+                `${method} payment is currently disabled.`
+            );
+
+            applyPaymentSettings();
+            return;
+        }
+
+        const delivery =
+            getDeliveryFee(subtotal);
 
         const gst =
-            subtotal * GST_RATE;
-
+            getGST(subtotal);
 
         const discount =
             getDiscount();
-
 
         const total =
             Math.max(
@@ -1408,264 +860,57 @@ document.addEventListener("DOMContentLoaded", () => {
                 discount
             );
 
-
-        // ---------------------------------------------
-        // ORDER ITEMS
-        // ---------------------------------------------
-
-        const orderItems =
-            cartItems.map(item => {
-
-                return {
-
-                    foodId:
-                        Number(
-                            item.food_id
-                        ),
-
-                    quantity:
-                        Number(
-                            item.quantity
-                        ),
-
-                    price:
-                        Number(
-                            item.price
-                        ),
-
-                    food_id:
-                        Number(
-                            item.food_id
-                        )
-
-                };
-
-            });
-
-
-        // =================================================
-        // ORDER DATA
-        // =================================================
+        const items =
+            cartItems.map(item => ({
+                foodId: Number(item.food_id),
+                quantity: Number(item.quantity),
+                price: Number(item.price)
+            }));
 
         const orderData = {
-
-            // =============================================
-            // ADDRESS ID
-            // =============================================
-
-            addressId:
-                Number(
-                    selectedAddress.id
-                ),
-
-            address_id:
-                Number(
-                    selectedAddress.id
-                ),
-
-
-            // =============================================
-            // CUSTOMER
-            // =============================================
 
             customerName:
                 selectedAddress.full_name,
 
-            customer_name:
-                selectedAddress.full_name,
-
-
-            // =============================================
-            // PHONE
-            // =============================================
-
             customerPhone:
                 selectedAddress.phone,
-
-            phone:
-                selectedAddress.phone,
-
-
-            // =============================================
-            // ADDRESS
-            // =============================================
 
             customerAddress:
                 selectedAddress.address,
 
-            address:
-                selectedAddress.address,
-
-
-            // =============================================
-            // CITY
-            // =============================================
-
             customerCity:
                 selectedAddress.city,
-
-            city:
-                selectedAddress.city,
-
-
-            // =============================================
-            // STATE
-            // =============================================
 
             customerState:
                 selectedAddress.state,
 
-            state:
-                selectedAddress.state,
-
-
-            // =============================================
-            // PINCODE
-            // =============================================
-
             customerPincode:
                 selectedAddress.pincode,
 
-            pincode:
-                selectedAddress.pincode,
-
-
-            // =============================================
-            // PAYMENT
-            // =============================================
-
-            paymentMethod:
-                paymentMethod,
-
-            payment_method:
-                paymentMethod,
-
-
-            // =============================================
-            // SUBTOTAL
-            // =============================================
+            paymentMethod: method,
 
             subtotal:
-                Number(
-                    subtotal.toFixed(2)
-                ),
-
-
-            // =============================================
-            // DELIVERY
-            // =============================================
+                Number(subtotal.toFixed(2)),
 
             deliveryFee:
-                Number(
-                    delivery.toFixed(2)
-                ),
-
-            delivery_fee:
-                Number(
-                    delivery.toFixed(2)
-                ),
-
-
-            // =============================================
-            // GST
-            // =============================================
+                Number(delivery.toFixed(2)),
 
             gst:
-                Number(
-                    gst.toFixed(2)
-                ),
-
-
-            // =============================================
-            // DISCOUNT
-            // =============================================
+                Number(gst.toFixed(2)),
 
             discount:
-                Number(
-                    discount.toFixed(2)
-                ),
-
-
-            // =============================================
-            // COUPON
-            // =============================================
+                Number(discount.toFixed(2)),
 
             couponCode:
-                appliedCoupon
-                    ? appliedCoupon.code
-                    : null,
-
-            coupon_code:
-                appliedCoupon
-                    ? appliedCoupon.code
-                    : null,
-
-            offerId:
-                appliedCoupon
-                    ? Number(
-                        appliedCoupon.id
-                    )
-                    : null,
-
-            offer_id:
-                appliedCoupon
-                    ? Number(
-                        appliedCoupon.id
-                    )
-                    : null,
-
-
-            // =============================================
-            // TOTAL
-            // =============================================
+                appliedCoupon?.code || null,
 
             total:
-                Number(
-                    total.toFixed(2)
-                ),
+                Number(total.toFixed(2)),
 
-            total_amount:
-                Number(
-                    total.toFixed(2)
-                ),
-
-
-            // =============================================
-            // ITEMS
-            // =============================================
-
-            items:
-                orderItems
-
+            items
         };
 
-
-        console.log(
-            "================================="
-        );
-
-        console.log(
-            "FINAL ORDER DATA:",
-            orderData
-        );
-
-        console.log(
-            "APPLIED COUPON:",
-            appliedCoupon
-        );
-
-        console.log(
-            "================================="
-        );
-
-
-        // ---------------------------------------------
-        // BUTTON
-        // ---------------------------------------------
-
-        const button =
-            $("placeOrderBtn");
-
+        const button = $("placeOrderBtn");
 
         if (button) {
 
@@ -1675,121 +920,39 @@ document.addEventListener("DOMContentLoaded", () => {
                 <i class="fa-solid fa-spinner fa-spin"></i>
                 Placing Order...
             `;
-
         }
-
 
         try {
 
-            // =============================================
-            // SEND ORDER
-            // =============================================
-
-            const response =
-                await fetch(
-                    "/api/orders",
-                    {
-
-                        method: "POST",
-
-                        headers: {
-
-                            "Content-Type":
-                                "application/json",
-
-                            "Accept":
-                                "application/json"
-
-                        },
-
-                        credentials:
-                            "include",
-
-                        body:
-                            JSON.stringify(
-                                orderData
-                            )
-
-                    }
-                );
-
-
-            // =============================================
-            // RAW RESPONSE
-            // =============================================
-
-            const rawText =
-                await response.text();
-
-
-            console.log(
-                "ORDER STATUS:",
-                response.status
+            const res = await fetch(
+                "/api/orders",
+                {
+                    method: "POST",
+                    credentials: "include",
+                    headers: {
+                        "Content-Type":
+                            "application/json",
+                        "Accept":
+                            "application/json"
+                    },
+                    body:
+                        JSON.stringify(orderData)
+                }
             );
 
+            if (res.status === 401) {
 
-            console.log(
-                "ORDER RAW RESPONSE:",
-                rawText
-            );
-
-
-            // =============================================
-            // JSON PARSE
-            // =============================================
-
-            let result;
-
-
-            try {
-
-                result =
-                    JSON.parse(
-                        rawText
-                    );
-
+                location.href = "/login";
+                return;
             }
 
-            catch (jsonError) {
+            const data = await res.json();
 
-                console.error(
-                    "INVALID ORDER JSON:",
-                    jsonError
-                );
-
+            if (!res.ok || !data.success)
                 throw new Error(
-                    "Server returned an invalid response. Check server console."
-                );
-
-            }
-
-
-            console.log(
-                "ORDER RESPONSE:",
-                result
-            );
-
-
-            // =============================================
-            // ERROR
-            // =============================================
-
-            if (
-                !response.ok ||
-                !result.success
-            ) {
-
-                throw new Error(
-                    result.message ||
+                    data.message ||
                     "Unable to place order."
                 );
-
-            }
-
-
-            // =============================================
-            // CLEAR COUPON AFTER SUCCESS
-            // =============================================
 
             localStorage.removeItem(
                 "jigatoAppliedCoupon"
@@ -1799,70 +962,32 @@ document.addEventListener("DOMContentLoaded", () => {
                 "jigatoCoupon"
             );
 
-
-            appliedCoupon =
-                null;
-
-
-            // =============================================
-            // SUCCESS
-            // =============================================
+            appliedCoupon = null;
 
             await Swal.fire({
-
                 icon: "success",
-
-                title:
-                    "Order Placed! 🎉",
-
+                title: "Order Placed! 🎉",
                 text:
-                    result.message ||
+                    data.message ||
                     "Your order has been placed successfully.",
-
-                confirmButtonColor:
-                    "#ff5a1f"
-
+                confirmButtonColor: "#ff5a1f"
             });
 
+            location.href = "/";
 
-            // =============================================
-            // REDIRECT
-            // =============================================
-
-            window.location.href =
-                "/";
-
-        }
-
-
-        catch (error) {
+        } catch (error) {
 
             console.error(
-                "PLACE ORDER ERROR:",
+                "ORDER ERROR:",
                 error
             );
 
+            showError(
+                error.message ||
+                "Unable to place order."
+            );
 
-            Swal.fire({
-
-                icon: "error",
-
-                title:
-                    "Order Failed",
-
-                text:
-                    error.message ||
-                    "Unable to place order.",
-
-                confirmButtonColor:
-                    "#ff5a1f"
-
-            });
-
-        }
-
-
-        finally {
+        } finally {
 
             if (button) {
 
@@ -1872,99 +997,46 @@ document.addEventListener("DOMContentLoaded", () => {
                     <i class="fa-solid fa-circle-check"></i>
                     Place Order
                 `;
-
             }
-
         }
-
     }
 
 
     // =====================================================
-    // ICON
+    // HELPERS
     // =====================================================
 
     function getIcon(label) {
 
-        if (
-            String(label).toLowerCase() ===
-            "work"
-        ) {
+        const value =
+            String(label || "").toLowerCase();
 
-            return "💼";
-
-        }
-
-
-        if (
-            String(label).toLowerCase() ===
-            "other"
-        ) {
-
-            return "📍";
-
-        }
-
+        if (value === "work") return "💼";
+        if (value === "other") return "📍";
 
         return "🏠";
-
     }
 
-
-    // =====================================================
-    // ESCAPE HTML
-    // =====================================================
 
     function escapeHTML(value) {
 
-        return String(
-            value ?? ""
-        )
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#039;"
-        );
-
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
     }
 
-
-    // =====================================================
-    // ERROR ALERT
-    // =====================================================
 
     function showError(message) {
 
         Swal.fire({
-
             icon: "error",
-
-            title:
-                "Oops!",
-
-            text:
-                message,
-
-            confirmButtonColor:
-                "#ff5a1f"
-
+            title: "Oops!",
+            text: message,
+            confirmButtonColor: "#ff5a1f"
         });
-
     }
 
 
