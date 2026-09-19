@@ -189,6 +189,45 @@ app.get(
     }
 );
 
+// =====================================================
+// FORGOT PASSWORD PAGE
+// PUBLIC
+// =====================================================
+
+app.get(
+    "/forgot-password",
+    (req, res) => {
+
+        res.sendFile(
+            path.join(
+                __dirname,
+                "views",
+                "forgot-password.html"
+            )
+        );
+
+    }
+);
+// =====================================================
+// RESET PASSWORD PAGE
+// PUBLIC
+// =====================================================
+
+app.get(
+    "/reset-password",
+    (req, res) => {
+
+        res.sendFile(
+            path.join(
+                __dirname,
+                "views",
+                "reset-password.html"
+            )
+        );
+
+    }
+);
+
 
 // =====================================================
 // MENU
@@ -469,7 +508,6 @@ app.use(
     "/admin",
     adminRoutes
 );
-
 
 // =====================================================
 // 404

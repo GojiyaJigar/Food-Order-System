@@ -1,19 +1,18 @@
 /* =====================================================
    JIGATO - MY ORDERS
+   Frontend Testing Simulation
 ===================================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
 
     const ordersList = document.getElementById("ordersList");
     const emptyOrders = document.getElementById("emptyOrders");
-
     const orderModal = document.getElementById("orderModal");
     const closeOrderModal = document.getElementById("closeOrderModal");
     const modalTitle = document.getElementById("modalOrderTitle");
     const modalContent = document.getElementById("orderModalContent");
 
     const filterButtons = document.querySelectorAll(".filter-btn");
-
     const totalCount = document.getElementById("totalOrdersCount");
     const activeCount = document.getElementById("activeOrdersCount");
     const deliveredCount = document.getElementById("deliveredOrdersCount");
@@ -21,7 +20,9 @@ document.addEventListener("DOMContentLoaded", () => {
     let orders = [];
     let filter = "all";
     let reordering = false;
+    let loading = false;
 
+    const SIMULATION_KEY = "jigato_order_simulation";
 
     /* =====================================================
        LOAD
@@ -29,10 +30,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     loadOrders();
 
+    // Status screen par automatically update hoga
+    setInterval(() => loadOrders(true), 5000);
 
-    async function loadOrders() {
 
-        showLoading();
+    async function loadOrders(silent = false) {
+
+        if (loading) return;
+
+        loading = true;
+
+        if (!silent) showLoading();
 
         try {
 
@@ -61,15 +69,161 @@ document.addEventListener("DOMContentLoaded", () => {
                 ? data.orders
                 : [];
 
+            // Frontend-only testing simulation
+            simulateOrders();
+
             updateStats();
             render();
 
-        } catch (err) {
+        } catch (error) {
 
-            console.error("MY ORDERS ERROR:", err);
+            console.error(
+                "MY ORDERS ERROR:",
+                error
+            );
 
-            showError(
-                err.message || "Unable to load your orders."
+            if (!silent) {
+                showError(
+                    error.message ||
+                    "Unable to load your orders."
+                );
+            }
+
+        } finally {
+
+            loading = false;
+
+        }
+    }
+
+
+    /* =====================================================
+       FRONTEND ORDER SIMULATION
+    ===================================================== */
+
+    function simulateOrders() {
+
+        const saved =
+            JSON.parse(
+                localStorage.getItem(SIMULATION_KEY) || "{}"
+            );
+
+        let changed = false;
+
+        orders.forEach(order => {
+
+            const status = normalize(
+                order.order_status
+            );
+
+            // Final DB status ko kabhi override mat karo
+            if (
+                status === "delivered" ||
+                status === "cancelled"
+            ) {
+                return;
+            }
+
+            const id = String(order.id);
+
+            if (!saved[id]) {
+
+                const deliveryMinutes =
+                    Math.floor(
+                        Math.random() * 10
+                    ) + 1;
+
+                const shouldCancel =
+                    Math.random() < 0.15;
+
+                const cancelMinutes =
+                    0.5 +
+                    Math.random() * (
+                        Math.max(
+                            1,
+                            deliveryMinutes * 0.7
+                        ) - 0.5
+                    );
+
+                saved[id] = {
+                    startedAt:
+                        new Date(
+                            order.created_at
+                        ).getTime(),
+
+                    deliveryMinutes,
+
+                    shouldCancel,
+
+                    cancelMinutes
+                };
+
+                changed = true;
+            }
+
+
+            const sim = saved[id];
+
+            const age =
+                (
+                    Date.now() -
+                    sim.startedAt
+                ) / 60000;
+
+
+            if (
+                sim.shouldCancel &&
+                age >= sim.cancelMinutes &&
+                age < sim.deliveryMinutes
+            ) {
+
+                order.order_status =
+                    "Cancelled";
+
+                return;
+            }
+
+
+            const progress =
+                age /
+                sim.deliveryMinutes;
+
+
+            if (progress >= 1) {
+
+                order.order_status =
+                    "Delivered";
+
+            } else if (progress >= 0.75) {
+
+                order.order_status =
+                    "Out For Delivery";
+
+            } else if (progress >= 0.45) {
+
+                order.order_status =
+                    "Preparing";
+
+            } else if (progress >= 0.15) {
+
+                order.order_status =
+                    "Confirmed";
+
+            } else {
+
+                order.order_status =
+                    "Pending";
+
+            }
+
+        });
+
+
+        if (changed) {
+
+            localStorage.setItem(
+                SIMULATION_KEY,
+                JSON.stringify(saved)
             );
 
         }
@@ -83,23 +237,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function updateStats() {
 
-        const active = orders.filter(order =>
-            [
-                "pending",
-                "confirmed",
-                "preparing",
-                "out for delivery"
-            ].includes(normalize(order.order_status))
-        ).length;
+        const active =
+            orders.filter(order =>
+                [
+                    "pending",
+                    "confirmed",
+                    "preparing",
+                    "out for delivery"
+                ].includes(
+                    normalize(order.order_status)
+                )
+            ).length;
 
-        const delivered = orders.filter(order =>
-            normalize(order.order_status) === "delivered"
-        ).length;
+        const delivered =
+            orders.filter(order =>
+                normalize(order.order_status) ===
+                "delivered"
+            ).length;
 
-        if (totalCount) totalCount.textContent = orders.length;
-        if (activeCount) activeCount.textContent = active;
-        if (deliveredCount) deliveredCount.textContent = delivered;
+        if (totalCount)
+            totalCount.textContent = orders.length;
 
+        if (activeCount)
+            activeCount.textContent = active;
+
+        if (deliveredCount)
+            deliveredCount.textContent = delivered;
     }
 
 
@@ -112,9 +275,12 @@ document.addEventListener("DOMContentLoaded", () => {
         let list = orders;
 
         if (filter !== "all") {
+
             list = orders.filter(order =>
-                normalize(order.order_status) === normalize(filter)
+                normalize(order.order_status) ===
+                normalize(filter)
             );
+
         }
 
         if (!list.length) {
@@ -122,17 +288,14 @@ document.addEventListener("DOMContentLoaded", () => {
             ordersList.innerHTML = "";
             ordersList.style.display = "none";
 
-            if (emptyOrders) {
+            if (emptyOrders)
                 emptyOrders.style.display = "block";
-            }
 
             return;
-
         }
 
-        if (emptyOrders) {
+        if (emptyOrders)
             emptyOrders.style.display = "none";
-        }
 
         ordersList.style.display = "flex";
 
@@ -140,7 +303,6 @@ document.addEventListener("DOMContentLoaded", () => {
             list.map(orderCard).join("");
 
         bindButtons();
-
     }
 
 
@@ -164,11 +326,17 @@ document.addEventListener("DOMContentLoaded", () => {
             order.pincode
         ].filter(Boolean).join(", ");
 
-        const discount = Number(order.discount || 0);
+        const discount = Number(
+            order.discount || 0
+        );
+
+        const cancelled =
+            normalize(order.order_status) ===
+            "cancelled";
 
         return `
 
-            <article class="order-card">
+            <article class="order-card ${cancelled ? "order-cancelled" : ""}">
 
                 <div class="order-card-top">
 
@@ -213,12 +381,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
                             ${
                                 extra
-                                ? `<div class="more-items">
-                                    + ${extra} more item${extra > 1 ? "s" : ""}
-                                </div>`
-                                : ""
+                                    ? `
+                                    <div class="more-items">
+                                        + ${extra} more item${extra > 1 ? "s" : ""}
+                                    </div>
+                                    `
+                                    : ""
                             }
-
 
                             <div class="order-info">
 
@@ -297,13 +466,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
                             ${
                                 discount > 0
-                                ? `
+                                    ? `
                                     <div class="order-summary-row discount">
                                         <span>Discount</span>
                                         <strong>- ₹${money(discount)}</strong>
                                     </div>
-                                `
-                                : ""
+                                    `
+                                    : ""
                             }
 
                             <hr>
@@ -312,23 +481,6 @@ document.addEventListener("DOMContentLoaded", () => {
                                 <span>Total</span>
                                 <strong>₹${money(order.total_amount)}</strong>
                             </div>
-
-                            ${
-                                discount > 0
-                                ? `
-                                    <div class="order-coupon">
-                                        <i class="fa-solid fa-ticket"></i>
-                                        <span>
-                                            ${escape(
-                                                order.coupon_code ||
-                                                "Coupon Applied"
-                                            )}
-                                            · Saved ₹${money(discount)}
-                                        </span>
-                                    </div>
-                                `
-                                : ""
-                            }
 
                         </div>
 
@@ -340,11 +492,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="order-card-footer">
 
                     <div class="order-footer-left">
+
                         <i class="fa-regular fa-clock"></i>
+
                         <span>
                             ${statusMessage(order.order_status)}
                         </span>
+
                     </div>
+
 
                     <div class="order-actions">
 
@@ -357,6 +513,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             <i class="fa-regular fa-eye"></i>
                             View Details
                         </button>
+
 
                         <button
                             type="button"
@@ -374,15 +531,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
             </article>
         `;
-
     }
 
+
+    /* =====================================================
+       ITEMS
+    ===================================================== */
 
     function itemHTML(item) {
 
         const qty = Number(item.quantity || 0);
         const price = Number(item.price || 0);
-        const total = Number(item.item_total || qty * price);
+        const total = Number(
+            item.item_total || qty * price
+        );
 
         return `
 
@@ -412,9 +574,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
 
             </div>
-
         `;
-
     }
 
 
@@ -424,289 +584,251 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function bindButtons() {
 
-        document.querySelectorAll("[data-action]").forEach(btn => {
+        document
+            .querySelectorAll("[data-action]")
+            .forEach(btn => {
 
-            btn.onclick = () => {
+                btn.onclick = () => {
 
-                const id = Number(btn.dataset.id);
-                const action = btn.dataset.action;
+                    const id =
+                        Number(btn.dataset.id);
 
-                if (action === "view") {
-                    openDetails(id);
-                }
+                    if (
+                        btn.dataset.action ===
+                        "view"
+                    ) {
+                        openDetails(id);
+                    }
 
-                if (action === "reorder") {
-                    reorder(id);
-                }
+                    if (
+                        btn.dataset.action ===
+                        "reorder"
+                    ) {
+                        reorder(id);
+                    }
 
-            };
+                };
 
-        });
+            });
 
     }
 
 
     /* =====================================================
-   REORDER
-===================================================== */
+       REORDER
+    ===================================================== */
 
-async function reorder(id) {
+    async function reorder(id) {
 
-    if (reordering) return;
+        if (reordering) return;
 
-    const order = orders.find(
-        item => Number(item.id) === Number(id)
-    );
-
-    if (!order || !order.items?.length) {
-
-        return alertBox(
-            "No items found in this order.",
-            "error"
-        );
-
-    }
-
-
-    if (typeof Swal !== "undefined") {
-
-        const result = await Swal.fire({
-
-            title: "Reorder this order?",
-
-            text: "All items will be added to your cart.",
-
-            icon: "question",
-
-            showCancelButton: true,
-
-            confirmButtonText: "Yes, Reorder",
-
-            cancelButtonText: "Cancel",
-
-            confirmButtonColor: "#ff5a1f"
-
-        });
-
-
-        if (!result.isConfirmed) return;
-
-    }
-
-
-    reordering = true;
-
-    setButtons(id, true);
-
-
-    try {
-
-        const validItems =
-            order.items.filter(
+        const order =
+            orders.find(
                 item =>
-                    Number(item.food_id) > 0 &&
-                    Number(item.quantity) > 0
+                    Number(item.id) ===
+                    Number(id)
             );
 
+        if (!order?.items?.length) {
 
-        /*
-         * Quantity ko ek hi request me bhej rahe hain.
-         * Existing endpoint = /cart/add
-         */
-
-        const results =
-            await Promise.allSettled(
-                validItems.map(item =>
-                    addToCart(
-                        Number(item.food_id),
-                        Number(item.quantity)
-                    )
-                )
-            );
-
-
-        const added =
-            results.filter(
-                r => r.status === "fulfilled"
-            ).length;
-
-
-        const failed =
-            results.length - added;
-
-
-        if (!added) {
-
-            throw new Error(
-                "Unable to add items to cart."
+            return alertBox(
+                "No items found in this order.",
+                "error"
             );
 
         }
-
-
-        await updateCartCount();
-
-
-        window.dispatchEvent(
-            new Event("cartUpdated")
-        );
-
 
         if (typeof Swal !== "undefined") {
 
-            const result = await Swal.fire({
+            const result =
+                await Swal.fire({
 
-                icon:
-                    failed
-                        ? "warning"
-                        : "success",
+                    title:
+                        "Reorder this order?",
 
-                title:
-                    failed
-                        ? "Partially Added"
-                        : "Added to Cart! 🛒",
+                    text:
+                        "All items will be added to your cart.",
 
-                text:
-                    failed
-                        ? `${added} item${added > 1 ? "s" : ""} added. ${failed} failed.`
-                        : `${added} item${added > 1 ? "s" : ""} added to your cart.`,
+                    icon:
+                        "question",
 
-                showCancelButton: true,
+                    showCancelButton:
+                        true,
 
-                confirmButtonText: "View Cart",
+                    confirmButtonText:
+                        "Yes, Reorder",
 
-                cancelButtonText: "Continue",
+                    cancelButtonText:
+                        "Cancel",
 
-                confirmButtonColor: "#ff5a1f"
+                    confirmButtonColor:
+                        "#ff5a1f"
 
-            });
+                });
 
-
-            if (result.isConfirmed) {
-
-                location.href =
-                    "/cart-page";
-
-            }
-
-        } else {
-
-            location.href =
-                "/cart-page";
-
+            if (!result.isConfirmed)
+                return;
         }
 
-    }
-    catch (error) {
+        reordering = true;
+        setButtons(id, true);
 
-        console.error(
-            "REORDER ERROR:",
-            error
-        );
+        try {
 
+            const validItems =
+                order.items.filter(item =>
+                    Number(item.food_id) > 0 &&
+                    Number(item.quantity) > 0
+                );
 
-        alertBox(
-            error.message ||
-            "Unable to reorder.",
-            "error"
-        );
+            const results =
+                await Promise.allSettled(
+                    validItems.map(item =>
+                        addToCart(
+                            Number(item.food_id),
+                            Number(item.quantity)
+                        )
+                    )
+                );
 
-    }
-    finally {
+            const added =
+                results.filter(
+                    r => r.status === "fulfilled"
+                ).length;
 
-        reordering = false;
+            const failed =
+                results.length - added;
 
-        setButtons(id, false);
+            if (!added)
+                throw new Error(
+                    "Unable to add items to cart."
+                );
 
-    }
+            await updateCartCount();
 
-}
+            window.dispatchEvent(
+                new Event("cartUpdated")
+            );
 
+            if (typeof Swal !== "undefined") {
 
-/* =====================================================
-   ADD TO CART
-===================================================== */
+                const result =
+                    await Swal.fire({
 
-async function addToCart(
-    foodId,
-    quantity
-) {
+                        icon:
+                            failed
+                                ? "warning"
+                                : "success",
 
-    const response =
-        await fetch(
-            "/cart/add",
-            {
-                method: "POST",
+                        title:
+                            failed
+                                ? "Partially Added"
+                                : "Added to Cart! 🛒",
 
-                credentials: "include",
+                        text:
+                            failed
+                                ? `${added} item${added > 1 ? "s" : ""} added. ${failed} failed.`
+                                : `${added} item${added > 1 ? "s" : ""} added to your cart.`,
 
-                headers: {
-                    "Content-Type":
-                        "application/json",
+                        showCancelButton:
+                            true,
 
-                    "Accept":
-                        "application/json"
-                },
+                        confirmButtonText:
+                            "View Cart",
 
-                body: JSON.stringify({
+                        cancelButtonText:
+                            "Continue",
 
-                    foodId:
-                        foodId,
+                        confirmButtonColor:
+                            "#ff5a1f"
 
-                    quantity:
-                        quantity
+                    });
 
-                })
+                if (result.isConfirmed)
+                    location.href = "/cart-page";
+
+            } else {
+
+                location.href = "/cart-page";
+
             }
-        );
 
+        } catch (error) {
 
-    if (response.status === 401) {
+            console.error(
+                "REORDER ERROR:",
+                error
+            );
 
-        location.href = "/login";
+            alertBox(
+                error.message ||
+                "Unable to reorder.",
+                "error"
+            );
 
-        throw new Error(
-            "Please login first."
-        );
+        } finally {
 
+            reordering = false;
+            setButtons(id, false);
+
+        }
     }
 
 
-    const data =
-        await response.json();
+    async function addToCart(foodId, quantity) {
 
+        const response =
+            await fetch(
+                "/cart/add",
+                {
+                    method: "POST",
+                    credentials: "include",
+                    headers: {
+                        "Content-Type":
+                            "application/json",
+                        Accept:
+                            "application/json"
+                    },
+                    body: JSON.stringify({
+                        foodId,
+                        quantity
+                    })
+                }
+            );
 
-    console.log(
-        "REORDER ADD CART:",
-        foodId,
-        quantity,
-        data
-    );
+        if (response.status === 401) {
 
+            location.href = "/login";
 
-    if (
-        !response.ok ||
-        data.success !== true
-    ) {
+            throw new Error(
+                "Please login first."
+            );
+        }
 
-        throw new Error(
-            data.message ||
-            "Unable to add item to cart."
-        );
+        const data =
+            await response.json();
 
+        if (
+            !response.ok ||
+            data.success !== true
+        ) {
+
+            throw new Error(
+                data.message ||
+                "Unable to add item to cart."
+            );
+        }
+
+        return data;
     }
-
-
-    return data;
-
-}
 
 
     function setButtons(id, loading) {
 
-        const btn = document.querySelector(
-            `[data-action="reorder"][data-id="${id}"]`
-        );
+        const btn =
+            document.querySelector(
+                `[data-action="reorder"][data-id="${id}"]`
+            );
 
         if (!btn) return;
 
@@ -729,17 +851,16 @@ async function addToCart(
             btn.innerHTML =
                 btn.dataset.oldHTML ||
                 `
-                    <i class="fa-solid fa-rotate-right"></i>
-                    Reorder
+                <i class="fa-solid fa-rotate-right"></i>
+                Reorder
                 `;
 
         }
-
     }
 
 
     /* =====================================================
-       VIEW DETAILS
+       DETAILS
     ===================================================== */
 
     async function openDetails(id) {
@@ -748,10 +869,9 @@ async function addToCart(
 
         orderModal.classList.add("show");
 
-        if (modalTitle) {
+        if (modalTitle)
             modalTitle.textContent =
                 `Order #${id}`;
-        }
 
         modalContent.innerHTML = `
             <div class="orders-loading">
@@ -762,24 +882,52 @@ async function addToCart(
 
         try {
 
-            const res = await fetch(
-                `/api/orders/my/${id}`,
-                {
-                    credentials: "include",
-                    cache: "no-store"
-                }
-            );
+            const res =
+                await fetch(
+                    `/api/orders/my/${id}`,
+                    {
+                        credentials: "include",
+                        cache: "no-store"
+                    }
+                );
 
-            const data = await res.json();
+            if (res.status === 401) {
+
+                location.href = "/login";
+                return;
+
+            }
+
+            const data =
+                await res.json();
 
             if (!res.ok || !data.success) {
+
                 throw new Error(
                     data.message ||
                     "Unable to load order."
                 );
+
             }
 
-            renderModal(data.order);
+            // Apply same frontend simulation to modal
+            const modalOrder = data.order;
+
+            const mainOrder =
+                orders.find(
+                    o =>
+                        Number(o.id) ===
+                        Number(id)
+                );
+
+            if (mainOrder) {
+
+                modalOrder.order_status =
+                    mainOrder.order_status;
+
+            }
+
+            renderModal(modalOrder);
 
         } catch (error) {
 
@@ -790,7 +938,6 @@ async function addToCart(
             `;
 
         }
-
     }
 
 
@@ -806,20 +953,30 @@ async function addToCart(
         const discount =
             Number(order.discount || 0);
 
-
         modalContent.innerHTML = `
 
             <div class="modal-status-box">
 
                 <div class="modal-status-text">
-                    <small>ORDER STATUS</small>
+
+                    <small>
+                        ORDER STATUS
+                    </small>
+
                     <strong>
-                        ${escape(order.order_status || "Pending")}
+                        ${escape(
+                            order.order_status ||
+                            "Pending"
+                        )}
                     </strong>
+
                 </div>
 
                 <span class="order-status ${statusClass(order.order_status)}">
-                    ${escape(order.order_status || "Pending")}
+                    ${escape(
+                        order.order_status ||
+                        "Pending"
+                    )}
                 </span>
 
             </div>
@@ -827,11 +984,9 @@ async function addToCart(
 
             <div class="modal-items">
 
-                ${
-                    (order.items || [])
-                        .map(modalItem)
-                        .join("")
-                }
+                ${(order.items || [])
+                    .map(modalItem)
+                    .join("")}
 
             </div>
 
@@ -839,8 +994,11 @@ async function addToCart(
             <div class="modal-address">
 
                 <div class="modal-address-title">
+
                     <i class="fa-solid fa-location-dot"></i>
+
                     Delivery Address
+
                 </div>
 
                 <p>
@@ -878,26 +1036,21 @@ async function addToCart(
 
                 ${
                     discount > 0
-                    ? `
+                        ? `
                         <div class="modal-bill-row discount">
-
                             <span>
                                 ${
                                     order.coupon_code
-                                    ? `Coupon (${escape(
-                                        order.coupon_code
-                                      )})`
-                                    : "Discount"
+                                        ? `Coupon (${escape(order.coupon_code)})`
+                                        : "Discount"
                                 }
                             </span>
-
                             <strong>
                                 - ₹${money(discount)}
                             </strong>
-
                         </div>
-                    `
-                    : ""
+                        `
+                        : ""
                 }
 
                 <hr>
@@ -911,18 +1064,22 @@ async function addToCart(
 
             </div>
         `;
-
     }
 
 
     function modalItem(item) {
 
-        const qty = Number(item.quantity || 0);
-        const price = Number(item.price || 0);
-        const total = Number(
-            item.item_total ||
-            qty * price
-        );
+        const qty =
+            Number(item.quantity || 0);
+
+        const price =
+            Number(item.price || 0);
+
+        const total =
+            Number(
+                item.item_total ||
+                qty * price
+            );
 
         return `
 
@@ -937,7 +1094,10 @@ async function addToCart(
                 <div class="modal-item-info">
 
                     <h4>
-                        ${escape(item.name || "Food Item")}
+                        ${escape(
+                            item.name ||
+                            "Food Item"
+                        )}
                     </h4>
 
                     <p>
@@ -951,14 +1111,12 @@ async function addToCart(
                 </div>
 
             </div>
-
         `;
-
     }
 
 
     /* =====================================================
-       FILTERS
+       FILTER
     ===================================================== */
 
     filterButtons.forEach(button => {
@@ -966,7 +1124,10 @@ async function addToCart(
         button.onclick = () => {
 
             filterButtons.forEach(
-                btn => btn.classList.remove("active")
+                btn =>
+                    btn.classList.remove(
+                        "active"
+                    )
             );
 
             button.classList.add("active");
@@ -983,35 +1144,33 @@ async function addToCart(
 
 
     /* =====================================================
-       CLOSE MODAL
+       MODAL CLOSE
     ===================================================== */
 
     function closeModal() {
 
-        if (orderModal) {
+        if (orderModal)
             orderModal.classList.remove("show");
-        }
 
     }
 
-
-    if (closeOrderModal) {
+    if (closeOrderModal)
         closeOrderModal.onclick = closeModal;
-    }
-
 
     if (orderModal) {
 
         orderModal.onclick = event => {
 
-            if (event.target === orderModal) {
+            if (
+                event.target ===
+                orderModal
+            ) {
                 closeModal();
             }
 
         };
 
     }
-
 
     document.addEventListener(
         "keydown",
@@ -1037,15 +1196,17 @@ async function addToCart(
 
         try {
 
-            const res = await fetch(
-                "/cart",
-                {
-                    credentials: "include",
-                    cache: "no-store"
-                }
-            );
+            const res =
+                await fetch(
+                    "/cart",
+                    {
+                        credentials: "include",
+                        cache: "no-store"
+                    }
+                );
 
-            const data = await res.json();
+            const data =
+                await res.json();
 
             const count =
                 Array.isArray(data.cart)
@@ -1067,18 +1228,15 @@ async function addToCart(
                     "cartCount"
                 );
 
-            if (desktop) {
+            if (desktop)
                 desktop.textContent = count;
-            }
 
-            if (mobile) {
+            if (mobile)
                 mobile.textContent = count;
-            }
 
-            if (floating) {
+            if (floating)
                 floating.textContent =
                     `${count} item${count === 1 ? "" : "s"}`;
-            }
 
         } catch (error) {
 
@@ -1088,7 +1246,6 @@ async function addToCart(
             );
 
         }
-
     }
 
 
@@ -1098,11 +1255,11 @@ async function addToCart(
 
     function foodImage(image) {
 
-        if (!image) {
+        if (!image)
             return "/images/food-placeholder.jpg";
-        }
 
-        const value = String(image).trim();
+        const value =
+            String(image).trim();
 
         if (
             value.startsWith("http://") ||
@@ -1113,40 +1270,58 @@ async function addToCart(
         }
 
         return "/images/foods/" + value;
-
     }
 
 
     function statusClass(status) {
 
         return {
-            pending: "status-pending",
-            confirmed: "status-confirmed",
-            preparing: "status-preparing",
+            pending:
+                "status-pending",
+
+            confirmed:
+                "status-confirmed",
+
+            preparing:
+                "status-preparing",
+
             "out for delivery":
                 "status-out-for-delivery",
-            delivered: "status-delivered",
-            cancelled: "status-cancelled"
-        }[
-            normalize(status)
-        ] || "status-pending";
 
+            delivered:
+                "status-delivered",
+
+            cancelled:
+                "status-cancelled"
+
+        }[normalize(status)] ||
+        "status-pending";
     }
 
 
     function statusMessage(status) {
 
         return {
-            pending: "Order received",
-            confirmed: "Restaurant confirmed your order",
-            preparing: "Your food is being prepared",
-            "out for delivery": "Your order is on the way",
-            delivered: "Order delivered successfully",
-            cancelled: "This order was cancelled"
-        }[
-            normalize(status)
-        ] || "Order placed";
+            pending:
+                "Order received",
 
+            confirmed:
+                "Your order has been confirmed",
+
+            preparing:
+                "Your food is being prepared",
+
+            "out for delivery":
+                "Your order is on the way",
+
+            delivered:
+                "Order delivered successfully",
+
+            cancelled:
+                "This order was cancelled"
+
+        }[normalize(status)] ||
+        "Order placed";
     }
 
 
@@ -1156,17 +1331,22 @@ async function addToCart(
             .trim()
             .toLowerCase()
             .replace(/\s+/g, " ");
-
     }
 
 
     function formatDate(value) {
 
-        if (!value) return "Date unavailable";
+        if (!value)
+            return "Date unavailable";
 
-        const date = new Date(value);
+        const date =
+            new Date(value);
 
-        if (Number.isNaN(date.getTime())) {
+        if (
+            Number.isNaN(
+                date.getTime()
+            )
+        ) {
             return "Date unavailable";
         }
 
@@ -1180,22 +1360,19 @@ async function addToCart(
                 minute: "2-digit"
             }
         );
-
     }
 
 
     function money(value) {
 
-        return (
-            Number(value || 0)
-        ).toLocaleString(
-            "en-IN",
-            {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }
-        );
-
+        return Number(value || 0)
+            .toLocaleString(
+                "en-IN",
+                {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }
+            );
     }
 
 
@@ -1207,14 +1384,11 @@ async function addToCart(
             .replace(/>/g, "&gt;")
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
-
     }
 
 
     function attr(value) {
-
         return escape(value);
-
     }
 
 
@@ -1222,9 +1396,8 @@ async function addToCart(
 
         if (!ordersList) return;
 
-        if (emptyOrders) {
+        if (emptyOrders)
             emptyOrders.style.display = "none";
-        }
 
         ordersList.style.display = "flex";
 
@@ -1234,7 +1407,6 @@ async function addToCart(
                 <p>Loading your orders...</p>
             </div>
         `;
-
     }
 
 
@@ -1268,8 +1440,9 @@ async function addToCart(
                         border-radius:7px;
                         background:#ff5a1f;
                         color:#fff;
-                        font-size:9px;
+                        font-size:12px;
                         font-weight:800;
+                        cursor:pointer;
                     "
                 >
                     Try Again
@@ -1283,10 +1456,9 @@ async function addToCart(
                 "retryOrders"
             );
 
-        if (retry) {
-            retry.onclick = loadOrders;
-        }
-
+        if (retry)
+            retry.onclick =
+                () => loadOrders();
     }
 
 
@@ -1305,7 +1477,6 @@ async function addToCart(
             alert(message);
 
         }
-
     }
 
 });

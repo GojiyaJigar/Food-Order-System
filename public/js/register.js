@@ -817,7 +817,7 @@ document.addEventListener(
         //     ?.addEventListener(
         //         "click",
         //         () => {
-
+                            
         //             window.location.href =
         //                 "/auth/google";
 

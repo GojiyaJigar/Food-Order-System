@@ -9,10 +9,10 @@ const {
     registerUser,
     loginUser,
     checkAuth,
-    logoutUser
-} = require(
-    "../controllers/authController"
-);
+    logoutUser,
+    forgotPassword,
+    resetPassword
+} = require("../controllers/authController");
 
 
 // =====================================================
@@ -52,6 +52,13 @@ router.post(
 router.get(
     "/check-auth",
     checkAuth
+);
+
+//forgot password
+router.post("/forgot-password", forgotPassword);
+router.post(
+    "/reset-password",
+    resetPassword
 );
 
 
