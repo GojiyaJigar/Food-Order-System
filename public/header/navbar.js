@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const navbar =
         document.getElementById("navbar");
 
+
     if (!navbar) return;
 
 
@@ -101,15 +102,18 @@ document.addEventListener("DOMContentLoaded", () => {
                     "headerLogin"
                 );
 
+
             const register =
                 document.getElementById(
                     "headerRegister"
                 );
 
+
             const profile =
                 document.getElementById(
                     "headerProfile"
                 );
+
 
             const logout =
                 document.getElementById(
@@ -166,15 +170,18 @@ document.addEventListener("DOMContentLoaded", () => {
                     "mobileHeaderLogin"
                 );
 
+
             const mobileRegister =
                 document.getElementById(
                     "mobileHeaderRegister"
                 );
 
+
             const mobileProfile =
                 document.getElementById(
                     "mobileHeaderProfile"
                 );
+
 
             const mobileLogout =
                 document.getElementById(
@@ -466,25 +473,99 @@ document.addEventListener("DOMContentLoaded", () => {
 
         .then(data => {
 
-            const count =
+            /*
+             * =================================================
+             * UNIQUE CART ITEMS
+             * =================================================
+             *
+             * Quantity ko count nahi karna hai.
+             *
+             * Example:
+             *
+             * Pizza       × 4
+             * Burger      × 2
+             * Biryani     × 5
+             *
+             * Result:
+             *
+             * 3 items
+             *
+             * Na ki:
+             *
+             * 4 + 2 + 5 = 11 items
+             *
+             * =================================================
+             */
+
+            const cart =
                 Array.isArray(data.cart)
-                    ? data.cart.reduce(
-                        (
-                            total,
-                            item
-                        ) => {
+                    ? data.cart
+                    : [];
 
-                            return (
-                                total +
-                                Number(
-                                    item.quantity || 0
-                                )
-                            );
 
-                        },
-                        0
-                    )
-                    : 0;
+            const uniqueFoodIds =
+                new Set();
+
+
+            cart.forEach(item => {
+
+                /*
+                 * Food ID ke possible field names.
+                 *
+                 * Backend mein jo available hoga
+                 * usko use kiya jayega.
+                 */
+
+                const foodId =
+                    item.food_id ??
+                    item.foodId ??
+                    item.menu_item_id ??
+                    item.menuItemId ??
+                    item.food?.id ??
+                    item.menu_item?.id ??
+                    item.id;
+
+
+                if (
+                    foodId !== undefined &&
+                    foodId !== null &&
+                    String(foodId).trim() !== ""
+                ) {
+
+                    uniqueFoodIds.add(
+                        String(foodId)
+                    );
+
+                }
+
+            });
+
+
+            /*
+             * Set mein duplicate food IDs
+             * automatically remove ho jaati hain.
+             */
+
+            const count =
+                uniqueFoodIds.size;
+
+
+            console.log(
+                "CART DATA:",
+                cart
+            );
+
+
+            console.log(
+                "UNIQUE FOOD IDS:",
+                [...uniqueFoodIds]
+            );
+
+
+            console.log(
+                "UNIQUE CART ITEM COUNT:",
+                count
+            );
 
 
             updateCartCount(count);
@@ -516,16 +597,22 @@ document.addEventListener("DOMContentLoaded", () => {
                 "headerCartCount"
             );
 
+
         const mobileCart =
             document.getElementById(
                 "mobileCartCount"
             );
+
 
         const floatingCart =
             document.getElementById(
                 "cartCount"
             );
 
+
+        // =============================================
+        // DESKTOP HEADER CART
+        // =============================================
 
         if (cart) {
 
@@ -535,6 +622,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
 
+        // =============================================
+        // MOBILE HEADER CART
+        // =============================================
+
         if (mobileCart) {
 
             mobileCart.textContent =
@@ -543,10 +634,18 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
 
+        // =============================================
+        // FLOATING CART
+        // =============================================
+
         if (floatingCart) {
 
             floatingCart.textContent =
-                `${count} items`;
+                `${count} ${
+                    count === 1
+                        ? "item"
+                        : "items"
+                }`;
 
         }
 
@@ -564,10 +663,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 "headerMobileMenu"
             );
 
+
         const open =
             document.getElementById(
                 "headerMenuBtn"
             );
+
 
         const close =
             document.getElementById(
@@ -588,6 +689,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 "show"
             );
 
+
             document.body.style.overflow =
                 "hidden";
 
@@ -601,6 +703,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 menu.classList.remove(
                     "show"
                 );
+
 
                 document.body.style.overflow =
                     "";
@@ -624,6 +727,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             "show"
                         );
 
+
                         document.body.style.overflow =
                             "";
 
@@ -645,6 +749,7 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById(
                 "headerLogout"
             );
+
 
         const mobileLogout =
             document.getElementById(
@@ -703,6 +808,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 err
             );
 
+
             window.location.href =
                 "/";
 
@@ -722,6 +828,7 @@ document.addEventListener("DOMContentLoaded", () => {
             console.log(
                 "Profile updated → refreshing navbar..."
             );
+
 
             loadFreshProfile();
 

@@ -18,11 +18,6 @@ require("./config/db");
 // MIDDLEWARE
 // =====================================================
 
-const {
-    requireCustomer
-} = require("./middleware/adminMiddleware");
-
-
 app.use(
     express.urlencoded({
         extended: true
@@ -38,6 +33,7 @@ app.use(express.json());
 
 app.use(
     session({
+
         name: "jigato.sid",
 
         secret:
@@ -49,12 +45,57 @@ app.use(
         saveUninitialized: false,
 
         cookie: {
-            maxAge: 1000 * 60 * 60 * 24,
+
+            maxAge:
+                1000 * 60 * 60 * 24,
+
             httpOnly: true,
+
             secure: false,
+
             sameSite: "lax"
+
         }
+
     })
+);
+
+
+// =====================================================
+// NO CACHE FOR ALL HTML PAGES
+// =====================================================
+
+app.use(
+    (req, res, next) => {
+
+        // API requests ko chhod do
+        // HTML pages ke liye browser cache disable karo
+
+        if (
+            req.method === "GET" &&
+            !req.path.startsWith("/api/")
+        ) {
+
+            res.set(
+                "Cache-Control",
+                "no-store, no-cache, must-revalidate, proxy-revalidate"
+            );
+
+            res.set(
+                "Pragma",
+                "no-cache"
+            );
+
+            res.set(
+                "Expires",
+                "0"
+            );
+
+        }
+
+        next();
+
+    }
 );
 
 
@@ -64,17 +105,33 @@ app.use(
 
 app.use(
     express.static(
-        path.join(__dirname, "public")
+        path.join(
+            __dirname,
+            "public"
+        ),
+        {
+            etag: false,
+            lastModified: false,
+            cacheControl: false
+        }
     )
 );
 
 
 // =====================================================
-// CUSTOMER PAGE ROUTES
+// CUSTOMER AUTH MIDDLEWARE
 // =====================================================
 
+const {
+    requireCustomer
+} = require("./middleware/adminMiddleware");
 
+
+// =====================================================
 // HOME
+// PUBLIC
+// =====================================================
+
 app.get(
     "/",
     (req, res) => {
@@ -91,7 +148,11 @@ app.get(
 );
 
 
+// =====================================================
 // REGISTER
+// PUBLIC
+// =====================================================
+
 app.get(
     "/register",
     (req, res) => {
@@ -108,7 +169,11 @@ app.get(
 );
 
 
+// =====================================================
 // LOGIN
+// PUBLIC
+// =====================================================
+
 app.get(
     "/login",
     (req, res) => {
@@ -125,10 +190,13 @@ app.get(
 );
 
 
+// =====================================================
 // MENU
+// PUBLIC
+// =====================================================
+
 app.get(
     "/menu",
-    requireCustomer,
     (req, res) => {
 
         res.sendFile(
@@ -143,7 +211,11 @@ app.get(
 );
 
 
-// CART
+// =====================================================
+// CART PAGE
+// AUTH PROTECTED
+// =====================================================
+
 app.get(
     "/cart-page",
     requireCustomer,
@@ -161,7 +233,11 @@ app.get(
 );
 
 
-// CHECKOUT
+// =====================================================
+// CHECKOUT PAGE
+// AUTH PROTECTED
+// =====================================================
+
 app.get(
     "/checkout",
     requireCustomer,
@@ -179,19 +255,50 @@ app.get(
 );
 
 
+// =====================================================
 // OLD CHECKOUT URL
+// AUTH PROTECTED
+// =====================================================
+
 app.get(
     "/checkout-page",
     requireCustomer,
     (req, res) => {
 
-        res.redirect("/checkout");
+        res.redirect(
+            "/checkout"
+        );
 
     }
 );
 
 
+// =====================================================
+// OFFERS
+// PUBLIC
+// =====================================================
+
+app.get(
+    "/offers",
+    (req, res) => {
+
+        res.sendFile(
+            path.join(
+                __dirname,
+                "views",
+                "offers.html"
+            )
+        );
+
+    }
+);
+
+
+// =====================================================
 // PROFILE
+// AUTH PROTECTED
+// =====================================================
+
 app.get(
     "/profile",
     requireCustomer,
@@ -209,25 +316,11 @@ app.get(
 );
 
 
-// OFFERS
-app.get(
-    "/offers",
-    requireCustomer,
-    (req, res) => {
-
-        res.sendFile(
-            path.join(
-                __dirname,
-                "views",
-                "offers.html"
-            )
-        );
-
-    }
-);
-
-
+// =====================================================
 // MY ORDERS
+// AUTH PROTECTED
+// =====================================================
+
 app.get(
     "/orders",
     requireCustomer,
@@ -246,71 +339,111 @@ app.get(
 
 
 // =====================================================
-// CUSTOMER / GENERAL API ROUTES
+// AUTH ROUTES
 // =====================================================
 
-
-// AUTH
 const authRoutes =
     require("./routes/authRoutes");
 
-app.use(authRoutes);
+app.use(
+    authRoutes
+);
 
 
-// HOME
+// =====================================================
+// HOME ROUTES
+// =====================================================
+
 const homeRoutes =
     require("./routes/homeRoutes");
 
-app.use(homeRoutes);
+app.use(
+    homeRoutes
+);
 
 
-// FOOD
+// =====================================================
+// FOOD ROUTES
+// =====================================================
+
 const foodRoutes =
     require("./routes/foodRoutes");
 
-app.use(foodRoutes);
+app.use(
+    foodRoutes
+);
 
 
-// CART
+// =====================================================
+// CART ROUTES
+// =====================================================
+
 const cartRoutes =
     require("./routes/cartRoutes");
 
-app.use(cartRoutes);
+app.use(
+    cartRoutes
+);
 
 
-// CHECKOUT
+// =====================================================
+// CHECKOUT ROUTES
+// =====================================================
+
 const checkoutRoutes =
     require("./routes/checkoutRoutes");
 
-app.use(checkoutRoutes);
+app.use(
+    checkoutRoutes
+);
 
 
-// ORDERS
+// =====================================================
+// ORDER ROUTES
+// =====================================================
+
 const orderRoutes =
     require("./routes/orderRoutes");
 
-app.use(orderRoutes);
+app.use(
+    orderRoutes
+);
 
 
-// PROFILE
+// =====================================================
+// PROFILE ROUTES
+// =====================================================
+
 const profileRoutes =
     require("./routes/profileRoutes");
 
-app.use(profileRoutes);
+app.use(
+    profileRoutes
+);
 
 
-// ADDRESS
+// =====================================================
+// ADDRESS ROUTES
+// =====================================================
+
 const addressRoutes =
     require("./routes/addressRoutes");
 
-app.use(addressRoutes);
+app.use(
+    addressRoutes
+);
 
 
-// OFFERS
+// =====================================================
+// OFFER ROUTES
+// =====================================================
+
 const offerRoutes =
     require("./routes/offerRoutes");
 
-app.use(offerRoutes);
+app.use(
+    offerRoutes
+);
 
 
 // =====================================================
@@ -320,7 +453,9 @@ app.use(offerRoutes);
 const settingsRoutes =
     require("./routes/settingsRoutes");
 
-app.use(settingsRoutes);
+app.use(
+    settingsRoutes
+);
 
 
 // =====================================================

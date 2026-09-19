@@ -410,15 +410,15 @@ document.addEventListener(
            GOOGLE LOGIN
         ================================================== */
 
-        googleLogin?.addEventListener(
-            "click",
-            () => {
+        // googleLogin?.addEventListener(
+        //     "click",
+        //     () => {
 
-                window.location.href =
-                    "/auth/google";
+        //         window.location.href =
+        //             "/auth/google";
 
-            }
-        );
+        //     }
+        // );
 
     }
 );

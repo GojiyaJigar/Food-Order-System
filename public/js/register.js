@@ -810,19 +810,19 @@ document.addEventListener(
            GOOGLE REGISTER
         ================================================== */
 
-        document
-            .getElementById(
-                "googleRegister"
-            )
-            ?.addEventListener(
-                "click",
-                () => {
+        // document
+        //     .getElementById(
+        //         "googleRegister"
+        //     )
+        //     ?.addEventListener(
+        //         "click",
+        //         () => {
 
-                    window.location.href =
-                        "/auth/google";
+        //             window.location.href =
+        //                 "/auth/google";
 
-                }
-            );
+        //         }
+        //     );
 
 
     }

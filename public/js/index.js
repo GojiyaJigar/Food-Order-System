@@ -1,6 +1,15 @@
 document.addEventListener("DOMContentLoaded", async () => {
 
+    /* =====================================================
+       HELPERS
+    ===================================================== */
+
     const $ = id => document.getElementById(id);
+
+
+    /* =====================================================
+       ELEMENTS
+    ===================================================== */
 
     const searchInput = $("searchInput");
     const searchBtn = $("searchBtn");
@@ -12,7 +21,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     const searchSection = $("searchResultsSection");
     const searchFoodBox = $("searchFoodContainer");
 
+
+    /* =====================================================
+       GLOBAL DATA
+    ===================================================== */
+
     let allFoods = [];
+
     let loggedIn = false;
 
 
@@ -32,6 +47,17 @@ document.addEventListener("DOMContentLoaded", async () => {
                         cache: "no-store"
                     }
                 );
+
+
+            if (!response.ok) {
+
+                loggedIn = false;
+
+                await updateCartCount();
+
+                return;
+
+            }
 
 
             const data =
@@ -58,7 +84,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                 error
             );
 
+
             loggedIn = false;
+
+
+            await updateCartCount();
 
         }
 
@@ -126,9 +156,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             );
 
 
-            /* =============================================
+            /* ---------------------------------------------
                FOOD COUNT
-            ============================================= */
+            --------------------------------------------- */
 
             if ($("foodCount")) {
 
@@ -138,22 +168,21 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
 
 
-            /* =============================================
+            /* ---------------------------------------------
                CATEGORIES
-            ============================================= */
+            --------------------------------------------- */
 
             createCategories();
 
 
-            /* =============================================
+            /* ---------------------------------------------
                POPULAR FOOD
-            ============================================= */
+            --------------------------------------------- */
 
             renderFoods(
                 allFoods.slice(0, 6),
                 foodBox
             );
-
 
         }
         catch (error) {
@@ -191,8 +220,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         list.forEach(food => {
 
-            if (!food)
+            if (!food) {
+
                 return;
+
+            }
 
 
             const id =
@@ -204,7 +236,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                 id === undefined ||
                 id === null
             ) {
+
                 return;
+
             }
 
 
@@ -237,8 +271,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     function createCategories() {
 
-        if (!categoryBox)
+        if (!categoryBox) {
+
             return;
+
+        }
 
 
         const categories =
@@ -256,7 +293,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             .sort();
 
 
-        categoryBox.innerHTML = "";
+        categoryBox.innerHTML =
+            "";
 
 
         categories.forEach(
@@ -347,6 +385,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 return String(
                     food.category || ""
                 )
+                .trim()
                 .toLowerCase()
                 === value;
 
@@ -389,10 +428,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         );
 
 
-        searchSection?.scrollIntoView({
-            behavior: "smooth",
-            block: "start"
-        });
+        if (searchSection) {
+
+            searchSection.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+
+        }
 
     }
 
@@ -406,8 +449,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         box
     ) {
 
-        if (!box)
+        if (!box) {
+
             return;
+
+        }
 
 
         if (!list.length) {
@@ -472,7 +518,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                                 "
                             >
 
-
                             <span class="offer">
                                 AVAILABLE
                             </span>
@@ -508,7 +553,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                                     type="button"
                                     class="order-btn"
 
-                                    data-food-id="${escapeHTML(id)}"
+                                    data-food-id="${escapeAttr(id)}"
 
                                     data-food-name="${escapeAttr(name)}"
                                 >
@@ -525,12 +570,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                 `;
 
-            }).join("");
+            })
+            .join("");
 
 
-        /*
-         * ADD TO CART
-         */
+        /* ---------------------------------------------
+           ADD TO CART BUTTONS
+        --------------------------------------------- */
 
         box
             .querySelectorAll(
@@ -564,6 +610,30 @@ document.addEventListener("DOMContentLoaded", async () => {
         foodName
     ) {
 
+        /* ---------------------------------------------
+           FOOD ID CHECK
+        --------------------------------------------- */
+
+        if (
+            foodId === undefined ||
+            foodId === null ||
+            String(foodId).trim() === ""
+        ) {
+
+            showPopup(
+                "❌ Food ID missing",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        /* ---------------------------------------------
+           LOGIN CHECK
+        --------------------------------------------- */
+
         if (!loggedIn) {
 
             showPopup(
@@ -576,19 +646,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
 
-        if (!foodId) {
-
-            showPopup(
-                "❌ Food ID missing",
-                "error"
-            );
-
-            return;
-
-        }
-
-
         try {
+
+            /* -----------------------------------------
+               ADD CART REQUEST
+            ----------------------------------------- */
 
             const response =
                 await fetch(
@@ -616,6 +678,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                 );
 
 
+            /* -----------------------------------------
+               RESPONSE
+            ----------------------------------------- */
+
             const data =
                 await response.json();
 
@@ -626,20 +692,36 @@ document.addEventListener("DOMContentLoaded", async () => {
             );
 
 
+            /* -----------------------------------------
+               LOGIN REQUIRED / SESSION EXPIRED
+            ----------------------------------------- */
+
             if (
                 response.status === 401 ||
                 response.status === 403
             ) {
+
+                loggedIn =
+                    false;
+
 
                 showPopup(
                     "🔐 Please login first",
                     "error"
                 );
 
+
+                await updateCartCount();
+
+
                 return;
 
             }
 
+
+            /* -----------------------------------------
+               OTHER API ERROR
+            ----------------------------------------- */
 
             if (
                 !response.ok ||
@@ -654,14 +736,26 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
 
 
+            /* -----------------------------------------
+               SUCCESS
+            ----------------------------------------- */
+
             showPopup(
                 `✅ ${foodName} added to cart`,
                 "success"
             );
 
 
+            /* -----------------------------------------
+               UPDATE UNIQUE CART COUNT
+            ----------------------------------------- */
+
             await updateCartCount();
 
+
+            /* -----------------------------------------
+               CART UPDATED EVENT
+            ----------------------------------------- */
 
             document.dispatchEvent(
                 new CustomEvent(
@@ -680,7 +774,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             showPopup(
                 "❌ " +
-                error.message,
+                (
+                    error.message ||
+                    "Unable to add item"
+                ),
                 "error"
             );
 
@@ -691,9 +788,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     /* =====================================================
        CART COUNT
+       
+       IMPORTANT:
+       Quantity COUNT nahi hogi.
+
+       Pizza × 5
+       Burger × 3
+
+       = 2 items
     ===================================================== */
 
     async function updateCartCount() {
+
+        /* ---------------------------------------------
+           NOT LOGGED IN
+        --------------------------------------------- */
 
         if (!loggedIn) {
 
@@ -728,6 +837,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         try {
 
+            /* -----------------------------------------
+               GET CART
+            ----------------------------------------- */
+
             const response =
                 await fetch(
                     "/cart",
@@ -738,8 +851,53 @@ document.addEventListener("DOMContentLoaded", async () => {
                 );
 
 
-            if (!response.ok)
+            /* -----------------------------------------
+               SESSION EXPIRED
+            ----------------------------------------- */
+
+            if (
+                response.status === 401 ||
+                response.status === 403
+            ) {
+
+                loggedIn =
+                    false;
+
+
+                if ($("cartCount")) {
+
+                    $("cartCount").textContent =
+                        "0 items";
+
+                }
+
+
+                if ($("headerCartCount")) {
+
+                    $("headerCartCount").textContent =
+                        "0";
+
+                }
+
+
+                if ($("mobileCartCount")) {
+
+                    $("mobileCartCount").textContent =
+                        "0";
+
+                }
+
+
                 return;
+
+            }
+
+
+            if (!response.ok) {
+
+                return;
+
+            }
 
 
             const data =
@@ -752,24 +910,111 @@ document.addEventListener("DOMContentLoaded", async () => {
                     : [];
 
 
+            /* -----------------------------------------
+               UNIQUE ITEMS
+               
+               Quantity ko ignore karo.
+            ----------------------------------------- */
+
+            const uniqueItems =
+                new Set();
+
+
+            cart.forEach(item => {
+
+                if (!item) {
+
+                    return;
+
+                }
+
+
+                /*
+                 * Food ID ko priority do.
+                 */
+
+                let foodKey =
+                    item.food_id ??
+                    item.foodId ??
+                    item.menu_item_id ??
+                    item.menuItemId ??
+                    item.food?.id ??
+                    item.menu_item?.id ??
+                    item.menuItem?.id;
+
+
+                /*
+                 * Food ID available nahi hai
+                 * to food name use karo.
+                 */
+
+                if (
+                    foodKey === undefined ||
+                    foodKey === null ||
+                    String(foodKey).trim() === ""
+                ) {
+
+                    foodKey =
+                        item.food_name ??
+                        item.foodName ??
+                        item.name ??
+                        item.food?.name ??
+                        item.menu_item?.name ??
+                        item.menuItem?.name;
+
+                }
+
+
+                /*
+                 * UNIQUE KEY ADD
+                 */
+
+                if (
+                    foodKey !== undefined &&
+                    foodKey !== null &&
+                    String(foodKey).trim() !== ""
+                ) {
+
+                    uniqueItems.add(
+                        String(foodKey)
+                            .trim()
+                            .toLowerCase()
+                    );
+
+                }
+
+            });
+
+
+            /* -----------------------------------------
+               FINAL COUNT
+            ----------------------------------------- */
+
             const count =
-                cart.reduce(
-                    (
-                        total,
-                        item
-                    ) => {
+                uniqueItems.size;
 
-                        return (
-                            total +
-                            Number(
-                                item.quantity || 0
-                            )
-                        );
 
-                    },
-                    0
-                );
+            console.log(
+                "CART DATA:",
+                cart
+            );
 
+
+            console.log(
+                "UNIQUE CART ITEMS:",
+                [...uniqueItems]
+            );
+
+
+            console.log(
+                "UNIQUE CART COUNT:",
+                count
+            );
+
+
+            /* -----------------------------------------
+               BOTTOM CART
+            ----------------------------------------- */
 
             if ($("cartCount")) {
 
@@ -784,6 +1029,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
 
 
+            /* -----------------------------------------
+               HEADER CART
+            ----------------------------------------- */
+
             if ($("headerCartCount")) {
 
                 $("headerCartCount")
@@ -792,6 +1041,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             }
 
+
+            /* -----------------------------------------
+               MOBILE CART
+            ----------------------------------------- */
 
             if ($("mobileCartCount")) {
 
@@ -897,10 +1150,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         );
 
 
-        searchSection?.scrollIntoView({
-            behavior: "smooth",
-            block: "start"
-        });
+        if (searchSection) {
+
+            searchSection.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+
+        }
 
     }
 
@@ -934,6 +1191,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             ) {
 
                 event.preventDefault();
+
 
                 search(
                     searchInput.value
@@ -1171,58 +1429,85 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (
             value.includes("pizza")
-        )
+        ) {
+
             return "🍕";
+
+        }
 
 
         if (
             value.includes("burger")
-        )
+        ) {
+
             return "🍔";
+
+        }
 
 
         if (
             value.includes("biryani")
-        )
+        ) {
+
             return "🍛";
+
+        }
 
 
         if (
             value.includes("chinese")
-        )
+        ) {
+
             return "🍜";
+
+        }
 
 
         if (
             value.includes("pasta")
-        )
+        ) {
+
             return "🍝";
+
+        }
 
 
         if (
             value.includes("drink") ||
             value.includes("beverage")
-        )
+        ) {
+
             return "🥤";
+
+        }
 
 
         if (
             value.includes("dessert") ||
             value.includes("sweet")
-        )
+        ) {
+
             return "🍰";
+
+        }
 
 
         if (
             value.includes("snack")
-        )
+        ) {
+
             return "🍟";
+
+        }
 
 
         if (
             value.includes("wrap")
-        )
+        ) {
+
             return "🌯";
+
+        }
 
 
         return "🍽️";
