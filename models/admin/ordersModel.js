@@ -1,9 +1,18 @@
+"use strict";
+
 const db = require("../../config/db");
 
+
+// =========================
+// GET ALL ORDERS
+// =========================
+
 const getAllOrders = (callback) => {
+
     const sql = `
         SELECT
             o.id,
+            o.order_number,
             o.user_id,
             o.customer_name,
             o.phone,
@@ -11,18 +20,60 @@ const getAllOrders = (callback) => {
             o.city,
             o.state,
             o.pincode,
+            o.subtotal,
+            o.delivery_fee,
+            o.gst,
+            o.discount,
+            o.coupon_code,
             o.total_amount,
             o.payment_method,
             o.order_status,
             o.created_at,
             o.updated_at,
             o.cancelled_at,
+
             COUNT(oi.id) AS items_count
+
         FROM orders o
+
         LEFT JOIN order_items oi
             ON oi.order_id = o.id
-        GROUP BY
+
+        GROUP BY o.id
+
+        ORDER BY o.created_at DESC
+    `;
+
+
+    db.query(sql, (err, results) => {
+
+        if (err) {
+            console.error(
+                "ADMIN GET ALL ORDERS ERROR:",
+                err
+            );
+
+            return callback(err, null);
+        }
+
+        callback(null, results || []);
+    });
+};
+
+
+// =========================
+// GET SINGLE ORDER
+// =========================
+
+const getOrderById = (
+    orderId,
+    callback
+) => {
+
+    const sql = `
+        SELECT
             o.id,
+            o.order_number,
             o.user_id,
             o.customer_name,
             o.phone,
@@ -30,108 +81,121 @@ const getAllOrders = (callback) => {
             o.city,
             o.state,
             o.pincode,
+            o.subtotal,
+            o.delivery_fee,
+            o.gst,
+            o.discount,
+            o.coupon_code,
             o.total_amount,
             o.payment_method,
             o.order_status,
             o.created_at,
             o.updated_at,
-            o.cancelled_at
-        ORDER BY o.created_at DESC, o.id DESC
+            o.cancelled_at,
+
+            oi.id AS item_id,
+            oi.food_id,
+            oi.quantity,
+            oi.price AS item_price,
+
+            f.name AS food_name,
+            f.description AS food_description,
+            f.image AS food_image,
+            f.category AS food_category
+
+        FROM orders o
+
+        LEFT JOIN order_items oi
+            ON oi.order_id = o.id
+
+        LEFT JOIN foods f
+            ON f.id = oi.food_id
+
+        WHERE o.id = ?
+
+        ORDER BY oi.id ASC
     `;
 
-    db.query(sql, (error, rows) => {
-        if (error) return callback(error);
-        callback(null, rows || []);
-    });
-};
 
+    db.query(
+        sql,
+        [orderId],
+        (err, results) => {
 
-const getOrderById = (orderId, callback) => {
-    const orderSql = `
-        SELECT
-            id,
-            user_id,
-            customer_name,
-            phone,
-            address,
-            city,
-            state,
-            pincode,
-            total_amount,
-            payment_method,
-            order_status,
-            created_at,
-            updated_at,
-            cancelled_at
-        FROM orders
-        WHERE id = ?
-        LIMIT 1
-    `;
+            if (err) {
 
-    db.query(orderSql, [orderId], (error, orderRows) => {
-        if (error) return callback(error);
+                console.error(
+                    "ADMIN GET ORDER ERROR:",
+                    err
+                );
 
-        if (!orderRows || !orderRows.length) {
-            return callback(null, null);
+                return callback(
+                    err,
+                    null
+                );
+            }
+
+            callback(
+                null,
+                results || []
+            );
         }
-
-        const order = orderRows[0];
-
-        const itemsSql = `
-            SELECT
-                oi.id,
-                oi.order_id,
-                oi.food_id,
-                oi.quantity,
-                oi.price,
-                f.name,
-                f.image,
-                (oi.quantity * oi.price) AS item_total
-            FROM order_items oi
-            LEFT JOIN foods f
-                ON f.id = oi.food_id
-            WHERE oi.order_id = ?
-            ORDER BY oi.id ASC
-        `;
-
-        db.query(itemsSql, [orderId], (itemsError, itemRows) => {
-            if (itemsError) return callback(itemsError);
-
-            order.items = itemRows || [];
-
-            callback(null, order);
-        });
-    });
+    );
 };
 
 
-const updateOrderStatus = (orderId, status, callback) => {
-    let sql;
-    let params;
+// =========================
+// UPDATE STATUS
+// =========================
 
-    if (status === "Cancelled") {
-        sql = `
-            UPDATE orders
-            SET
-                order_status = ?,
-                cancelled_at = NOW()
-            WHERE id = ?
-        `;
+const updateOrderStatus = (
+    orderId,
+    status,
+    callback
+) => {
 
-        params = [status, orderId];
-    } else {
-        sql = `
-            UPDATE orders
-            SET
-                order_status = ?,
-                cancelled_at = NULL
-            WHERE id = ?
-        `;
+    const sql = `
+        UPDATE orders
+        SET
+            order_status = ?,
+            cancelled_at =
+                CASE
+                    WHEN ? = 'Cancelled'
+                    THEN NOW()
+                    ELSE NULL
+                END
+        WHERE id = ?
+    `;
 
-        params = [status, orderId];
-    }
 
-    db.query(sql, params, callback);
+    db.query(
+        sql,
+        [
+            status,
+            status,
+            orderId
+        ],
+        (err, result) => {
+
+            if (err) {
+
+                console.error(
+                    "ADMIN UPDATE ORDER ERROR:",
+                    err
+                );
+
+                return callback(
+                    err,
+                    null
+                );
+            }
+
+            callback(
+                null,
+                result
+            );
+        }
+    );
 };
 
 
@@ -139,4 +203,4 @@ module.exports = {
     getAllOrders,
     getOrderById,
     updateOrderStatus
-};  
+};

@@ -5,42 +5,22 @@ const router = express.Router();
 const {
     createOrder,
     getMyOrders,
-    getMyOrderById
+    getMyOrderById,
+    updateOrderStatus
 } = require("../controllers/orderController");
 
 
-// =====================================================
-// PLACE ORDER
-// =====================================================
+// Create Order
+router.post("/", createOrder);
 
-router.post(
-    "/api/orders",
-    createOrder
-);
+// My Orders
+router.get("/my", getMyOrders);
 
+// Single Order
+router.get("/my/:id", getMyOrderById);
 
-// =====================================================
-// MY ORDERS
-// =====================================================
+// Update Order Status
+router.post("/:id/status", updateOrderStatus);
 
-router.get(
-    "/api/orders/my",
-    getMyOrders
-);
-
-
-// =====================================================
-// SINGLE MY ORDER
-// =====================================================
-
-router.get(
-    "/api/orders/my/:id",
-    getMyOrderById
-);
-
-
-// =====================================================
-// EXPORT ROUTER
-// =====================================================
 
 module.exports = router;

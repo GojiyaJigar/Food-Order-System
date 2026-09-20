@@ -49,7 +49,6 @@ document.addEventListener("DOMContentLoaded", () => {
         updateStatus: $("updateOrderStatusBtn")
     };
 
-
     const statuses = [
         "Pending",
         "Confirmed",
@@ -59,15 +58,9 @@ document.addEventListener("DOMContentLoaded", () => {
         "Cancelled"
     ];
 
-
-    /* =====================================================
-       HELPERS
-    ===================================================== */
-
     function money(value) {
         return `₹${Number(value || 0).toFixed(2)}`;
     }
-
 
     function date(value) {
         if (!value) return "-";
@@ -87,7 +80,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-
     function esc(value) {
         return String(value ?? "")
             .replace(/&/g, "&amp;")
@@ -97,7 +89,6 @@ document.addEventListener("DOMContentLoaded", () => {
             .replace(/'/g, "&#039;");
     }
 
-
     function statusClass(status) {
         return String(status || "")
             .toLowerCase()
@@ -105,50 +96,49 @@ document.addEventListener("DOMContentLoaded", () => {
             .replace("out-for-delivery", "out");
     }
 
-
-    function getId(o) {
-        return o.id ?? o.order_id ?? "";
+    function getId(order) {
+        return order.id ?? order.order_id ?? "";
     }
 
-
-    function getStatus(o) {
-        return o.order_status || "Pending";
+    function getOrderNumber(order) {
+        return (
+            order.orderNumber ||
+            order.order_number ||
+            "-"
+        );
     }
 
-
-    function getName(o) {
-        return o.customer_name || "Unknown Customer";
+    function getStatus(order) {
+        return order.order_status || "Pending";
     }
 
-
-    function getPhone(o) {
-        return o.phone || "-";
+    function getName(order) {
+        return order.customer_name || "Unknown Customer";
     }
 
+    function getPhone(order) {
+        return order.phone || "-";
+    }
 
-    function getAmount(o) {
+    function getAmount(order) {
         return Number(
-            o.total_amount ??
-            o.total ??
+            order.total_amount ??
+            order.total ??
             0
         );
     }
 
-
-    function getPayment(o) {
-        return o.payment_method || "COD";
+    function getPayment(order) {
+        return order.payment_method || "COD";
     }
 
-
-    function getDate(o) {
-        return o.created_at || null;
+    function getDate(order) {
+        return order.created_at || null;
     }
 
-
-    function getItems(o) {
-
-        if (Array.isArray(o.items)) {
-            return o.items.reduce(
+    function getItems(order) {
+        if (Array.isArray(order.items)) {
+            return order.items.reduce(
                 (sum, item) =>
                     sum + Number(item.quantity || 0),
                 0
@@ -156,16 +146,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         return Number(
-            o.items_count ??
-            o.item_count ??
+            order.items_count ??
+            order.item_count ??
             0
         );
     }
-
-
-    /* =====================================================
-       API
-    ===================================================== */
 
     async function api(url, options = {}) {
 
@@ -197,11 +182,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         return data;
     }
-
-
-    /* =====================================================
-       LOAD
-    ===================================================== */
 
     async function load(showAlert = false) {
 
@@ -246,10 +226,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         } catch (error) {
 
-            console.error(
-                "ORDERS LOAD:",
-                error
-            );
+            console.error("ORDERS LOAD:", error);
 
             state.orders = [];
             state.filtered = [];
@@ -258,9 +235,7 @@ document.addEventListener("DOMContentLoaded", () => {
             render();
             pagination();
 
-            if (
-                typeof Swal !== "undefined"
-            ) {
+            if (typeof Swal !== "undefined") {
                 Swal.fire({
                     icon: "error",
                     title: "Unable to load orders",
@@ -270,47 +245,35 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-
-    /* =====================================================
-       STATS
-    ===================================================== */
-
     function updateStats() {
 
         const orders = state.orders;
 
         const count = status =>
             orders.filter(
-                o =>
-                    getStatus(o)
-                        .toLowerCase() ===
+                order =>
+                    getStatus(order).toLowerCase() ===
                     status.toLowerCase()
             ).length;
 
+        const revenue = orders.reduce(
+            (sum, order) =>
+                getStatus(order) === "Cancelled"
+                    ? sum
+                    : sum + getAmount(order),
+            0
+        );
 
-        const revenue =
-            orders.reduce(
-                (sum, o) =>
-                    getStatus(o) === "Cancelled"
-                        ? sum
-                        : sum + getAmount(o),
-                0
-            );
-
-
-        el.total.textContent =
-            orders.length;
-
-        el.pending.textContent =
-            count("Pending");
+        el.total.textContent = orders.length;
+        el.pending.textContent = count("Pending");
 
         el.active.textContent =
-            orders.filter(o =>
+            orders.filter(order =>
                 [
                     "Confirmed",
                     "Preparing",
                     "Out For Delivery"
-                ].includes(getStatus(o))
+                ].includes(getStatus(order))
             ).length;
 
         el.delivered.textContent =
@@ -323,11 +286,6 @@ document.addEventListener("DOMContentLoaded", () => {
             money(revenue);
     }
 
-
-    /* =====================================================
-       FILTER + SORT
-    ===================================================== */
-
     function apply() {
 
         const q =
@@ -335,117 +293,84 @@ document.addEventListener("DOMContentLoaded", () => {
                 .trim()
                 .toLowerCase();
 
-
         const selectedStatus =
             (el.status.value || "all")
                 .trim()
                 .toLowerCase();
 
-
-        let list =
-            [...state.orders];
-
-
-        /* SEARCH */
+        let list = [...state.orders];
 
         if (q) {
+            list = list.filter(order => {
 
-            list =
-                list.filter(o => {
+                const text = [
+                    getOrderNumber(order),
+                    getId(order),
+                    getName(order),
+                    getPhone(order)
+                ]
+                    .join(" ")
+                    .toLowerCase();
 
-                    const text =
-                        [
-                            getId(o),
-                            getName(o),
-                            getPhone(o)
-                        ]
-                            .join(" ")
-                            .toLowerCase();
-
-                    return text.includes(q);
-                });
+                return text.includes(q);
+            });
         }
 
-
-        /* STATUS */
-
         if (selectedStatus !== "all") {
-
-            list =
-                list.filter(o =>
-                    getStatus(o)
+            list = list.filter(
+                order =>
+                    getStatus(order)
                         .trim()
                         .toLowerCase() ===
                     selectedStatus
-                );
+            );
         }
-
-
-        /* SORT */
 
         switch (el.sort.value) {
 
             case "oldest":
-
                 list.sort(
                     (a, b) =>
                         new Date(getDate(a)) -
                         new Date(getDate(b))
                 );
-
                 break;
 
-
             case "amount-high":
-
                 list.sort(
                     (a, b) =>
                         getAmount(b) -
                         getAmount(a)
                 );
-
                 break;
 
-
             case "amount-low":
-
                 list.sort(
                     (a, b) =>
                         getAmount(a) -
                         getAmount(b)
                 );
-
                 break;
-
 
             case "customer-az":
-
                 list.sort(
                     (a, b) =>
-                        getName(a)
-                            .localeCompare(
-                                getName(b)
-                            )
+                        getName(a).localeCompare(
+                            getName(b)
+                        )
                 );
-
                 break;
-
 
             case "customer-za":
-
                 list.sort(
                     (a, b) =>
-                        getName(b)
-                            .localeCompare(
-                                getName(a)
-                            )
+                        getName(b).localeCompare(
+                            getName(a)
+                        )
                 );
-
                 break;
 
-
             default:
-
                 list.sort(
                     (a, b) =>
                         new Date(getDate(b)) -
@@ -453,39 +378,25 @@ document.addEventListener("DOMContentLoaded", () => {
                 );
         }
 
-
         state.filtered = list;
 
-
-        const pages =
-            Math.max(
-                1,
-                Math.ceil(
-                    list.length /
-                    state.size
-                )
-            );
-
+        const pages = Math.max(
+            1,
+            Math.ceil(
+                list.length / state.size
+            )
+        );
 
         if (state.page > pages) {
             state.page = pages;
         }
-
 
         updateFilterHeader();
         render();
         pagination();
     }
 
-
-    /* =====================================================
-       HEADER
-    ===================================================== */
-
     function updateFilterHeader() {
-
-        const value =
-            el.status.value;
 
         const labels = {
             all: "All Orders",
@@ -497,13 +408,9 @@ document.addEventListener("DOMContentLoaded", () => {
             Cancelled: "Cancelled"
         };
 
-        const title =
-            labels[value] || "All Orders";
-
-
         el.title.textContent =
-            title;
-
+            labels[el.status.value] ||
+            "All Orders";
 
         el.count.textContent =
             `${state.filtered.length} ${
@@ -513,11 +420,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }`;
     }
 
-
-    /* =====================================================
-       TABLE
-    ===================================================== */
-
     function render() {
 
         if (!state.filtered.length) {
@@ -525,7 +427,6 @@ document.addEventListener("DOMContentLoaded", () => {
             el.body.innerHTML = "";
 
             el.empty.hidden = false;
-
             el.empty.style.display = "flex";
 
             el.emptyText.textContent =
@@ -536,15 +437,12 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-
         el.empty.hidden = true;
         el.empty.style.display = "none";
-
 
         const start =
             (state.page - 1) *
             state.size;
-
 
         const items =
             state.filtered.slice(
@@ -552,30 +450,24 @@ document.addEventListener("DOMContentLoaded", () => {
                 start + state.size
             );
 
-
         el.body.innerHTML =
             items.map(row).join("");
     }
 
-
     function row(order) {
 
-        const status =
-            getStatus(order);
-
-        const payment =
-            getPayment(order);
-
+        const status = getStatus(order);
+        const payment = getPayment(order);
+        const orderNumber = getOrderNumber(order);
 
         return `
             <tr>
 
                 <td>
                     <div class="order-id">
-                        #${esc(getId(order))}
+                        ${esc(orderNumber)}
                     </div>
                 </td>
-
 
                 <td>
                     <div class="customer-name">
@@ -587,13 +479,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
                 </td>
 
-
                 <td>
                     <span class="items-count">
                         ${getItems(order)}
                     </span>
                 </td>
-
 
                 <td>
                     <strong>
@@ -601,20 +491,19 @@ document.addEventListener("DOMContentLoaded", () => {
                     </strong>
                 </td>
 
-
                 <td>
                     <span class="payment-badge">
                         ${esc(payment)}
                     </span>
                 </td>
 
-
                 <td>
-                    <span class="order-status status-${statusClass(status)}">
+                    <span
+                        class="order-status status-${statusClass(status)}"
+                    >
                         ${esc(status)}
                     </span>
                 </td>
-
 
                 <td>
                     <span class="order-date">
@@ -622,10 +511,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     </span>
                 </td>
 
-
                 <td>
                     <div class="order-actions">
-
                         <button
                             type="button"
                             class="order-action-btn"
@@ -634,7 +521,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         >
                             <i class="fa-solid fa-eye"></i>
                         </button>
-
                     </div>
                 </td>
 
@@ -642,135 +528,78 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
     }
 
-
-    /* =====================================================
-       PAGINATION
-    ===================================================== */
-
     function pagination() {
 
         const total =
             state.filtered.length;
 
+        const pages = Math.max(
+            1,
+            Math.ceil(
+                total / state.size
+            )
+        );
 
-        const pages =
-            Math.max(
-                1,
-                Math.ceil(
-                    total /
-                    state.size
-                )
-            );
+        const start = total
+            ? ((state.page - 1) * state.size) + 1
+            : 0;
 
-
-        const start =
-            total
-                ? (
-                    (state.page - 1) *
-                    state.size
-                ) + 1
-                : 0;
-
-
-        const end =
-            total
-                ? Math.min(
-                    state.page *
-                    state.size,
-                    total
-                )
-                : 0;
-
+        const end = total
+            ? Math.min(
+                state.page * state.size,
+                total
+            )
+            : 0;
 
         el.result.textContent =
             `Showing ${start}-${end} of ${total} orders`;
 
-
         el.prev.disabled =
             state.page <= 1;
-
 
         el.next.disabled =
             state.page >= pages ||
             total === 0;
 
-
         el.pages.innerHTML = "";
 
-
-        for (
-            let i = 1;
-            i <= pages;
-            i++
-        ) {
+        for (let i = 1; i <= pages; i++) {
 
             const button =
-                document.createElement(
-                    "button"
-                );
+                document.createElement("button");
 
+            button.type = "button";
+            button.className = "page-btn";
 
-            button.type =
-                "button";
-
-
-            button.className =
-                "page-btn";
-
-
-            if (
-                i === state.page
-            ) {
-                button.classList.add(
-                    "active"
-                );
+            if (i === state.page) {
+                button.classList.add("active");
             }
 
-
-            button.textContent =
-                i;
-
+            button.textContent = i;
 
             button.addEventListener(
                 "click",
                 () => {
-
                     state.page = i;
-
                     render();
                     pagination();
                 }
             );
 
-
-            el.pages.appendChild(
-                button
-            );
+            el.pages.appendChild(button);
         }
     }
 
-
-    /* =====================================================
-       MODAL
-    ===================================================== */
-
     async function openModal(id) {
 
-        state.selectedId =
-            id;
+        state.selectedId = id;
 
-
-        el.modal.hidden =
-            false;
-
-
+        el.modal.hidden = false;
         el.modalTitle.textContent =
-            `Order #${id}`;
-
+            "Order Details";
 
         el.modalDate.textContent =
             "Loading...";
-
 
         el.modalContent.innerHTML = `
             <div class="orders-loading">
@@ -779,7 +608,6 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
         `;
 
-
         try {
 
             const data =
@@ -787,10 +615,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     `/admin/api/orders/${encodeURIComponent(id)}`
                 );
 
-
-            const order =
-                data.order;
-
+            const order = data.order;
 
             if (!order) {
                 throw new Error(
@@ -798,18 +623,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 );
             }
 
+            const orderNumber =
+                getOrderNumber(order);
 
             el.modalTitle.textContent =
-                `Order #${getId(order)}`;
-
+                orderNumber !== "-"
+                    ? `Order ${orderNumber}`
+                    : "Order Details";
 
             el.modalDate.textContent =
                 date(getDate(order));
 
-
             el.modalStatus.value =
                 getStatus(order);
-
 
             renderModal(order);
 
@@ -823,7 +649,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-
     function renderModal(order) {
 
         const items =
@@ -831,56 +656,51 @@ document.addEventListener("DOMContentLoaded", () => {
                 ? order.items
                 : [];
 
+        const address = [
+            order.address,
+            order.city,
+            order.state,
+            order.pincode
+        ]
+            .filter(Boolean)
+            .join(", ");
 
-        const address =
-            [
-                order.address,
-                order.city,
-                order.state,
-                order.pincode
-            ]
-                .filter(Boolean)
-                .join(", ");
+        const itemHtml = items.length
+            ? items.map(item => `
+                <div class="order-item-row">
 
-
-        const itemHtml =
-            items.length
-                ? items.map(item => `
-                    <div class="order-item-row">
-
-                        <div>
-                            <div class="order-item-name">
-                                ${esc(
-                                    item.name ||
-                                    "Food Item"
-                                )}
-                            </div>
-
-                            <div class="order-item-meta">
-                                ${Number(item.quantity || 0)}
-                                ×
-                                ${money(item.price)}
-                            </div>
-                        </div>
-
-                        <div class="order-item-total">
-                            ${money(
-                                item.item_total ??
-                                (
-                                    Number(item.quantity || 0) *
-                                    Number(item.price || 0)
-                                )
+                    <div>
+                        <div class="order-item-name">
+                            ${esc(
+                                item.name ||
+                                "Food Item"
                             )}
                         </div>
 
+                        <div class="order-item-meta">
+                            ${Number(item.quantity || 0)}
+                            ×
+                            ${money(item.price)}
+                        </div>
                     </div>
-                `).join("")
-                : `
-                    <div class="orders-loading">
-                        No item details available.
-                    </div>
-                `;
 
+                    <div class="order-item-total">
+                        ${money(
+                            item.item_total ??
+                            (
+                                Number(item.quantity || 0) *
+                                Number(item.price || 0)
+                            )
+                        )}
+                    </div>
+
+                </div>
+            `).join("")
+            : `
+                <div class="orders-loading">
+                    No item details available.
+                </div>
+            `;
 
         el.modalContent.innerHTML = `
 
@@ -902,7 +722,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             </div>
 
-
             <div class="order-modal-section">
 
                 <div class="order-modal-section-title">
@@ -914,7 +733,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
 
             </div>
-
 
             <div class="order-modal-section">
 
@@ -928,7 +746,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             </div>
 
-
             <div class="order-modal-section">
 
                 <div class="order-modal-section-title">
@@ -941,7 +758,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             </div>
 
-
             <div class="order-modal-section">
 
                 <div class="order-modal-section-title">
@@ -951,10 +767,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="order-modal-totals">
 
                     <div class="order-total-row">
-                        <span>Total Amount</span>
+
+                        <span>
+                            Total Amount
+                        </span>
+
                         <strong>
                             ${money(getAmount(order))}
                         </strong>
+
                     </div>
 
                 </div>
@@ -963,117 +784,88 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
     }
 
-
     function closeModal() {
-
-        el.modal.hidden =
-            true;
-
-        state.selectedId =
-            null;
+        el.modal.hidden = true;
+        state.selectedId = null;
     }
-
-
-    /* =====================================================
-       STATUS UPDATE
-    ===================================================== */
 
     async function updateStatus() {
 
-        if (!state.selectedId) {
-            return;
-        }
-
+        if (!state.selectedId) return;
 
         const status =
             el.modalStatus.value;
-
 
         if (!statuses.includes(status)) {
             return;
         }
 
+        if (typeof Swal !== "undefined") {
 
-        if (
-            typeof Swal !== "undefined"
-        ) {
+            const selectedOrder =
+                state.orders.find(
+                    order =>
+                        String(getId(order)) ===
+                        String(state.selectedId)
+                );
+
+            const displayId =
+                selectedOrder
+                    ? getOrderNumber(selectedOrder)
+                    : state.selectedId;
 
             const result =
                 await Swal.fire({
-
                     icon: "question",
-
-                    title:
-                        "Update order status?",
-
+                    title: "Update order status?",
                     text:
-                        `Order #${state.selectedId} → ${status}`,
-
+                        `Order ${displayId} → ${status}`,
                     showCancelButton: true,
-
-                    confirmButtonText:
-                        "Update",
-
-                    cancelButtonText:
-                        "Cancel"
+                    confirmButtonText: "Update",
+                    cancelButtonText: "Cancel"
                 });
-
 
             if (!result.isConfirmed) {
                 return;
             }
         }
 
-
-        el.updateStatus.disabled =
-            true;
-
+        el.updateStatus.disabled = true;
 
         try {
 
             await api(
-                `/admin/api/orders/${encodeURIComponent(state.selectedId)}/status`,
+                `/admin/api/orders/${encodeURIComponent(
+                    state.selectedId
+                )}/status`,
                 {
                     method: "PATCH",
-
                     headers: {
                         "Content-Type":
                             "application/json"
                     },
-
-                    body:
-                        JSON.stringify({
-                            status
-                        })
+                    body: JSON.stringify({
+                        status
+                    })
                 }
             );
 
-
             const local =
                 state.orders.find(
-                    o =>
-                        String(getId(o)) ===
+                    order =>
+                        String(getId(order)) ===
                         String(state.selectedId)
                 );
 
-
             if (local) {
-                local.order_status =
-                    status;
+                local.order_status = status;
             }
 
-
             updateStats();
-
             apply();
-
             closeModal();
 
-
-            if (
-                typeof Swal !== "undefined"
-            ) {
-
+            if (typeof Swal !== "undefined") {
                 Swal.fire({
                     icon: "success",
                     title: "Status updated",
@@ -1084,10 +876,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         } catch (error) {
 
-            if (
-                typeof Swal !== "undefined"
-            ) {
-
+            if (typeof Swal !== "undefined") {
                 Swal.fire({
                     icon: "error",
                     title: "Update failed",
@@ -1096,183 +885,106 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
         } finally {
-
-            el.updateStatus.disabled =
-                false;
+            el.updateStatus.disabled = false;
         }
     }
 
+    el.search.addEventListener("input", () => {
+        state.page = 1;
+        apply();
+    });
 
-    /* =====================================================
-       EVENTS
-    ===================================================== */
+    el.clear.addEventListener("click", () => {
+        el.search.value = "";
+        state.page = 1;
+        apply();
+        el.search.focus();
+    });
 
-    el.search.addEventListener(
-        "input",
-        () => {
-            state.page = 1;
-            apply();
-        }
-    );
+    el.status.addEventListener("change", () => {
+        state.page = 1;
+        apply();
+    });
 
-
-    el.clear.addEventListener(
-        "click",
-        () => {
-            el.search.value = "";
-            state.page = 1;
-            apply();
-            el.search.focus();
-        }
-    );
-
-
-    el.status.addEventListener(
-        "change",
-        () => {
-            state.page = 1;
-            apply();
-        }
-    );
-
-
-    el.sort.addEventListener(
-        "change",
-        () => {
-            state.page = 1;
-            apply();
-        }
-    );
-
+    el.sort.addEventListener("change", () => {
+        state.page = 1;
+        apply();
+    });
 
     el.refresh.addEventListener(
         "click",
         () => load(true)
     );
 
+    el.reset.addEventListener("click", () => {
+        el.search.value = "";
+        el.status.value = "all";
+        el.sort.value = "latest";
+        state.page = 1;
+        apply();
+    });
 
-    el.reset.addEventListener(
-        "click",
-        () => {
+    el.prev.addEventListener("click", () => {
 
-            el.search.value =
-                "";
-
-            el.status.value =
-                "all";
-
-            el.sort.value =
-                "latest";
-
-            state.page =
-                1;
-
-            apply();
+        if (state.page > 1) {
+            state.page--;
+            render();
+            pagination();
         }
-    );
+    });
 
+    el.next.addEventListener("click", () => {
 
-    el.prev.addEventListener(
-        "click",
-        () => {
-
-            if (
-                state.page > 1
-            ) {
-
-                state.page--;
-
-                render();
-                pagination();
-            }
-        }
-    );
-
-
-    el.next.addEventListener(
-        "click",
-        () => {
-
-            const pages =
-                Math.max(
-                    1,
-                    Math.ceil(
-                        state.filtered.length /
-                        state.size
-                    )
-                );
-
-
-            if (
-                state.page < pages
-            ) {
-
-                state.page++;
-
-                render();
-                pagination();
-            }
-        }
-    );
-
-
-    el.body.addEventListener(
-        "click",
-        event => {
-
-            const button =
-                event.target.closest(
-                    "[data-view]"
-                );
-
-
-            if (!button) {
-                return;
-            }
-
-
-            openModal(
-                button.dataset.view
+        const pages =
+            Math.max(
+                1,
+                Math.ceil(
+                    state.filtered.length /
+                    state.size
+                )
             );
-        }
-    );
 
+        if (state.page < pages) {
+            state.page++;
+            render();
+            pagination();
+        }
+    });
+
+    el.body.addEventListener("click", event => {
+
+        const button =
+            event.target.closest("[data-view]");
+
+        if (!button) return;
+
+        openModal(button.dataset.view);
+    });
 
     el.closeModal.addEventListener(
         "click",
         closeModal
     );
 
-
     el.overlay.addEventListener(
         "click",
         closeModal
     );
-
 
     el.updateStatus.addEventListener(
         "click",
         updateStatus
     );
 
+    document.addEventListener("keydown", event => {
 
-    document.addEventListener(
-        "keydown",
-        event => {
-
-            if (
-                event.key === "Escape" &&
-                !el.modal.hidden
-            ) {
-                closeModal();
-            }
+        if (
+            event.key === "Escape" &&
+            !el.modal.hidden
+        ) {
+            closeModal();
         }
-    );
-
-
-    /* =====================================================
-       TIME
-    ===================================================== */
+    });
 
     function updateTime() {
 
@@ -1280,20 +992,14 @@ document.addEventListener("DOMContentLoaded", () => {
             `Updated ${new Date().toLocaleTimeString(
                 "en-IN",
                 {
-                    hour:"2-digit",
-                    minute:"2-digit"
+                    hour: "2-digit",
+                    minute: "2-digit"
                 }
             )}`;
     }
-
-
-    /* =====================================================
-       START
-    ===================================================== */
 
     el.status.value = "all";
     el.sort.value = "latest";
 
     load();
-
 });

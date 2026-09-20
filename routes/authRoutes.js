@@ -1,8 +1,6 @@
-const express =
-    require("express");
+const express = require("express");
 
-const router =
-    express.Router();
+const router = express.Router();
 
 
 const {
@@ -15,52 +13,46 @@ const {
 } = require("../controllers/authController");
 
 
-// =====================================================
 // REGISTER
-// =====================================================
-
 router.post(
     "/register",
     registerUser
 );
 
 
-// =====================================================
 // LOGIN
-// =====================================================
-
 router.post(
     "/login",
     loginUser
 );
 
 
-// =====================================================
-// LOGOUT
-// =====================================================
+// CHECK AUTH
+router.get(
+    "/check-auth",
+    checkAuth
+);
 
+
+// LOGOUT
 router.post(
     "/logout",
     logoutUser
 );
 
 
-// =====================================================
-// CHECK AUTH
-// =====================================================
-
-router.get(
-    "/check-auth",
-    checkAuth
+// FORGOT PASSWORD
+router.post(
+    "/forgot-password",
+    forgotPassword
 );
 
-//forgot password
-router.post("/forgot-password", forgotPassword);
+
+// RESET PASSWORD
 router.post(
     "/reset-password",
     resetPassword
 );
 
 
-module.exports =
-    router;
+module.exports = router;

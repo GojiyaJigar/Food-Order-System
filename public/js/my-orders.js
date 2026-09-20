@@ -1,7 +1,4 @@
-/* =====================================================
-   JIGATO - MY ORDERS
-   Frontend Testing Simulation
-===================================================== */
+/* JIGATO - MY ORDERS */
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -12,27 +9,38 @@ document.addEventListener("DOMContentLoaded", () => {
     const modalTitle = document.getElementById("modalOrderTitle");
     const modalContent = document.getElementById("orderModalContent");
 
-    const filterButtons = document.querySelectorAll(".filter-btn");
-    const totalCount = document.getElementById("totalOrdersCount");
-    const activeCount = document.getElementById("activeOrdersCount");
-    const deliveredCount = document.getElementById("deliveredOrdersCount");
+    const filterButtons =
+        document.querySelectorAll(".filter-btn");
+
+    const totalCount =
+        document.getElementById("totalOrdersCount");
+
+    const activeCount =
+        document.getElementById("activeOrdersCount");
+
+    const deliveredCount =
+        document.getElementById("deliveredOrdersCount");
 
     let orders = [];
     let filter = "all";
     let reordering = false;
     let loading = false;
 
-    const SIMULATION_KEY = "jigato_order_simulation";
+    const SIMULATION_KEY =
+        "jigato_order_simulation";
 
-    /* =====================================================
-       LOAD
-    ===================================================== */
 
     loadOrders();
 
-    // Status screen par automatically update hoga
-    setInterval(() => loadOrders(true), 5000);
+    setInterval(
+        () => loadOrders(true),
+        5000
+    );
 
+
+    /* =========================
+       LOAD ORDERS
+    ========================= */
 
     async function loadOrders(silent = false) {
 
@@ -40,37 +48,44 @@ document.addEventListener("DOMContentLoaded", () => {
 
         loading = true;
 
-        if (!silent) showLoading();
+        if (!silent) {
+            showLoading();
+        }
 
         try {
 
-            const res = await fetch("/api/orders/my", {
-                credentials: "include",
-                cache: "no-store",
-                headers: {
-                    Accept: "application/json"
+            const res = await fetch(
+                "/api/orders/my",
+                {
+                    credentials: "include",
+                    cache: "no-store",
+                    headers: {
+                        Accept: "application/json"
+                    }
                 }
-            });
+            );
 
             if (res.status === 401) {
                 location.href = "/login";
                 return;
             }
 
-            const data = await res.json();
+            const data =
+                await readJSON(res);
 
             if (!res.ok || !data.success) {
                 throw new Error(
-                    data.message || "Unable to load orders."
+                    data.message ||
+                    "Unable to load orders."
                 );
             }
 
-            orders = Array.isArray(data.orders)
-                ? data.orders
-                : [];
+            orders =
+                Array.isArray(data.orders)
+                    ? data.orders
+                    : [];
 
-            // Frontend-only testing simulation
-            simulateOrders();
+            await simulateOrders();
 
             updateStats();
             render();
@@ -90,41 +105,54 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
         } finally {
-
             loading = false;
-
         }
     }
 
 
-    /* =====================================================
-       FRONTEND ORDER SIMULATION
-    ===================================================== */
+    /* =========================
+       STATUS SIMULATION
+    ========================= */
 
-    function simulateOrders() {
+    async function simulateOrders() {
 
-        const saved =
-            JSON.parse(
-                localStorage.getItem(SIMULATION_KEY) || "{}"
+        let saved = {};
+
+        try {
+
+            saved = JSON.parse(
+                localStorage.getItem(
+                    SIMULATION_KEY
+                ) || "{}"
             );
+
+        } catch (error) {
+
+            localStorage.removeItem(
+                SIMULATION_KEY
+            );
+
+            saved = {};
+        }
 
         let changed = false;
 
-        orders.forEach(order => {
+        for (const order of orders) {
 
-            const status = normalize(
-                order.order_status
-            );
+            const currentStatus =
+                normalize(
+                    order.order_status
+                );
 
-            // Final DB status ko kabhi override mat karo
             if (
-                status === "delivered" ||
-                status === "cancelled"
+                currentStatus === "delivered" ||
+                currentStatus === "cancelled"
             ) {
-                return;
+                continue;
             }
 
-            const id = String(order.id);
+            const id =
+                String(order.id);
 
             if (!saved[id]) {
 
@@ -133,42 +161,39 @@ document.addEventListener("DOMContentLoaded", () => {
                         Math.random() * 10
                     ) + 1;
 
-                const shouldCancel =
-                    Math.random() < 0.15;
-
-                const cancelMinutes =
-                    0.5 +
-                    Math.random() * (
-                        Math.max(
-                            1,
-                            deliveryMinutes * 0.7
-                        ) - 0.5
-                    );
-
                 saved[id] = {
+
                     startedAt:
-                        new Date(
-                            order.created_at
-                        ).getTime(),
+                        Date.now(),
 
                     deliveryMinutes,
 
-                    shouldCancel,
+                    shouldCancel:
+                        Math.random() < 0.15,
 
-                    cancelMinutes
+                    cancelMinutes:
+                        0.5 +
+                        Math.random() * 3,
+
+                    lastStatus:
+                        order.order_status ||
+                        "Pending"
                 };
 
                 changed = true;
             }
 
-
-            const sim = saved[id];
+            const sim =
+                saved[id];
 
             const age =
                 (
                     Date.now() -
                     sim.startedAt
                 ) / 60000;
+
+            let newStatus =
+                "Pending";
 
 
             if (
@@ -177,46 +202,109 @@ document.addEventListener("DOMContentLoaded", () => {
                 age < sim.deliveryMinutes
             ) {
 
-                order.order_status =
+                newStatus =
                     "Cancelled";
 
-                return;
+            } else {
+
+                const progress =
+                    age /
+                    sim.deliveryMinutes;
+
+                if (progress >= 1) {
+
+                    newStatus =
+                        "Delivered";
+
+                } else if (
+                    progress >= 0.75
+                ) {
+
+                    newStatus =
+                        "Out For Delivery";
+
+                } else if (
+                    progress >= 0.45
+                ) {
+
+                    newStatus =
+                        "Preparing";
+
+                } else if (
+                    progress >= 0.15
+                ) {
+
+                    newStatus =
+                        "Confirmed";
+                }
             }
 
 
-            const progress =
-                age /
-                sim.deliveryMinutes;
+            if (
+                normalize(newStatus) !==
+                normalize(sim.lastStatus)
+            ) {
+
+                try {
+
+                    const res =
+                        await fetch(
+                            `/api/orders/${order.id}/status`,
+                            {
+                                method: "POST",
+                                credentials: "include",
+                                headers: {
+                                    "Content-Type":
+                                        "application/json",
+                                    Accept:
+                                        "application/json"
+                                },
+                                body:
+                                    JSON.stringify({
+                                        status:
+                                            newStatus
+                                    })
+                            }
+                        );
 
 
-            if (progress >= 1) {
+                    const data =
+                        await readJSON(res);
 
-                order.order_status =
-                    "Delivered";
 
-            } else if (progress >= 0.75) {
+                    if (
+                        !res.ok ||
+                        !data.success
+                    ) {
+                        throw new Error(
+                            data.message ||
+                            "Status update failed"
+                        );
+                    }
 
-                order.order_status =
-                    "Out For Delivery";
 
-            } else if (progress >= 0.45) {
+                    sim.lastStatus =
+                        newStatus;
 
-                order.order_status =
-                    "Preparing";
+                    order.order_status =
+                        newStatus;
 
-            } else if (progress >= 0.15) {
+                    changed = true;
 
-                order.order_status =
-                    "Confirmed";
+                } catch (error) {
+
+                    console.error(
+                        `STATUS UPDATE ERROR #${order.id}:`,
+                        error
+                    );
+                }
 
             } else {
 
                 order.order_status =
-                    "Pending";
-
+                    sim.lastStatus;
             }
-
-        });
+        }
 
 
         if (changed) {
@@ -225,15 +313,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 SIMULATION_KEY,
                 JSON.stringify(saved)
             );
-
         }
-
     }
 
 
-    /* =====================================================
+    /* =========================
        STATS
-    ===================================================== */
+    ========================= */
 
     function updateStats() {
 
@@ -245,30 +331,41 @@ document.addEventListener("DOMContentLoaded", () => {
                     "preparing",
                     "out for delivery"
                 ].includes(
-                    normalize(order.order_status)
+                    normalize(
+                        order.order_status
+                    )
                 )
             ).length;
 
+
         const delivered =
             orders.filter(order =>
-                normalize(order.order_status) ===
-                "delivered"
+                normalize(
+                    order.order_status
+                ) === "delivered"
             ).length;
 
-        if (totalCount)
-            totalCount.textContent = orders.length;
 
-        if (activeCount)
-            activeCount.textContent = active;
+        if (totalCount) {
+            totalCount.textContent =
+                orders.length;
+        }
 
-        if (deliveredCount)
-            deliveredCount.textContent = delivered;
+        if (activeCount) {
+            activeCount.textContent =
+                active;
+        }
+
+        if (deliveredCount) {
+            deliveredCount.textContent =
+                delivered;
+        }
     }
 
 
-    /* =====================================================
+    /* =========================
        RENDER
-    ===================================================== */
+    ========================= */
 
     function render() {
 
@@ -276,28 +373,38 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (filter !== "all") {
 
-            list = orders.filter(order =>
-                normalize(order.order_status) ===
-                normalize(filter)
-            );
-
+            list =
+                orders.filter(order =>
+                    normalize(
+                        order.order_status
+                    ) === normalize(filter)
+                );
         }
+
 
         if (!list.length) {
 
             ordersList.innerHTML = "";
-            ordersList.style.display = "none";
 
-            if (emptyOrders)
-                emptyOrders.style.display = "block";
+            ordersList.style.display =
+                "none";
+
+            if (emptyOrders) {
+                emptyOrders.style.display =
+                    "block";
+            }
 
             return;
         }
 
-        if (emptyOrders)
-            emptyOrders.style.display = "none";
 
-        ordersList.style.display = "flex";
+        if (emptyOrders) {
+            emptyOrders.style.display =
+                "none";
+        }
+
+        ordersList.style.display =
+            "flex";
 
         ordersList.innerHTML =
             list.map(orderCard).join("");
@@ -306,37 +413,62 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    /* =====================================================
+    /* =========================
        ORDER CARD
-    ===================================================== */
+    ========================= */
 
     function orderCard(order) {
 
-        const items = Array.isArray(order.items)
-            ? order.items
-            : [];
+        const items =
+            Array.isArray(order.items)
+                ? order.items
+                : [];
 
-        const shown = items.slice(0, 3);
-        const extra = Math.max(items.length - 3, 0);
+        const shown =
+            items.slice(0, 3);
+
+        const extra =
+            Math.max(
+                items.length - 3,
+                0
+            );
+
 
         const address = [
             order.address,
             order.city,
             order.state,
             order.pincode
-        ].filter(Boolean).join(", ");
+        ]
+            .filter(Boolean)
+            .join(", ");
 
-        const discount = Number(
-            order.discount || 0
-        );
+
+        const discount =
+            Number(order.discount || 0);
+
 
         const cancelled =
-            normalize(order.order_status) ===
-            "cancelled";
+            normalize(
+                order.order_status
+            ) === "cancelled";
+
+
+        const displayOrderNumber =
+    order.orderNumber ||
+    order.order_number ||
+    order.id;
+
 
         return `
 
-            <article class="order-card ${cancelled ? "order-cancelled" : ""}">
+            <article
+                class="order-card ${
+                    cancelled
+                        ? "order-cancelled"
+                        : ""
+                }"
+            >
 
                 <div class="order-card-top">
 
@@ -349,19 +481,33 @@ document.addEventListener("DOMContentLoaded", () => {
                         <div class="order-number">
 
                             <h3>
-                                Order #${order.id}
+                                Order #${escape(
+                                    displayOrderNumber
+                                )}
                             </h3>
 
                             <p>
-                                ${formatDate(order.created_at)}
+                                ${formatDate(
+                                    order.created_at
+                                )}
                             </p>
 
                         </div>
 
                     </div>
 
-                    <span class="order-status ${statusClass(order.order_status)}">
-                        ${escape(order.order_status || "Pending")}
+
+                    <span
+                        class="order-status ${
+                            statusClass(
+                                order.order_status
+                            )
+                        }"
+                    >
+                        ${escape(
+                            order.order_status ||
+                            "Pending"
+                        )}
                     </span>
 
                 </div>
@@ -374,20 +520,27 @@ document.addEventListener("DOMContentLoaded", () => {
                         <div>
 
                             <div class="order-items">
-
-                                ${shown.map(itemHTML).join("")}
-
+                                ${shown
+                                    .map(itemHTML)
+                                    .join("")}
                             </div>
+
 
                             ${
                                 extra
                                     ? `
                                     <div class="more-items">
-                                        + ${extra} more item${extra > 1 ? "s" : ""}
+                                        + ${extra}
+                                        more item${
+                                            extra > 1
+                                                ? "s"
+                                                : ""
+                                        }
                                     </div>
                                     `
                                     : ""
                             }
+
 
                             <div class="order-info">
 
@@ -449,37 +602,88 @@ document.addEventListener("DOMContentLoaded", () => {
                                 Order Summary
                             </h4>
 
-                            <div class="order-summary-row">
-                                <span>Subtotal</span>
-                                <strong>₹${money(order.subtotal)}</strong>
-                            </div>
 
                             <div class="order-summary-row">
-                                <span>Delivery</span>
-                                <strong>₹${money(order.delivery_fee)}</strong>
+
+                                <span>
+                                    Subtotal
+                                </span>
+
+                                <strong>
+                                    ₹${money(
+                                        order.subtotal
+                                    )}
+                                </strong>
+
                             </div>
 
+
                             <div class="order-summary-row">
-                                <span>GST</span>
-                                <strong>₹${money(order.gst)}</strong>
+
+                                <span>
+                                    Delivery
+                                </span>
+
+                                <strong>
+                                    ₹${money(
+                                        order.delivery_fee
+                                    )}
+                                </strong>
+
                             </div>
+
+
+                            <div class="order-summary-row">
+
+                                <span>
+                                    GST
+                                </span>
+
+                                <strong>
+                                    ₹${money(
+                                        order.gst
+                                    )}
+                                </strong>
+
+                            </div>
+
 
                             ${
                                 discount > 0
                                     ? `
                                     <div class="order-summary-row discount">
-                                        <span>Discount</span>
-                                        <strong>- ₹${money(discount)}</strong>
+
+                                        <span>
+                                            Discount
+                                        </span>
+
+                                        <strong>
+                                            - ₹${money(
+                                                discount
+                                            )}
+                                        </strong>
+
                                     </div>
                                     `
                                     : ""
                             }
 
+
                             <hr>
 
+
                             <div class="order-summary-row total">
-                                <span>Total</span>
-                                <strong>₹${money(order.total_amount)}</strong>
+
+                                <span>
+                                    Total
+                                </span>
+
+                                <strong>
+                                    ₹${money(
+                                        order.total_amount
+                                    )}
+                                </strong>
+
                             </div>
 
                         </div>
@@ -496,7 +700,9 @@ document.addEventListener("DOMContentLoaded", () => {
                         <i class="fa-regular fa-clock"></i>
 
                         <span>
-                            ${statusMessage(order.order_status)}
+                            ${statusMessage(
+                                order.order_status
+                            )}
                         </span>
 
                     </div>
@@ -534,17 +740,24 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    /* =====================================================
-       ITEMS
-    ===================================================== */
+    /* =========================
+       ORDER ITEM
+    ========================= */
 
     function itemHTML(item) {
 
-        const qty = Number(item.quantity || 0);
-        const price = Number(item.price || 0);
-        const total = Number(
-            item.item_total || qty * price
-        );
+        const qty =
+            Number(item.quantity || 0);
+
+        const price =
+            Number(item.price || 0);
+
+        const total =
+            Number(
+                item.item_total ||
+                qty * price
+            );
+
 
         return `
 
@@ -552,15 +765,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 <img
                     class="order-item-image"
-                    src="${attr(foodImage(item.image))}"
-                    alt="${attr(item.name || "Food")}"
-                    onerror="this.onerror=null;this.src='/images/food-placeholder.jpg';"
+                    src="${attr(
+                        foodImage(item.image)
+                    )}"
+                    alt="${attr(
+                        item.name || "Food"
+                    )}"
+                    onerror="
+                        this.onerror=null;
+                        this.style.display='none';
+                    "
                 >
+
 
                 <div class="order-item-info">
 
                     <h4>
-                        ${escape(item.name || "Food Item")}
+                        ${escape(
+                            item.name ||
+                            "Food Item"
+                        )}
                     </h4>
 
                     <p>
@@ -568,6 +792,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     </p>
 
                 </div>
+
 
                 <div class="order-item-price">
                     ₹${money(total)}
@@ -578,49 +803,55 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    /* =====================================================
+    /* =========================
        BUTTONS
-    ===================================================== */
+    ========================= */
 
     function bindButtons() {
 
         document
-            .querySelectorAll("[data-action]")
+            .querySelectorAll(
+                "[data-action]"
+            )
             .forEach(btn => {
 
                 btn.onclick = () => {
 
                     const id =
-                        Number(btn.dataset.id);
+                        Number(
+                            btn.dataset.id
+                        );
+
 
                     if (
                         btn.dataset.action ===
                         "view"
                     ) {
+
                         openDetails(id);
                     }
+
 
                     if (
                         btn.dataset.action ===
                         "reorder"
                     ) {
+
                         reorder(id);
                     }
-
                 };
-
             });
-
     }
 
 
-    /* =====================================================
+    /* =========================
        REORDER
-    ===================================================== */
+    ========================= */
 
     async function reorder(id) {
 
         if (reordering) return;
+
 
         const order =
             orders.find(
@@ -629,16 +860,20 @@ document.addEventListener("DOMContentLoaded", () => {
                     Number(id)
             );
 
+
         if (!order?.items?.length) {
 
             return alertBox(
                 "No items found in this order.",
                 "error"
             );
-
         }
 
-        if (typeof Swal !== "undefined") {
+
+        if (
+            typeof Swal !==
+            "undefined"
+        ) {
 
             const result =
                 await Swal.fire({
@@ -663,23 +898,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     confirmButtonColor:
                         "#ff5a1f"
-
                 });
 
-            if (!result.isConfirmed)
+
+            if (!result.isConfirmed) {
                 return;
+            }
         }
 
+
         reordering = true;
+
         setButtons(id, true);
+
 
         try {
 
             const validItems =
-                order.items.filter(item =>
-                    Number(item.food_id) > 0 &&
-                    Number(item.quantity) > 0
+                order.items.filter(
+                    item =>
+                        Number(item.food_id) > 0 &&
+                        Number(item.quantity) > 0
                 );
+
 
             const results =
                 await Promise.allSettled(
@@ -691,26 +932,39 @@ document.addEventListener("DOMContentLoaded", () => {
                     )
                 );
 
+
             const added =
                 results.filter(
-                    r => r.status === "fulfilled"
+                    r =>
+                        r.status ===
+                        "fulfilled"
                 ).length;
 
-            const failed =
-                results.length - added;
 
-            if (!added)
+            const failed =
+                results.length -
+                added;
+
+
+            if (!added) {
                 throw new Error(
                     "Unable to add items to cart."
                 );
+            }
+
 
             await updateCartCount();
+
 
             window.dispatchEvent(
                 new Event("cartUpdated")
             );
 
-            if (typeof Swal !== "undefined") {
+
+            if (
+                typeof Swal !==
+                "undefined"
+            ) {
 
                 const result =
                     await Swal.fire({
@@ -727,8 +981,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
                         text:
                             failed
-                                ? `${added} item${added > 1 ? "s" : ""} added. ${failed} failed.`
-                                : `${added} item${added > 1 ? "s" : ""} added to your cart.`,
+                                ? `${added} item${
+                                    added > 1
+                                        ? "s"
+                                        : ""
+                                } added. ${failed} failed.`
+                                : `${added} item${
+                                    added > 1
+                                        ? "s"
+                                        : ""
+                                } added to your cart.`,
 
                         showCancelButton:
                             true,
@@ -741,17 +1003,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
                         confirmButtonColor:
                             "#ff5a1f"
-
                     });
 
-                if (result.isConfirmed)
-                    location.href = "/cart-page";
+
+                if (result.isConfirmed) {
+                    location.href =
+                        "/cart-page";
+                }
 
             } else {
 
-                location.href = "/cart-page";
-
+                location.href =
+                    "/cart-page";
             }
+
 
         } catch (error) {
 
@@ -769,13 +1034,19 @@ document.addEventListener("DOMContentLoaded", () => {
         } finally {
 
             reordering = false;
-            setButtons(id, false);
 
+            setButtons(
+                id,
+                false
+            );
         }
     }
 
 
-    async function addToCart(foodId, quantity) {
+    async function addToCart(
+        foodId,
+        quantity
+    ) {
 
         const response =
             await fetch(
@@ -789,24 +1060,29 @@ document.addEventListener("DOMContentLoaded", () => {
                         Accept:
                             "application/json"
                     },
-                    body: JSON.stringify({
-                        foodId,
-                        quantity
-                    })
+                    body:
+                        JSON.stringify({
+                            foodId,
+                            quantity
+                        })
                 }
             );
 
+
         if (response.status === 401) {
 
-            location.href = "/login";
+            location.href =
+                "/login";
 
             throw new Error(
                 "Please login first."
             );
         }
 
+
         const data =
-            await response.json();
+            await readJSON(response);
+
 
         if (
             !response.ok ||
@@ -819,20 +1095,26 @@ document.addEventListener("DOMContentLoaded", () => {
             );
         }
 
+
         return data;
     }
 
 
-    function setButtons(id, loading) {
+    function setButtons(
+        id,
+        loadingState
+    ) {
 
         const btn =
             document.querySelector(
                 `[data-action="reorder"][data-id="${id}"]`
             );
 
+
         if (!btn) return;
 
-        if (loading) {
+
+        if (loadingState) {
 
             btn.disabled = true;
 
@@ -854,24 +1136,29 @@ document.addEventListener("DOMContentLoaded", () => {
                 <i class="fa-solid fa-rotate-right"></i>
                 Reorder
                 `;
-
         }
     }
 
 
-    /* =====================================================
-       DETAILS
-    ===================================================== */
+    /* =========================
+       ORDER DETAILS
+    ========================= */
 
     async function openDetails(id) {
 
         if (!orderModal) return;
 
-        orderModal.classList.add("show");
 
-        if (modalTitle)
+        orderModal.classList.add(
+            "show"
+        );
+
+
+        if (modalTitle) {
             modalTitle.textContent =
-                `Order #${id}`;
+                "Order Details";
+        }
+
 
         modalContent.innerHTML = `
             <div class="orders-loading">
@@ -880,38 +1167,55 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
         `;
 
+
         try {
 
             const res =
                 await fetch(
                     `/api/orders/my/${id}`,
                     {
-                        credentials: "include",
-                        cache: "no-store"
+                        credentials:
+                            "include",
+
+                        cache:
+                            "no-store",
+
+                        headers: {
+                            Accept:
+                                "application/json"
+                        }
                     }
                 );
 
+
             if (res.status === 401) {
 
-                location.href = "/login";
-                return;
+                location.href =
+                    "/login";
 
+                return;
             }
 
-            const data =
-                await res.json();
 
-            if (!res.ok || !data.success) {
+            const data =
+                await readJSON(res);
+
+
+            if (
+                !res.ok ||
+                !data.success
+            ) {
 
                 throw new Error(
                     data.message ||
                     "Unable to load order."
                 );
-
             }
 
-            // Apply same frontend simulation to modal
-            const modalOrder = data.order;
+
+            const modalOrder =
+                data.order;
+
 
             const mainOrder =
                 orders.find(
@@ -920,23 +1224,41 @@ document.addEventListener("DOMContentLoaded", () => {
                         Number(id)
                 );
 
+
             if (mainOrder) {
 
                 modalOrder.order_status =
                     mainOrder.order_status;
-
             }
 
-            renderModal(modalOrder);
+
+            if (modalTitle) {
+
+               modalTitle.textContent =
+    `Order #${
+        modalOrder.orderNumber ||
+        modalOrder.order_number ||
+        id
+    }`;
+            }
+
+
+            renderModal(
+                modalOrder
+            );
+
 
         } catch (error) {
 
             modalContent.innerHTML = `
                 <div class="orders-loading">
-                    <p>${escape(error.message)}</p>
+                    <p>
+                        ${escape(
+                            error.message
+                        )}
+                    </p>
                 </div>
             `;
-
         }
     }
 
@@ -948,10 +1270,16 @@ document.addEventListener("DOMContentLoaded", () => {
             order.city,
             order.state,
             order.pincode
-        ].filter(Boolean).join(", ");
+        ]
+            .filter(Boolean)
+            .join(", ");
+
 
         const discount =
-            Number(order.discount || 0);
+            Number(
+                order.discount || 0
+            );
+
 
         modalContent.innerHTML = `
 
@@ -972,7 +1300,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 </div>
 
-                <span class="order-status ${statusClass(order.order_status)}">
+
+                <span
+                    class="order-status ${
+                        statusClass(
+                            order.order_status
+                        )
+                    }"
+                >
                     ${escape(
                         order.order_status ||
                         "Pending"
@@ -1001,6 +1336,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 </div>
 
+
                 <p>
                     ${escape(
                         address ||
@@ -1014,52 +1350,92 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="modal-bill">
 
                 <div class="modal-bill-row">
-                    <span>Subtotal</span>
+
+                    <span>
+                        Subtotal
+                    </span>
+
                     <strong>
-                        ₹${money(order.subtotal)}
+                        ₹${money(
+                            order.subtotal
+                        )}
                     </strong>
+
                 </div>
 
-                <div class="modal-bill-row">
-                    <span>Delivery Fee</span>
-                    <strong>
-                        ₹${money(order.delivery_fee)}
-                    </strong>
-                </div>
 
                 <div class="modal-bill-row">
-                    <span>GST</span>
+
+                    <span>
+                        Delivery Fee
+                    </span>
+
                     <strong>
-                        ₹${money(order.gst)}
+                        ₹${money(
+                            order.delivery_fee
+                        )}
                     </strong>
+
                 </div>
+
+
+                <div class="modal-bill-row">
+
+                    <span>
+                        GST
+                    </span>
+
+                    <strong>
+                        ₹${money(
+                            order.gst
+                        )}
+                    </strong>
+
+                </div>
+
 
                 ${
                     discount > 0
                         ? `
                         <div class="modal-bill-row discount">
+
                             <span>
                                 ${
                                     order.coupon_code
-                                        ? `Coupon (${escape(order.coupon_code)})`
+                                        ? `Coupon (${escape(
+                                            order.coupon_code
+                                        )})`
                                         : "Discount"
                                 }
                             </span>
+
                             <strong>
-                                - ₹${money(discount)}
+                                - ₹${money(
+                                    discount
+                                )}
                             </strong>
+
                         </div>
                         `
                         : ""
                 }
 
+
                 <hr>
 
+
                 <div class="modal-bill-row total">
-                    <span>Total</span>
+
+                    <span>
+                        Total
+                    </span>
+
                     <strong>
-                        ₹${money(order.total_amount)}
+                        ₹${money(
+                            order.total_amount
+                        )}
                     </strong>
+
                 </div>
 
             </div>
@@ -1070,10 +1446,14 @@ document.addEventListener("DOMContentLoaded", () => {
     function modalItem(item) {
 
         const qty =
-            Number(item.quantity || 0);
+            Number(
+                item.quantity || 0
+            );
 
         const price =
-            Number(item.price || 0);
+            Number(
+                item.price || 0
+            );
 
         const total =
             Number(
@@ -1081,15 +1461,24 @@ document.addEventListener("DOMContentLoaded", () => {
                 qty * price
             );
 
+
         return `
 
             <div class="modal-item">
 
                 <img
-                    src="${attr(foodImage(item.image))}"
-                    alt="${attr(item.name || "Food")}"
-                    onerror="this.onerror=null;this.src='/images/food-placeholder.jpg';"
+                    src="${attr(
+                        foodImage(item.image)
+                    )}"
+                    alt="${attr(
+                        item.name || "Food"
+                    )}"
+                    onerror="
+                        this.onerror=null;
+                        this.style.display='none';
+                    "
                 >
+
 
                 <div class="modal-item-info">
 
@@ -1106,6 +1495,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 </div>
 
+
                 <div class="modal-item-total">
                     ₹${money(total)}
                 </div>
@@ -1115,62 +1505,73 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    /* =====================================================
+    /* =========================
        FILTER
-    ===================================================== */
+    ========================= */
 
-    filterButtons.forEach(button => {
+    filterButtons.forEach(
+        button => {
 
-        button.onclick = () => {
+            button.onclick = () => {
 
-            filterButtons.forEach(
-                btn =>
-                    btn.classList.remove(
-                        "active"
-                    )
-            );
-
-            button.classList.add("active");
-
-            filter =
-                button.dataset.status ||
-                "all";
-
-            render();
-
-        };
-
-    });
+                filterButtons.forEach(
+                    btn =>
+                        btn.classList.remove(
+                            "active"
+                        )
+                );
 
 
-    /* =====================================================
-       MODAL CLOSE
-    ===================================================== */
+                button.classList.add(
+                    "active"
+                );
+
+
+                filter =
+                    button.dataset.status ||
+                    "all";
+
+
+                render();
+            };
+        }
+    );
+
+
+    /* =========================
+       MODAL
+    ========================= */
 
     function closeModal() {
 
-        if (orderModal)
-            orderModal.classList.remove("show");
-
+        if (orderModal) {
+            orderModal.classList.remove(
+                "show"
+            );
+        }
     }
 
-    if (closeOrderModal)
-        closeOrderModal.onclick = closeModal;
+
+    if (closeOrderModal) {
+        closeOrderModal.onclick =
+            closeModal;
+    }
+
 
     if (orderModal) {
 
-        orderModal.onclick = event => {
+        orderModal.onclick =
+            event => {
 
-            if (
-                event.target ===
-                orderModal
-            ) {
-                closeModal();
-            }
-
-        };
-
+                if (
+                    event.target ===
+                    orderModal
+                ) {
+                    closeModal();
+                }
+            };
     }
+
 
     document.addEventListener(
         "keydown",
@@ -1179,18 +1580,19 @@ document.addEventListener("DOMContentLoaded", () => {
             if (
                 event.key === "Escape" &&
                 orderModal &&
-                orderModal.classList.contains("show")
+                orderModal.classList.contains(
+                    "show"
+                )
             ) {
                 closeModal();
             }
-
         }
     );
 
 
-    /* =====================================================
+    /* =========================
        CART COUNT
-    ===================================================== */
+    ========================= */
 
     async function updateCartCount() {
 
@@ -1200,18 +1602,29 @@ document.addEventListener("DOMContentLoaded", () => {
                 await fetch(
                     "/cart",
                     {
-                        credentials: "include",
-                        cache: "no-store"
+                        credentials:
+                            "include",
+
+                        cache:
+                            "no-store",
+
+                        headers: {
+                            Accept:
+                                "application/json"
+                        }
                     }
                 );
 
+
             const data =
-                await res.json();
+                await readJSON(res);
+
 
             const count =
                 Array.isArray(data.cart)
                     ? data.cart.length
                     : 0;
+
 
             const desktop =
                 document.getElementById(
@@ -1228,15 +1641,29 @@ document.addEventListener("DOMContentLoaded", () => {
                     "cartCount"
                 );
 
-            if (desktop)
-                desktop.textContent = count;
 
-            if (mobile)
-                mobile.textContent = count;
+            if (desktop) {
+                desktop.textContent =
+                    count;
+            }
 
-            if (floating)
+
+            if (mobile) {
+                mobile.textContent =
+                    count;
+            }
+
+
+            if (floating) {
+
                 floating.textContent =
-                    `${count} item${count === 1 ? "" : "s"}`;
+                    `${count} item${
+                        count === 1
+                            ? ""
+                            : "s"
+                    }`;
+            }
+
 
         } catch (error) {
 
@@ -1244,22 +1671,60 @@ document.addEventListener("DOMContentLoaded", () => {
                 "CART COUNT ERROR:",
                 error
             );
-
         }
     }
 
 
-    /* =====================================================
+    /* =========================
+       SAFE JSON
+    ========================= */
+
+    async function readJSON(response) {
+
+        const raw =
+            await response.text();
+
+
+        if (!raw.trim()) {
+
+            throw new Error(
+                `Empty server response (${response.status})`
+            );
+        }
+
+
+        try {
+
+            return JSON.parse(raw);
+
+        } catch (error) {
+
+            console.error(
+                "INVALID JSON RESPONSE:",
+                raw
+            );
+
+            throw new Error(
+                `Server returned invalid JSON (${response.status}).`
+            );
+        }
+    }
+
+
+    /* =========================
        HELPERS
-    ===================================================== */
+    ========================= */
 
     function foodImage(image) {
 
-        if (!image)
+        if (!image) {
             return "/images/food-placeholder.jpg";
+        }
+
 
         const value =
             String(image).trim();
+
 
         if (
             value.startsWith("http://") ||
@@ -1269,6 +1734,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return value;
         }
 
+
         return "/images/foods/" + value;
     }
 
@@ -1276,6 +1742,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function statusClass(status) {
 
         return {
+
             pending:
                 "status-pending",
 
@@ -1294,7 +1761,9 @@ document.addEventListener("DOMContentLoaded", () => {
             cancelled:
                 "status-cancelled"
 
-        }[normalize(status)] ||
+        }[
+            normalize(status)
+        ] ||
         "status-pending";
     }
 
@@ -1302,6 +1771,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function statusMessage(status) {
 
         return {
+
             pending:
                 "Order received",
 
@@ -1320,27 +1790,37 @@ document.addEventListener("DOMContentLoaded", () => {
             cancelled:
                 "This order was cancelled"
 
-        }[normalize(status)] ||
+        }[
+            normalize(status)
+        ] ||
         "Order placed";
     }
 
 
     function normalize(value) {
 
-        return String(value || "")
+        return String(
+            value || ""
+        )
             .trim()
             .toLowerCase()
-            .replace(/\s+/g, " ");
+            .replace(
+                /\s+/g,
+                " "
+            );
     }
 
 
     function formatDate(value) {
 
-        if (!value)
+        if (!value) {
             return "Date unavailable";
+        }
+
 
         const date =
             new Date(value);
+
 
         if (
             Number.isNaN(
@@ -1350,14 +1830,24 @@ document.addEventListener("DOMContentLoaded", () => {
             return "Date unavailable";
         }
 
+
         return date.toLocaleDateString(
             "en-IN",
             {
-                day: "2-digit",
-                month: "short",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit"
+                day:
+                    "2-digit",
+
+                month:
+                    "short",
+
+                year:
+                    "numeric",
+
+                hour:
+                    "2-digit",
+
+                minute:
+                    "2-digit"
             }
         );
     }
@@ -1365,25 +1855,46 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function money(value) {
 
-        return Number(value || 0)
-            .toLocaleString(
-                "en-IN",
-                {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                }
-            );
+        return Number(
+            value || 0
+        ).toLocaleString(
+            "en-IN",
+            {
+                minimumFractionDigits:
+                    2,
+
+                maximumFractionDigits:
+                    2
+            }
+        );
     }
 
 
     function escape(value) {
 
-        return String(value ?? "")
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
+        return String(
+            value ?? ""
+        )
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+            .replace(
+                /</g,
+                "&lt;"
+            )
+            .replace(
+                />/g,
+                "&gt;"
+            )
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+            .replace(
+                /'/g,
+                "&#039;"
+            );
     }
 
 
@@ -1396,16 +1907,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!ordersList) return;
 
-        if (emptyOrders)
-            emptyOrders.style.display = "none";
 
-        ordersList.style.display = "flex";
+        if (emptyOrders) {
+            emptyOrders.style.display =
+                "none";
+        }
+
+
+        ordersList.style.display =
+            "flex";
+
 
         ordersList.innerHTML = `
+
             <div class="orders-loading">
+
                 <div class="loading-spinner"></div>
-                <p>Loading your orders...</p>
+
+                <p>
+                    Loading your orders...
+                </p>
+
             </div>
+
         `;
     }
 
@@ -1414,7 +1938,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!ordersList) return;
 
+
         ordersList.innerHTML = `
+
             <div class="orders-loading">
 
                 <i
@@ -1429,6 +1955,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <p>
                     ${escape(message)}
                 </p>
+
 
                 <button
                     id="retryOrders"
@@ -1451,31 +1978,46 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
         `;
 
+
         const retry =
             document.getElementById(
                 "retryOrders"
             );
 
-        if (retry)
+
+        if (retry) {
             retry.onclick =
                 () => loadOrders();
+        }
     }
 
 
-    function alertBox(message, type) {
+    function alertBox(
+        message,
+        type
+    ) {
 
-        if (typeof Swal !== "undefined") {
+        if (
+            typeof Swal !==
+            "undefined"
+        ) {
 
             Swal.fire({
-                icon: type || "info",
-                text: message,
-                confirmButtonColor: "#ff5a1f"
+
+                icon:
+                    type || "info",
+
+                text:
+                    message,
+
+                confirmButtonColor:
+                    "#ff5a1f"
+
             });
 
         } else {
 
             alert(message);
-
         }
     }
 

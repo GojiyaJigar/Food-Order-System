@@ -1,3 +1,5 @@
+"use strict";
+
 const db = require("../config/db");
 
 
@@ -8,10 +10,9 @@ const db = require("../config/db");
 const getMyOrders = (userId, callback) => {
 
     const sql = `
-
         SELECT
-
             o.id,
+            o.order_number,
             o.user_id,
 
             o.customer_name,
@@ -60,9 +61,7 @@ const getMyOrders = (userId, callback) => {
         ORDER BY
             o.created_at DESC,
             oi.id ASC
-
     `;
-
 
     db.query(
         sql,
@@ -76,24 +75,13 @@ const getMyOrders = (userId, callback) => {
                     err
                 );
 
-                return callback(
-                    err,
-                    null
-                );
-
+                return callback(err, null);
             }
 
-
-            callback(
-                null,
-                results
-            );
-
+            callback(null, results);
         }
     );
-
 };
-
 
 
 // =====================================================
@@ -107,10 +95,9 @@ const getOrderById = (
 ) => {
 
     const sql = `
-
         SELECT
-
             o.id,
+            o.order_number,
             o.user_id,
 
             o.customer_name,
@@ -160,9 +147,7 @@ const getOrderById = (
 
         ORDER BY
             oi.id ASC
-
     `;
-
 
     db.query(
         sql,
@@ -179,24 +164,13 @@ const getOrderById = (
                     err
                 );
 
-                return callback(
-                    err,
-                    null
-                );
-
+                return callback(err, null);
             }
 
-
-            callback(
-                null,
-                results
-            );
-
+            callback(null, results);
         }
     );
-
 };
-
 
 
 // =====================================================
@@ -204,8 +178,6 @@ const getOrderById = (
 // =====================================================
 
 module.exports = {
-
     getMyOrders,
     getOrderById
-
 };

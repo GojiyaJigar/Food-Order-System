@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 19, 2026 at 01:26 PM
+-- Generation Time: Sep 19, 2026 at 09:26 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -47,7 +47,9 @@ CREATE TABLE `addresses` (
 --
 
 INSERT INTO `addresses` (`id`, `user_id`, `address_label`, `full_name`, `phone`, `address`, `city`, `state`, `pincode`, `is_default`, `created_at`, `updated_at`) VALUES
-(7, 20, 'Home', 'jiglo', '1234569870', 'Ahir Vidhyarthi BHavan', 'Dwarka', 'gujrat', '321654', 1, '2026-09-15 10:06:01', '2026-09-15 10:06:01');
+(7, 20, 'Home', 'jiglo', '1234569870', 'Ahir Vidhyarthi BHavan', 'Dwarka', 'gujrat', '321654', 1, '2026-09-15 10:06:01', '2026-09-15 10:06:01'),
+(8, 21, 'Home', 'Jiglo Aayar', '7418520963', 'Dwarka The Kingdom Of Krishna', 'Dwarka', 'Gujrat', '741852', 1, '2026-09-19 12:35:15', '2026-09-19 12:35:15'),
+(9, 22, 'Home', 'Scammer', '6356499565', 'dwarka', 'Dwarka', 'gujrat', '741258', 1, '2026-09-19 18:01:45', '2026-09-19 18:01:45');
 
 -- --------------------------------------------------------
 
@@ -240,15 +242,27 @@ CREATE TABLE `orders` (
   `order_status` enum('Pending','Confirmed','Preparing','Out For Delivery','Delivered','Cancelled') DEFAULT 'Pending',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `cancelled_at` datetime DEFAULT NULL
+  `cancelled_at` datetime DEFAULT NULL,
+  `cancellation_reason` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `orders`
 --
 
-INSERT INTO `orders` (`id`, `user_id`, `customer_name`, `phone`, `address`, `city`, `state`, `pincode`, `subtotal`, `delivery_fee`, `gst`, `discount`, `coupon_code`, `total_amount`, `payment_method`, `order_status`, `created_at`, `updated_at`, `cancelled_at`) VALUES
-(31, 20, 'jiglo', '1234569870', 'Ahir Vidhyarthi BHavan', 'Dwarka', 'gujrat', '321654', 941.00, 40.00, 65.87, 75.00, 'SAVE75', 971.87, 'COD', 'Pending', '2026-09-19 10:47:32', '2026-09-19 10:47:32', NULL);
+INSERT INTO `orders` (`id`, `user_id`, `customer_name`, `phone`, `address`, `city`, `state`, `pincode`, `subtotal`, `delivery_fee`, `gst`, `discount`, `coupon_code`, `total_amount`, `payment_method`, `order_status`, `created_at`, `updated_at`, `cancelled_at`, `cancellation_reason`) VALUES
+(31, 20, 'jiglo', '1234569870', 'Ahir Vidhyarthi BHavan', 'Dwarka', 'gujrat', '321654', 941.00, 40.00, 65.87, 75.00, 'SAVE75', 971.87, 'COD', 'Delivered', '2026-09-19 10:47:32', '2026-09-19 15:56:42', NULL, NULL),
+(32, 21, 'Jiglo Aayar', '7418520963', 'Dwarka The Kingdom Of Krishna', 'Dwarka', 'Gujrat', '741852', 500.00, 40.00, 35.00, 0.00, NULL, 575.00, 'COD', 'Cancelled', '2026-09-19 12:35:20', '2026-09-19 15:56:42', '2026-09-19 21:26:42', NULL),
+(33, 20, 'jiglo', '1234569870', 'Ahir Vidhyarthi BHavan', 'Dwarka', 'gujrat', '321654', 320.00, 40.00, 22.40, 0.00, NULL, 382.40, 'COD', 'Delivered', '2026-09-19 15:58:01', '2026-09-19 16:03:03', NULL, NULL),
+(34, 20, 'jiglo', '1234569870', 'Ahir Vidhyarthi BHavan', 'Dwarka', 'gujrat', '321654', 250.00, 40.00, 17.50, 0.00, NULL, 307.50, 'COD', 'Pending', '2026-09-19 16:10:50', '2026-09-19 16:10:50', NULL, NULL),
+(35, 20, 'jiglo', '1234569870', 'Ahir Vidhyarthi BHavan', 'Dwarka', 'gujrat', '321654', 160.00, 40.00, 11.20, 0.00, NULL, 211.20, 'COD', 'Pending', '2026-09-19 16:59:17', '2026-09-19 16:59:17', NULL, NULL),
+(36, 20, 'jiglo', '1234569870', 'Ahir Vidhyarthi BHavan', 'Dwarka', 'gujrat', '321654', 150.00, 40.00, 10.50, 0.00, NULL, 200.50, 'COD', 'Pending', '2026-09-19 17:00:05', '2026-09-19 17:00:05', NULL, NULL),
+(37, 22, 'Scammer', '6356499565', 'dwarka', 'Dwarka', 'gujrat', '741258', 360.00, 40.00, 25.20, 0.00, NULL, 425.20, 'COD', 'Delivered', '2026-09-19 18:01:54', '2026-09-19 19:02:35', NULL, NULL),
+(38, 22, 'Scammer', '6356499565', 'dwarka', 'Dwarka', 'gujrat', '741258', 725.00, 40.00, 50.75, 100.00, 'FLAT100', 715.75, 'UPI', 'Delivered', '2026-09-19 18:11:36', '2026-09-19 19:02:34', NULL, NULL),
+(39, 22, 'Scammer', '6356499565', 'dwarka', 'Dwarka', 'gujrat', '741258', 300.00, 40.00, 21.00, 50.00, 'SAVE50', 311.00, 'CARD', 'Delivered', '2026-09-19 18:20:51', '2026-09-19 19:02:25', NULL, NULL),
+(40, 22, 'Scammer', '6356499565', 'dwarka', 'Dwarka', 'gujrat', '741258', 159.00, 40.00, 11.13, 0.00, NULL, 210.13, 'COD', 'Delivered', '2026-09-19 19:01:52', '2026-09-19 19:04:35', NULL, NULL),
+(41, 22, 'Scammer', '6356499565', 'dwarka', 'Dwarka', 'gujrat', '741258', 200.00, 40.00, 14.00, 0.00, NULL, 254.00, 'COD', 'Cancelled', '2026-09-19 19:10:10', '2026-09-19 19:14:12', '2026-09-20 00:44:12', NULL),
+(42, 22, 'Scammer', '6356499565', 'dwarka', 'Dwarka', 'gujrat', '741258', 150.00, 40.00, 10.50, 0.00, NULL, 200.50, 'COD', 'Delivered', '2026-09-19 19:15:02', '2026-09-19 19:15:46', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -276,7 +290,52 @@ INSERT INTO `order_items` (`id`, `order_id`, `food_id`, `quantity`, `price`) VAL
 (81, 31, 70, 1, 65.00),
 (82, 31, 69, 1, 60.00),
 (83, 31, 71, 1, 90.00),
-(84, 31, 81, 1, 110.00);
+(84, 31, 81, 1, 110.00),
+(85, 32, 69, 2, 60.00),
+(86, 32, 83, 2, 80.00),
+(87, 32, 81, 2, 110.00),
+(88, 33, 83, 4, 80.00),
+(89, 34, 82, 5, 50.00),
+(90, 35, 83, 2, 80.00),
+(91, 36, 82, 3, 50.00),
+(92, 37, 69, 6, 60.00),
+(93, 38, 71, 4, 90.00),
+(94, 38, 69, 1, 60.00),
+(95, 38, 70, 1, 65.00),
+(96, 38, 82, 1, 50.00),
+(97, 38, 83, 1, 80.00),
+(98, 38, 81, 1, 110.00),
+(99, 39, 69, 1, 60.00),
+(100, 39, 81, 1, 110.00),
+(101, 39, 83, 1, 80.00),
+(102, 39, 82, 1, 50.00),
+(103, 40, 66, 1, 159.00),
+(104, 41, 82, 4, 50.00),
+(105, 42, 82, 3, 50.00);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `password_reset_tokens`
+--
+
+CREATE TABLE `password_reset_tokens` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `token_hash` varchar(255) NOT NULL,
+  `expires_at` datetime NOT NULL,
+  `used_at` datetime DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `password_reset_tokens`
+--
+
+INSERT INTO `password_reset_tokens` (`id`, `user_id`, `token_hash`, `expires_at`, `used_at`, `created_at`) VALUES
+(5, 21, '9c3f7db9e01aa870eb46f21f090e5042dc6bb8531037e42c0f7a6dc3e5e5c087', '2026-09-19 18:45:19', NULL, '2026-09-19 13:00:19'),
+(6, 22, '91a0c98560e8639b26eccbde2b2b3a78d8b0169a76d2c8717efbb647919e5e16', '2026-09-19 18:46:29', '2026-09-19 18:31:59', '2026-09-19 13:01:29'),
+(7, 22, '0a58091b6e4964a2fab005a836c87bb2c606b37b409c0e81c00ae1e27cfde4a9', '2026-09-19 23:09:11', '2026-09-19 22:54:49', '2026-09-19 17:24:11');
 
 -- --------------------------------------------------------
 
@@ -306,24 +365,27 @@ CREATE TABLE `users` (
   `id` int(11) NOT NULL,
   `name` varchar(100) NOT NULL,
   `email` varchar(100) NOT NULL,
-  `phone` varchar(15) NOT NULL,
-  `city` varchar(100) NOT NULL,
-  `password` varchar(255) NOT NULL,
+  `phone` varchar(15) DEFAULT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
   `role` enum('customer','owner','admin') NOT NULL DEFAULT 'customer',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `address` text DEFAULT NULL,
   `state` varchar(100) DEFAULT NULL,
   `pincode` varchar(10) DEFAULT NULL,
-  `status` enum('active','inactive') NOT NULL DEFAULT 'active'
+  `status` enum('active','inactive') NOT NULL DEFAULT 'active',
+  `google_id` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `name`, `email`, `phone`, `city`, `password`, `role`, `created_at`, `address`, `state`, `pincode`, `status`) VALUES
-(15, 'Ahir', 'admin@gmail.com', '7418520963', 'Dwarka', '$2b$10$FPjPfMKo67yFLW6GgxbgCO7uhN6AXnVFsdo4a6crTXUVOAplUfOiu', 'admin', '2026-09-14 13:43:25', NULL, NULL, NULL, 'active'),
-(20, 'jigar', 'jigar@gmail.com', '1234569870', 'Dwarka', '$2b$10$TXspXoecM17zTsq1fGZYiOmdVv.o8NwYYE18gjZ2BXKic55WkULHW', 'customer', '2026-09-15 10:03:55', NULL, NULL, NULL, 'active');
+INSERT INTO `users` (`id`, `name`, `email`, `phone`, `city`, `password`, `role`, `created_at`, `address`, `state`, `pincode`, `status`, `google_id`) VALUES
+(15, 'Ahir', 'admin@gmail.com', '7418520963', 'Dwarka', '$2b$10$FPjPfMKo67yFLW6GgxbgCO7uhN6AXnVFsdo4a6crTXUVOAplUfOiu', 'admin', '2026-09-14 13:43:25', NULL, NULL, NULL, 'active', NULL),
+(20, 'jigar', 'jigar@gmail.com', '1234569870', 'Dwarka', '$2b$10$TXspXoecM17zTsq1fGZYiOmdVv.o8NwYYE18gjZ2BXKic55WkULHW', 'customer', '2026-09-15 10:03:55', NULL, NULL, NULL, 'active', NULL),
+(21, 'Jigar Ahir', 'gojiyajigar000@gmail.com', '6356499565', 'Dwarka', '$2b$10$gMoJ0LjPhw.xtghlPJl1IOaenLyhIBnE92Oaa.x7bJLoBijkxeNAK', 'customer', '2026-09-19 12:33:57', NULL, NULL, NULL, 'active', NULL),
+(22, 'jiglo aayar', 'proscammer1998@gmail.com', '8520369741', 'Dwarka', '$2b$10$Dax8VUboDH1LU8rIDPew8eXYg6Bm.iWQuHAVAJq4PBEyJ5686wBy2', 'customer', '2026-09-19 13:01:24', NULL, NULL, NULL, 'active', NULL);
 
 -- --------------------------------------------------------
 
@@ -400,6 +462,14 @@ ALTER TABLE `order_items`
   ADD KEY `food_id` (`food_id`);
 
 --
+-- Indexes for table `password_reset_tokens`
+--
+ALTER TABLE `password_reset_tokens`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_user_id` (`user_id`),
+  ADD KEY `idx_token_hash` (`token_hash`);
+
+--
 -- Indexes for table `profiles`
 --
 ALTER TABLE `profiles`
@@ -412,7 +482,8 @@ ALTER TABLE `profiles`
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `email` (`email`),
-  ADD UNIQUE KEY `phone` (`phone`);
+  ADD UNIQUE KEY `phone` (`phone`),
+  ADD UNIQUE KEY `google_id` (`google_id`);
 
 --
 -- Indexes for table `user_addresses`
@@ -429,13 +500,13 @@ ALTER TABLE `user_addresses`
 -- AUTO_INCREMENT for table `addresses`
 --
 ALTER TABLE `addresses`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=116;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=142;
 
 --
 -- AUTO_INCREMENT for table `foods`
@@ -453,13 +524,19 @@ ALTER TABLE `offers`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
 
 --
 -- AUTO_INCREMENT for table `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=85;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=106;
+
+--
+-- AUTO_INCREMENT for table `password_reset_tokens`
+--
+ALTER TABLE `password_reset_tokens`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `profiles`
@@ -471,7 +548,7 @@ ALTER TABLE `profiles`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `user_addresses`
@@ -508,6 +585,12 @@ ALTER TABLE `orders`
 ALTER TABLE `order_items`
   ADD CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`food_id`) REFERENCES `foods` (`id`);
+
+--
+-- Constraints for table `password_reset_tokens`
+--
+ALTER TABLE `password_reset_tokens`
+  ADD CONSTRAINT `fk_password_reset_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `profiles`

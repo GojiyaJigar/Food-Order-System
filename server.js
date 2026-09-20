@@ -1,3 +1,5 @@
+"use strict";
+
 require("dotenv").config();
 
 const express = require("express");
@@ -15,7 +17,32 @@ require("./config/db");
 
 
 // =====================================================
-// MIDDLEWARE
+// SERVER SESSION GENERATION
+// =====================================================
+//
+// Har server start par new generation.
+//
+// Old session + new server
+//        ↓
+// Generation mismatch
+//        ↓
+// Session destroy
+//        ↓
+// Login required
+//
+// =====================================================
+
+const SESSION_GENERATION =
+    Date.now().toString();
+
+
+// Controllers ke liye available
+app.locals.sessionGeneration =
+    SESSION_GENERATION;
+
+
+// =====================================================
+// BODY PARSER
 // =====================================================
 
 app.use(
@@ -24,7 +51,9 @@ app.use(
     })
 );
 
-app.use(express.json());
+app.use(
+    express.json()
+);
 
 
 // =====================================================
@@ -46,8 +75,8 @@ app.use(
 
         cookie: {
 
-            maxAge:
-                1000 * 60 * 60 * 24,
+            // Browser session cookie
+            // maxAge / expires intentionally nahi hai
 
             httpOnly: true,
 
@@ -62,18 +91,152 @@ app.use(
 
 
 // =====================================================
-// NO CACHE FOR ALL HTML PAGES
+// SESSION GENERATION CHECK
+// =====================================================
+//
+// IMPORTANT:
+//
+// Login se pehle:
+//     req.session.userId nahi hoga
+//
+// Login ke baad controller save karega:
+//
+//     userId
+//     role
+//     name
+//     city
+//     sessionGeneration
+//
 // =====================================================
 
 app.use(
     (req, res, next) => {
 
-        // API requests ko chhod do
-        // HTML pages ke liye browser cache disable karo
+        // ---------------------------------------------
+        // GUEST
+        // ---------------------------------------------
 
         if (
-            req.method === "GET" &&
-            !req.path.startsWith("/api/")
+            !req.session ||
+            !req.session.userId
+        ) {
+
+            return next();
+
+        }
+
+
+        // ---------------------------------------------
+        // GENERATION MISSING
+        // ---------------------------------------------
+        //
+        // Iska matlab valid login session nahi hai.
+        //
+
+        if (
+            !req.session.sessionGeneration
+        ) {
+
+            console.log(
+                "⚠️ SESSION GENERATION MISSING -> DESTROYING SESSION"
+            );
+
+
+            return req.session.destroy(
+                () => {
+
+                    // API request
+                    if (
+                        req.path.startsWith("/api/")
+                    ) {
+
+                        return res.status(401).json({
+
+                            success: false,
+
+                            message:
+                                "Session expired. Please login again."
+
+                        });
+
+                    }
+
+
+                    // Normal page
+                    return res.redirect(
+                        "/login"
+                    );
+
+                }
+            );
+
+        }
+
+
+        // ---------------------------------------------
+        // OLD SERVER SESSION
+        // ---------------------------------------------
+
+        if (
+            req.session.sessionGeneration !==
+            SESSION_GENERATION
+        ) {
+
+            console.log(
+                "⚠️ OLD SESSION -> DESTROYING SESSION"
+            );
+
+
+            return req.session.destroy(
+                () => {
+
+                    // API request
+                    if (
+                        req.path.startsWith("/api/")
+                    ) {
+
+                        return res.status(401).json({
+
+                            success: false,
+
+                            message:
+                                "Session expired. Please login again."
+
+                        });
+
+                    }
+
+
+                    // Normal page
+                    return res.redirect(
+                        "/login"
+                    );
+
+                }
+            );
+
+        }
+
+
+        // ---------------------------------------------
+        // VALID SESSION
+        // ---------------------------------------------
+
+        next();
+
+    }
+);
+
+
+// =====================================================
+// NO CACHE
+// =====================================================
+
+app.use(
+    (req, res, next) => {
+
+        if (
+            req.method === "GET"
         ) {
 
             res.set(
@@ -119,24 +282,132 @@ app.use(
 
 
 // =====================================================
-// CUSTOMER AUTH MIDDLEWARE
+// AUTH / ROLE MIDDLEWARE
 // =====================================================
 
 const {
-    requireCustomer
-} = require("./middleware/adminMiddleware");
+    requireCustomer,
+    requireAdmin,
+    blockStaffFromCustomer
+} = require(
+    "./middleware/adminMiddleware"
+);
+
+
+// =====================================================
+// HELPERS
+// =====================================================
+
+function isLoggedIn(req) {
+
+    return Boolean(
+        req.session &&
+        req.session.userId
+    );
+
+}
+
+
+function getUserRole(req) {
+
+    return String(
+        req.session?.role || ""
+    )
+    .trim()
+    .toLowerCase();
+
+}
+
+
+function redirectByRole(
+    req,
+    res
+) {
+
+    const role =
+        getUserRole(req);
+
+
+    // ADMIN
+
+    if (
+        role === "admin"
+    ) {
+
+        return res.redirect(
+            "/admin/dashboard"
+        );
+
+    }
+
+
+    // OWNER
+
+    if (
+        role === "owner"
+    ) {
+
+        return res.redirect(
+            "/owner"
+        );
+
+    }
+
+
+    // CUSTOMER
+
+    return res.redirect(
+        "/"
+    );
+
+}
 
 
 // =====================================================
 // HOME
-// PUBLIC
 // =====================================================
 
 app.get(
     "/",
     (req, res) => {
 
-        res.sendFile(
+        if (
+            isLoggedIn(req)
+        ) {
+
+            const role =
+                getUserRole(req);
+
+
+            // ADMIN
+
+            if (
+                role === "admin"
+            ) {
+
+                return res.redirect(
+                    "/admin/dashboard"
+                );
+
+            }
+
+
+            // OWNER
+
+            if (
+                role === "owner"
+            ) {
+
+                return res.redirect(
+                    "/owner"
+                );
+
+            }
+
+        }
+
+
+        return res.sendFile(
             path.join(
                 __dirname,
                 "views",
@@ -149,15 +420,58 @@ app.get(
 
 
 // =====================================================
-// REGISTER
-// PUBLIC
+// LOGIN PAGE
+// =====================================================
+
+app.get(
+    "/login",
+    (req, res) => {
+
+        if (
+            isLoggedIn(req)
+        ) {
+
+            return redirectByRole(
+                req,
+                res
+            );
+
+        }
+
+
+        return res.sendFile(
+            path.join(
+                __dirname,
+                "views",
+                "login.html"
+            )
+        );
+
+    }
+);
+
+
+// =====================================================
+// REGISTER PAGE
 // =====================================================
 
 app.get(
     "/register",
     (req, res) => {
 
-        res.sendFile(
+        if (
+            isLoggedIn(req)
+        ) {
+
+            return redirectByRole(
+                req,
+                res
+            );
+
+        }
+
+
+        return res.sendFile(
             path.join(
                 __dirname,
                 "views",
@@ -170,35 +484,14 @@ app.get(
 
 
 // =====================================================
-// LOGIN
-// PUBLIC
-// =====================================================
-
-app.get(
-    "/login",
-    (req, res) => {
-
-        res.sendFile(
-            path.join(
-                __dirname,
-                "views",
-                "login.html"
-            )
-        );
-
-    }
-);
-
-// =====================================================
-// FORGOT PASSWORD PAGE
-// PUBLIC
+// FORGOT PASSWORD
 // =====================================================
 
 app.get(
     "/forgot-password",
     (req, res) => {
 
-        res.sendFile(
+        return res.sendFile(
             path.join(
                 __dirname,
                 "views",
@@ -208,16 +501,17 @@ app.get(
 
     }
 );
+
+
 // =====================================================
-// RESET PASSWORD PAGE
-// PUBLIC
+// RESET PASSWORD
 // =====================================================
 
 app.get(
     "/reset-password",
     (req, res) => {
 
-        res.sendFile(
+        return res.sendFile(
             path.join(
                 __dirname,
                 "views",
@@ -231,14 +525,14 @@ app.get(
 
 // =====================================================
 // MENU
-// PUBLIC
 // =====================================================
 
 app.get(
     "/menu",
+    blockStaffFromCustomer,
     (req, res) => {
 
-        res.sendFile(
+        return res.sendFile(
             path.join(
                 __dirname,
                 "views",
@@ -251,77 +545,15 @@ app.get(
 
 
 // =====================================================
-// CART PAGE
-// AUTH PROTECTED
-// =====================================================
-
-app.get(
-    "/cart-page",
-    requireCustomer,
-    (req, res) => {
-
-        res.sendFile(
-            path.join(
-                __dirname,
-                "views",
-                "cart.html"
-            )
-        );
-
-    }
-);
-
-
-// =====================================================
-// CHECKOUT PAGE
-// AUTH PROTECTED
-// =====================================================
-
-app.get(
-    "/checkout",
-    requireCustomer,
-    (req, res) => {
-
-        res.sendFile(
-            path.join(
-                __dirname,
-                "views",
-                "checkout.html"
-            )
-        );
-
-    }
-);
-
-
-// =====================================================
-// OLD CHECKOUT URL
-// AUTH PROTECTED
-// =====================================================
-
-app.get(
-    "/checkout-page",
-    requireCustomer,
-    (req, res) => {
-
-        res.redirect(
-            "/checkout"
-        );
-
-    }
-);
-
-
-// =====================================================
 // OFFERS
-// PUBLIC
 // =====================================================
 
 app.get(
     "/offers",
+    blockStaffFromCustomer,
     (req, res) => {
 
-        res.sendFile(
+        return res.sendFile(
             path.join(
                 __dirname,
                 "views",
@@ -334,8 +566,66 @@ app.get(
 
 
 // =====================================================
+// CART
+// =====================================================
+
+app.get(
+    "/cart-page",
+    requireCustomer,
+    (req, res) => {
+
+        return res.sendFile(
+            path.join(
+                __dirname,
+                "views",
+                "cart.html"
+            )
+        );
+
+    }
+);
+
+
+// =====================================================
+// CHECKOUT
+// =====================================================
+
+app.get(
+    "/checkout",
+    requireCustomer,
+    (req, res) => {
+
+        return res.sendFile(
+            path.join(
+                __dirname,
+                "views",
+                "checkout.html"
+            )
+        );
+
+    }
+);
+
+
+// =====================================================
+// OLD CHECKOUT
+// =====================================================
+
+app.get(
+    "/checkout-page",
+    requireCustomer,
+    (req, res) => {
+
+        return res.redirect(
+            "/checkout"
+        );
+
+    }
+);
+
+
+// =====================================================
 // PROFILE
-// AUTH PROTECTED
 // =====================================================
 
 app.get(
@@ -343,7 +633,7 @@ app.get(
     requireCustomer,
     (req, res) => {
 
-        res.sendFile(
+        return res.sendFile(
             path.join(
                 __dirname,
                 "views",
@@ -357,7 +647,6 @@ app.get(
 
 // =====================================================
 // MY ORDERS
-// AUTH PROTECTED
 // =====================================================
 
 app.get(
@@ -365,7 +654,7 @@ app.get(
     requireCustomer,
     (req, res) => {
 
-        res.sendFile(
+        return res.sendFile(
             path.join(
                 __dirname,
                 "views",
@@ -384,7 +673,19 @@ app.get(
 const authRoutes =
     require("./routes/authRoutes");
 
+
+// NEW API
+
 app.use(
+    "/api/auth",
+    authRoutes
+);
+
+
+// LEGACY
+
+app.use(
+    "/",
     authRoutes
 );
 
@@ -445,6 +746,7 @@ const orderRoutes =
     require("./routes/orderRoutes");
 
 app.use(
+    "/api/orders",
     orderRoutes
 );
 
@@ -486,7 +788,7 @@ app.use(
 
 
 // =====================================================
-// PUBLIC SETTINGS API
+// SETTINGS ROUTES
 // =====================================================
 
 const settingsRoutes =
@@ -506,8 +808,10 @@ const adminRoutes =
 
 app.use(
     "/admin",
+    requireAdmin,
     adminRoutes
 );
+
 
 // =====================================================
 // 404
@@ -516,7 +820,23 @@ app.use(
 app.use(
     (req, res) => {
 
-        res.status(404).send(
+        if (
+            req.path.startsWith("/api/")
+        ) {
+
+            return res.status(404).json({
+
+                success: false,
+
+                message:
+                    "API endpoint not found."
+
+            });
+
+        }
+
+
+        return res.status(404).send(
             "404 - Page Not Found"
         );
 
@@ -525,32 +845,60 @@ app.use(
 
 
 // =====================================================
-// ERROR HANDLER
+// GLOBAL ERROR
 // =====================================================
 
 app.use(
-    (err, req, res, next) => {
+    (
+        err,
+        req,
+        res,
+        next
+    ) => {
 
         console.error(
-            "SERVER ERROR:",
+            "======================================"
+        );
+
+        console.error(
+            "SERVER ERROR:"
+        );
+
+        console.error(
             err
         );
 
-        res.status(500).json({
+        console.error(
+            "======================================"
+        );
 
-            success: false,
 
-            message:
-                "Internal Server Error"
+        if (
+            req.path.startsWith("/api/")
+        ) {
 
-        });
+            return res.status(500).json({
+
+                success: false,
+
+                message:
+                    "Internal Server Error"
+
+            });
+
+        }
+
+
+        return res.status(500).send(
+            "500 - Internal Server Error"
+        );
 
     }
 );
 
 
 // =====================================================
-// SERVER
+// START SERVER
 // =====================================================
 
 const PORT =
@@ -562,7 +910,23 @@ app.listen(
     () => {
 
         console.log(
-            `🚀 Server Running on http://localhost:${PORT}`
+            "======================================"
+        );
+
+        console.log(
+            "🚀 Jigato Server Started"
+        );
+
+        console.log(
+            `🌐 http://localhost:${PORT}`
+        );
+
+        console.log(
+            `🔐 Session Generation: ${SESSION_GENERATION}`
+        );
+
+        console.log(
+            "======================================"
         );
 
     }
