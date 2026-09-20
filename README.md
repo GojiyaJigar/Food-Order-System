@@ -7,7 +7,7 @@
 <img src="https://img.shields.io/badge/MySQL-MariaDB-blue?style=for-the-badge&logo=mysql" alt="MySQL">
 <img src="https://img.shields.io/badge/HTML5-CSS3-orange?style=for-the-badge&logo=html5" alt="HTML5">
 
-*A complete, full-stack online food ordering ecosystem built for seamless customer experience and robust administrative control.*
+*A complete, full-stack online food ordering ecosystem built with an MVC architecture for seamless customer experience and robust administrative control.*
 
 </div>
 
@@ -17,9 +17,7 @@
 
 ## 📖 About Jigato
 
-**Jigato** is a feature-rich, full-stack online food ordering application designed from scratch. It bridges the gap between hungry customers looking for delicious food and restaurant administrators managing operations, menus, orders, and dynamic platform rules. 
-
-Built using **HTML5, CSS3, Vanilla JavaScript, Node.js, Express.js, and MySQL/MariaDB**, Jigato implements industry-standard security practices, session management, dynamic pricing/taxes, email workflows via Nodemailer, and a fully modular admin dashboard.
+**Jigato** is a feature-rich, full-stack online food ordering application. It bridges the gap between customers looking to order food online and administrators managing operations, menus, orders, customer profiles, and dynamic platform settings.
 
 ---
 
@@ -29,107 +27,158 @@ Built using **HTML5, CSS3, Vanilla JavaScript, Node.js, Express.js, and MySQL/Ma
 <summary><b>🔐 1. Authentication & Security</b></summary>
 <br>
 
-- **Customer Accounts:** Registration, secure login, logout, and active session management.
-- **Password Recovery:** Comprehensive **Forgot Password** flow with secure temporary token generation and email delivery via **Nodemailer** (Gmail SMTP/App Password).
-- **Password Reset:** Token-validated interface for creating new encrypted passwords.
-- **Security Protocols:** Industry-grade `bcrypt` password hashing, parameterized MySQL queries, session-based role protection, and no-cache security headers.
+- **Customer & Admin Accounts:** Registration, secure login, logout, and session tracking.
+- **Password Recovery:** Forgot password flow with secure token links and automated email sending via Nodemailer (`authEmailService.js`, `orderEmailService.js`).
+- **Security Protocols:** Secure password hashing, session-based role checking via `adminMiddleware.js`.
 </details>
 
 <details>
-<summary><b>🍽️ 2. Dynamic Menu & Browsing</b></summary>
+<summary><b>🍽️ 2. Menu, Cart & Checkout</b></summary>
 <br>
 
-- **Public Accessibility:** Browse food items, categories, and descriptions without requiring an immediate login.
-- **Filter & Search:** Real-time food search, category filtering (*Pizza, Burger, Snacks, Drinks, Gujarati, South Indian, Fast Food, Juices, Non-Veg*), and sorting.
-- **Admin Management:** Dedicated admin controls to add, edit, toggle availability, and update prices or images of menu items.
+- **Menu Browsing:** Publicly viewable food items categorized cleanly.
+- **Cart & Addresses:** User-specific cart handling and multiple saved delivery addresses.
+- **Offers & Coupons:** Seamless coupon application and dynamic discount verification.
 </details>
 
 <details>
-<summary><b>🛒 3. Cart & Checkout System</b></summary>
+<summary><b>🧑‍💼 3. Complete Admin Dashboard</b></summary>
 <br>
 
-- **User-Specific Cart:** Add items, scale quantities up/down, remove entries, and track unique item counts and subtotals dynamically.
-- **Delivery Addresses:** Add, edit, delete, and select multiple saved delivery addresses labeled as *Home, Work, or Other*.
-- **Smart Checkout Engine:** Real-time calculation encompassing Subtotal, Delivery Fee, GST tax rates, and active Coupon/Offer discounts based on live admin settings.
-</details>
-
-<details>
-<summary><b>🎟️ Offers, Coupons & Dynamic Settings</b></summary>
-<br>
-
-- **Promotions:** Support for general, welcome, and free-delivery coupons with percentage or flat-rate discounts, minimum order requirements, maximum caps, and usage tracking.
-- **Dynamic Admin Configuration:** Control platform behavior on the fly (Delivery Fees, Free Delivery thresholds, GST rates, Minimum Order limits, and Payment Gateways like COD, UPI, CARD) without touching code.
-</details>
-
-<details>
-<summary><b>📦 Order Management & Email Notifications</b></summary>
-<br>
-
-- **Customer Tracking:** Place orders, view complete order history, and inspect historical bills and itemized details.
-- **Order Lifecycles:** Track progression through $\rightarrow$ `Pending` $\rightarrow$ `Confirmed` $\rightarrow$ `Preparing` $\rightarrow$ `Out For Delivery` $\rightarrow$ `Delivered` (or `Cancelled`).
-- **Automated Email Triggers:** Real-time email updates sent to customers at every major order status stage.
+- **Management Modules:** Dedicated control panels for Dashboard, Users, Foods, Orders, Offers, Reports, Settings, and Profile.
+- **Shared Layouts:** Reusable modular components like admin sidebars (`public/admin/sidebar/`).
 </details>
 
 ---
 
-## 🧑‍💼 Admin Dashboard Module
+## 🏗️ Exact Project Structure
 
-The admin panel is equipped with a unified, shared-sidebar layout across all control sections:
-
-*   📊 **Dashboard:** Real-time overview of total customers, foods, orders, revenue, and active offer metrics.
-*   👥 **Users:** View, search, update details, or block/activate/delete customer accounts.
-*   🍔 **Foods/Menu:** Manage inventory, categories, pricing, and upload food images (`public/images/foods/`).
-*   📦 **Orders:** Monitor incoming orders and update delivery/preparation states.
-*   🏷️ **Offers:** Create, modify, and expire promotional coupon codes.
-*   📈 **Reports:** Generate sales and activity analytics across custom date ranges, weeks, or months.
-*   ⚙️ **Settings:** Fine-tune system rules, taxes, delivery charges, and toggle payment options.
-
----
-
-## 🏗️ Project Architecture & Structure
+Based on your directory layout, the project follows this exact tree hierarchy[cite: 1]:
 
 ```text
-JIGATO/
-│
-├── config/
-│   └── db.js
+Food Order System/
 │
 ├── controllers/
+│   ├── admin/
+│   │   ├── dashboardController.js
+│   │   ├── foodsController.js
+│   │   ├── offersController.js
+│   │   ├── ordersController.js
+│   │   ├── profileController.js
+│   │   ├── reportsController.js
+│   │   ├── settingsController.js
+│   │   └── usersController.js
+│   ├── addressController.js
+│   ├── adminController.js
 │   ├── authController.js
-│   ├── orderController.js
+│   ├── cartController.js
+│   ├── checkoutController.js
+│   ├── foodController.js
+│   ├── homeController.js
 │   ├── offerController.js
-│   └── admin/
-│       └── settingsController.js
+│   ├── orderController.js
+│   ├── passwordResetController.js
+│   └── profileController.js
 │
-├── middleware/
+├── Middleware/
 │   └── adminMiddleware.js
 │
 ├── models/
-│   ├── orderModel.js
+│   ├── admin/
+│   │   ├── dashboardModel.js
+│   │   ├── foodsModel.js
+│   │   ├── offersModel.js
+│   │   ├── ordersModel.js
+│   │   ├── profileModel.js
+│   │   ├── reportsModel.js
+│   │   ├── settingsModel.js
+│   │   └── usersModel.js
+│   ├── addressModel.js
+│   ├── adminModel.js
+│   ├── cartModel.js
+│   ├── checkoutModel.js
+│   ├── foodModel.js
+│   ├── homeModel.js
 │   ├── offerModel.js
-│   └── admin/
-│       └── settingsModel.js
-│
-├── routes/
-│   ├── authRoutes.js, homeRoutes.js, foodRoutes.js, cartRoutes.js,
-│   ├── checkoutRoutes.js, orderRoutes.js, profileRoutes.js,
-│   ├── addressRoutes.js, offerRoutes.js, settingsRoutes.js, adminRoutes.js
-│   └── admin/
-│       └── settingsRoutes.js
+│   ├── orderModel.js
+│   ├── profileModel.js
+│   └── userModel.js
 │
 ├── public/
+│   ├── admin/
+│   │   └── sidebar/
+│   │       ├── sidebar.css
+│   │       ├── sidebar.html
+│   │       └── sidebar.js
 │   ├── css/
-│   ├── js/
-│   ├── images/foods/
-│   └── admin/sidebar/
+│   │   ├── admin/ (dashboard.css, foods.css, offers.css, orders.css, profile.css, reports.css, settings.css, users.css)
+│   │   ├── cart.css, checkout.css, forgot-password.css, login.css, menu.css, my-orders.css, offers.css, orders.css, profile.css, register.css, reset-password.css, style.css
+│   ├── footer/
+│   │   ├── footer.css
+│   │   └── footer.html
+│   ├── header/
+│   │   ├── navbar.css
+│   │   └── navbar.html
+│   ├── images/
+│   │   ├── foods/
+│   │   └── hero-food.png
+│   └── js/
+│       ├── admin/ (dashboard.js, foods.js, offers.js, profile.js, reports.js, settings.js, users.js)
+│       ├── cart.js, checkout.js, forgot-password.js, index.js, login.js, menu.js, my-orders.js, offers.js, orders.js, profile.js, register.js, reset-password.js
+│
+├── routes/
+│   ├── admin/
+│   │   ├── dashboardRoutes.js
+│   │   ├── foodsRoutes.js
+│   │   ├── offersRoutes.js
+│   │   ├── ordersRoutes.js
+│   │   ├── profileRoutes.js
+│   │   ├── reportsRoutes.js
+│   │   ├── settingsRoutes.js
+│   │   └── usersRoutes.js
+│   ├── addressRoutes.js
+│   ├── adminRoutes.js
+│   ├── authRoutes.js
+│   ├── cartRoutes.js
+│   ├── checkoutRoutes.js
+│   ├── foodRoutes.js
+│   ├── homeRoutes.js
+│   ├── offerRoutes.js
+│   ├── orderRoutes.js
+│   ├── passwordResetRoutes.js
+│   ├── profileRoutes.js
+│   └── settingsRoutes.js
+│
+├── services/
+│   ├── authEmailService.js
+│   └── orderEmailService.js
 │
 ├── views/
-│   ├── index.html, register.html, login.html, forgot-password.html,
-│   ├── reset-password.html, menu.html, cart.html, checkout.html,
-│   ├── offers.html, profile.html, my-orders.html
-│   └── admin/ (dashboard.html, users.html, foods.html, orders.html, etc.)
+│   ├── admin/
+│   │   ├── dashboard.html
+│   │   ├── foods.html
+│   │   ├── offers.html
+│   │   ├── orders.html
+│   │   ├── profile.html
+│   │   ├── reports.html
+│   │   ├── settings.html
+│   │   └── users.html
+│   ├── cart.html
+│   ├── checkout.html
+│   .   ├── forgot-password.html
+│   ├── index.html
+│   ├── login.html
+│   ├── menu.html
+│   ├── my-orders.html
+│   ├── offers.html
+│   ├── profile.html
+│   ├── register.html
+│   └── reset-password.html
 │
 ├── .env
-├── server.js
+├── .gitignore
+├── food_order_system (6).sql
+├── db.js
+├── package-lock.json
 ├── package.json
-└── README.md
+└── server.js
