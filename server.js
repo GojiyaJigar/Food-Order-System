@@ -1,933 +1,222 @@
 "use strict";
-
 require("dotenv").config();
-
 const express = require("express");
 const session = require("express-session");
 const path = require("path");
-
 const app = express();
-
-
-// =====================================================
-// DATABASE
-// =====================================================
-
+// DATABASE CONFIGURATION
 require("./config/db");
-
-
-// =====================================================
-// SERVER SESSION GENERATION
-// =====================================================
-//
-// Har server start par new generation.
-//
-// Old session + new server
-//        ↓
-// Generation mismatch
-//        ↓
-// Session destroy
-//        ↓
-// Login required
-//
-// =====================================================
-
-const SESSION_GENERATION =
-    Date.now().toString();
-
-
-// Controllers ke liye available
-app.locals.sessionGeneration =
-    SESSION_GENERATION;
-
-
-// =====================================================
+// SESSION GENERATION
+const SESSION_GENERATION = Date.now().toString();
+app.locals.sessionGeneration = SESSION_GENERATION;
 // BODY PARSER
-// =====================================================
-
-app.use(
-    express.urlencoded({
-        extended: true
-    })
-);
-
-app.use(
-    express.json()
-);
-
-
-// =====================================================
-// SESSION
-// =====================================================
-
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+// SESSION CONFIGURATION
 app.use(
     session({
-
         name: "jigato.sid",
-
-        secret:
-            process.env.SESSION_SECRET ||
-            "jigato_secret_key",
-
+        secret: process.env.SESSION_SECRET || "jigato_secret_key",
         resave: false,
-
         saveUninitialized: false,
-
         cookie: {
-
-            // Browser session cookie
-            // maxAge / expires intentionally nahi hai
-
             httpOnly: true,
-
             secure: false,
-
             sameSite: "lax"
-
         }
-
     })
 );
-
-
-// =====================================================
+// SESSION NORMALIZATION: req.session.userId aur req.session.user.id dono ko sync me rakhta hai
+app.use((req, res, next) => {
+    if (!req.session) return next();
+    // User object hai par user ID missing hai
+    if (!req.session.userId && req.session.user && req.session.user.id) {
+        req.session.userId = req.session.user.id;
+    }
+    // User ID hai par user object missing hai
+    if (req.session.userId && !req.session.user) {
+        req.session.user = {
+            id: req.session.userId,
+            name: req.session.name || "",
+            role: req.session.role || "customer"
+        };
+    }
+    // User object ID ko sync me rakhein
+    if (req.session.user && req.session.userId) {
+        req.session.user.id = req.session.userId;
+    }
+    // Role ko sync me rakhein
+    if (req.session.user && req.session.role) {
+        req.session.user.role = req.session.role;
+    }
+    next();
+});
 // SESSION GENERATION CHECK
-// =====================================================
-//
-// IMPORTANT:
-//
-// Login se pehle:
-//     req.session.userId nahi hoga
-//
-// Login ke baad controller save karega:
-//
-//     userId
-//     role
-//     name
-//     city
-//     sessionGeneration
-//
-// =====================================================
-
-app.use(
-    (req, res, next) => {
-
-        // ---------------------------------------------
-        // GUEST
-        // ---------------------------------------------
-
-        if (
-            !req.session ||
-            !req.session.userId
-        ) {
-
-            return next();
-
-        }
-
-
-        // ---------------------------------------------
-        // GENERATION MISSING
-        // ---------------------------------------------
-        //
-        // Iska matlab valid login session nahi hai.
-        //
-
-        if (
-            !req.session.sessionGeneration
-        ) {
-
-            console.log(
-                "⚠️ SESSION GENERATION MISSING -> DESTROYING SESSION"
-            );
-
-
-            return req.session.destroy(
-                () => {
-
-                    // API request
-                    if (
-                        req.path.startsWith("/api/")
-                    ) {
-
-                        return res.status(401).json({
-
-                            success: false,
-
-                            message:
-                                "Session expired. Please login again."
-
-                        });
-
-                    }
-
-
-                    // Normal page
-                    return res.redirect(
-                        "/login"
-                    );
-
-                }
-            );
-
-        }
-
-
-        // ---------------------------------------------
-        // OLD SERVER SESSION
-        // ---------------------------------------------
-
-        if (
-            req.session.sessionGeneration !==
-            SESSION_GENERATION
-        ) {
-
-            console.log(
-                "⚠️ OLD SESSION -> DESTROYING SESSION"
-            );
-
-
-            return req.session.destroy(
-                () => {
-
-                    // API request
-                    if (
-                        req.path.startsWith("/api/")
-                    ) {
-
-                        return res.status(401).json({
-
-                            success: false,
-
-                            message:
-                                "Session expired. Please login again."
-
-                        });
-
-                    }
-
-
-                    // Normal page
-                    return res.redirect(
-                        "/login"
-                    );
-
-                }
-            );
-
-        }
-
-
-        // ---------------------------------------------
-        // VALID SESSION
-        // ---------------------------------------------
-
-        next();
-
+app.use((req, res, next) => {
+    // Guest users
+    if (!req.session || !req.session.userId) return next();
+    // Generation missing
+    if (!req.session.sessionGeneration) {
+        console.log("⚠️ SESSION GENERATION MISSING -> DESTROYING SESSION");
+        return req.session.destroy(() => {
+            if (req.path.startsWith("/api/")) {
+                return res.status(401).json({ success: false, message: "Session expired. Please login again." });
+            }
+            return res.redirect("/login");
+        });
     }
-);
-
-
-// =====================================================
-// NO CACHE
-// =====================================================
-
-app.use(
-    (req, res, next) => {
-
-        if (
-            req.method === "GET"
-        ) {
-
-            res.set(
-                "Cache-Control",
-                "no-store, no-cache, must-revalidate, proxy-revalidate"
-            );
-
-            res.set(
-                "Pragma",
-                "no-cache"
-            );
-
-            res.set(
-                "Expires",
-                "0"
-            );
-
-        }
-
-        next();
-
+    // Old server session
+    if (req.session.sessionGeneration !== SESSION_GENERATION) {
+        console.log("⚠️ OLD SESSION -> DESTROYING SESSION");
+        return req.session.destroy(() => {
+            if (req.path.startsWith("/api/")) {
+                return res.status(401).json({ success: false, message: "Session expired. Please login again." });
+            }
+            return res.redirect("/login");
+        });
     }
-);
-
-
-// =====================================================
+    next();
+});
+// NO CACHE MIDDLEWARE
+app.use((req, res, next) => {
+    if (req.method === "GET") {
+        res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+        res.set("Pragma", "no-cache");
+        res.set("Expires", "0");
+    }
+    next();
+});
 // STATIC FILES
-// =====================================================
-
 app.use(
-    express.static(
-        path.join(
-            __dirname,
-            "public"
-        ),
-        {
-            etag: false,
-            lastModified: false,
-            cacheControl: false
-        }
-    )
+    express.static(path.join(__dirname, "public"), {
+        etag: false,
+        lastModified: false,
+        cacheControl: false
+    })
 );
-
-
-// =====================================================
-// AUTH / ROLE MIDDLEWARE
-// =====================================================
-
+// AUTH & ROLE MIDDLEWARE
 const {
     requireCustomer,
     requireAdmin,
-    blockStaffFromCustomer
-} = require(
-    "./middleware/adminMiddleware"
-);
-
-
-// =====================================================
-// HELPERS
-// =====================================================
-
+    blockStaffFromCustomer,
+    checkBlockedUser
+} = require("./middleware/adminMiddleware");
+// HELPER FUNCTIONS
 function isLoggedIn(req) {
-
-    return Boolean(
-        req.session &&
-        req.session.userId
-    );
-
+    return Boolean(req.session && req.session.userId);
 }
-
-
 function getUserRole(req) {
-
-    return String(
-        req.session?.role || ""
-    )
-    .trim()
-    .toLowerCase();
-
+    return String(req.session?.role || req.session?.user?.role || "").trim().toLowerCase();
 }
-
-
-function redirectByRole(
-    req,
-    res
-) {
-
-    const role =
-        getUserRole(req);
-
-
-    // ADMIN
-
-    if (
-        role === "admin"
-    ) {
-
-        return res.redirect(
-            "/admin/dashboard"
-        );
-
-    }
-
-
-    // OWNER
-
-    if (
-        role === "owner"
-    ) {
-
-        return res.redirect(
-            "/owner"
-        );
-
-    }
-
-
-    // CUSTOMER
-
-    return res.redirect(
-        "/"
-    );
-
+function redirectByRole(req, res) {
+    const role = getUserRole(req);
+    if (role === "admin") return res.redirect("/admin/dashboard");
+    if (role === "owner") return res.redirect("/owner");
+    return res.redirect("/");
 }
-
-
-// =====================================================
-// HOME
-// =====================================================
-
-app.get(
-    "/",
-    (req, res) => {
-
-        if (
-            isLoggedIn(req)
-        ) {
-
-            const role =
-                getUserRole(req);
-
-
-            // ADMIN
-
-            if (
-                role === "admin"
-            ) {
-
-                return res.redirect(
-                    "/admin/dashboard"
-                );
-
-            }
-
-
-            // OWNER
-
-            if (
-                role === "owner"
-            ) {
-
-                return res.redirect(
-                    "/owner"
-                );
-
-            }
-
-        }
-
-
-        return res.sendFile(
-            path.join(
-                __dirname,
-                "views",
-                "index.html"
-            )
-        );
-
+// PAGE ROUTES
+app.get("/", (req, res) => {
+    if (isLoggedIn(req)) {
+        const role = getUserRole(req);
+        if (role === "admin") return res.redirect("/admin/dashboard");
+        if (role === "owner") return res.redirect("/owner");
     }
-);
+    return res.sendFile(path.join(__dirname, "views", "index.html"));
+});
+app.get("/login", (req, res) => {
+    if (isLoggedIn(req)) return redirectByRole(req, res);
+    return res.sendFile(path.join(__dirname, "views", "login.html"));
+});
+app.get("/register", (req, res) => {
+    if (isLoggedIn(req)) return redirectByRole(req, res);
+    return res.sendFile(path.join(__dirname, "views", "register.html"));
+});
+app.get("/forgot-password", (req, res) => {
+    return res.sendFile(path.join(__dirname, "views", "forgot-password.html"));
+});
+app.get("/reset-password", (req, res) => {
+    return res.sendFile(path.join(__dirname, "views", "reset-password.html"));
+});
+app.get("/menu", blockStaffFromCustomer, (req, res) => {
+    return res.sendFile(path.join(__dirname, "views", "menu.html"));
+});
+app.get("/offers", blockStaffFromCustomer, (req, res) => {
+    return res.sendFile(path.join(__dirname, "views", "offers.html"));
+});
+app.get("/cart-page", requireCustomer, (req, res) => {
+    return res.sendFile(path.join(__dirname, "views", "cart.html"));
+});
+app.get("/checkout", requireCustomer, (req, res) => {
+    return res.sendFile(path.join(__dirname, "views", "checkout.html"));
+});
+app.get("/checkout-page", requireCustomer, (req, res) => {
+    return res.redirect("/checkout");
+});
+app.get("/profile", requireCustomer, (req, res) => {
+    return res.sendFile(path.join(__dirname, "views", "profile.html"));
+});
+app.get("/orders", requireCustomer, (req, res) => {
+    return res.sendFile(path.join(__dirname, "views", "my-orders.html"));
+});
+// API & ROUTE MODULES
+const authRoutes = require("./routes/authRoutes");
+app.use("/api/auth", authRoutes);
+app.use("/", authRoutes);
 
+const homeRoutes = require("./routes/homeRoutes");
+app.use(homeRoutes);
 
-// =====================================================
-// LOGIN PAGE
-// =====================================================
+const foodRoutes = require("./routes/foodRoutes");
+app.use(foodRoutes);
 
-app.get(
-    "/login",
-    (req, res) => {
+const cartRoutes = require("./routes/cartRoutes");
+app.use(cartRoutes);
 
-        if (
-            isLoggedIn(req)
-        ) {
+const checkoutRoutes = require("./routes/checkoutRoutes");
+app.use(checkoutRoutes);
 
-            return redirectByRole(
-                req,
-                res
-            );
+const orderRoutes = require("./routes/orderRoutes");
+app.use("/api/orders", orderRoutes);
 
-        }
+const profileRoutes = require("./routes/profileRoutes");
+app.use(profileRoutes);
 
+const addressRoutes = require("./routes/addressRoutes");
+app.use(addressRoutes);
 
-        return res.sendFile(
-            path.join(
-                __dirname,
-                "views",
-                "login.html"
-            )
-        );
+const offerRoutes = require("./routes/offerRoutes");
+app.use(offerRoutes);
 
+const settingsRoutes = require("./routes/settingsRoutes");
+app.use(settingsRoutes);
+
+const adminRoutes = require("./routes/adminRoutes");
+app.use("/admin", requireAdmin, adminRoutes);
+
+// 404 HANDLER
+app.use((req, res) => {
+    if (req.path.startsWith("/api/")) {
+        return res.status(404).json({ success: false, message: "API endpoint not found." });
     }
-);
-
-
-// =====================================================
-// REGISTER PAGE
-// =====================================================
-
-app.get(
-    "/register",
-    (req, res) => {
-
-        if (
-            isLoggedIn(req)
-        ) {
-
-            return redirectByRole(
-                req,
-                res
-            );
-
-        }
-
-
-        return res.sendFile(
-            path.join(
-                __dirname,
-                "views",
-                "register.html"
-            )
-        );
-
+    return res.status(404).send("404 - Page Not Found");
+});
+// GLOBAL ERROR HANDLER
+app.use((err, req, res, next) => {
+    console.error("======================================");
+    console.error("SERVER ERROR:");
+    console.error(err);
+    console.error("======================================");
+    if (req.path.startsWith("/api/")) {
+        return res.status(500).json({ success: false, message: "Internal Server Error" });
     }
-);
-
-
-// =====================================================
-// FORGOT PASSWORD
-// =====================================================
-
-app.get(
-    "/forgot-password",
-    (req, res) => {
-
-        return res.sendFile(
-            path.join(
-                __dirname,
-                "views",
-                "forgot-password.html"
-            )
-        );
-
-    }
-);
-
-
-// =====================================================
-// RESET PASSWORD
-// =====================================================
-
-app.get(
-    "/reset-password",
-    (req, res) => {
-
-        return res.sendFile(
-            path.join(
-                __dirname,
-                "views",
-                "reset-password.html"
-            )
-        );
-
-    }
-);
-
-
-// =====================================================
-// MENU
-// =====================================================
-
-app.get(
-    "/menu",
-    blockStaffFromCustomer,
-    (req, res) => {
-
-        return res.sendFile(
-            path.join(
-                __dirname,
-                "views",
-                "menu.html"
-            )
-        );
-
-    }
-);
-
-
-// =====================================================
-// OFFERS
-// =====================================================
-
-app.get(
-    "/offers",
-    blockStaffFromCustomer,
-    (req, res) => {
-
-        return res.sendFile(
-            path.join(
-                __dirname,
-                "views",
-                "offers.html"
-            )
-        );
-
-    }
-);
-
-
-// =====================================================
-// CART
-// =====================================================
-
-app.get(
-    "/cart-page",
-    requireCustomer,
-    (req, res) => {
-
-        return res.sendFile(
-            path.join(
-                __dirname,
-                "views",
-                "cart.html"
-            )
-        );
-
-    }
-);
-
-
-// =====================================================
-// CHECKOUT
-// =====================================================
-
-app.get(
-    "/checkout",
-    requireCustomer,
-    (req, res) => {
-
-        return res.sendFile(
-            path.join(
-                __dirname,
-                "views",
-                "checkout.html"
-            )
-        );
-
-    }
-);
-
-
-// =====================================================
-// OLD CHECKOUT
-// =====================================================
-
-app.get(
-    "/checkout-page",
-    requireCustomer,
-    (req, res) => {
-
-        return res.redirect(
-            "/checkout"
-        );
-
-    }
-);
-
-
-// =====================================================
-// PROFILE
-// =====================================================
-
-app.get(
-    "/profile",
-    requireCustomer,
-    (req, res) => {
-
-        return res.sendFile(
-            path.join(
-                __dirname,
-                "views",
-                "profile.html"
-            )
-        );
-
-    }
-);
-
-
-// =====================================================
-// MY ORDERS
-// =====================================================
-
-app.get(
-    "/orders",
-    requireCustomer,
-    (req, res) => {
-
-        return res.sendFile(
-            path.join(
-                __dirname,
-                "views",
-                "my-orders.html"
-            )
-        );
-
-    }
-);
-
-
-// =====================================================
-// AUTH ROUTES
-// =====================================================
-
-const authRoutes =
-    require("./routes/authRoutes");
-
-
-// NEW API
-
-app.use(
-    "/api/auth",
-    authRoutes
-);
-
-
-// LEGACY
-
-app.use(
-    "/",
-    authRoutes
-);
-
-
-// =====================================================
-// HOME ROUTES
-// =====================================================
-
-const homeRoutes =
-    require("./routes/homeRoutes");
-
-app.use(
-    homeRoutes
-);
-
-
-// =====================================================
-// FOOD ROUTES
-// =====================================================
-
-const foodRoutes =
-    require("./routes/foodRoutes");
-
-app.use(
-    foodRoutes
-);
-
-
-// =====================================================
-// CART ROUTES
-// =====================================================
-
-const cartRoutes =
-    require("./routes/cartRoutes");
-
-app.use(
-    cartRoutes
-);
-
-
-// =====================================================
-// CHECKOUT ROUTES
-// =====================================================
-
-const checkoutRoutes =
-    require("./routes/checkoutRoutes");
-
-app.use(
-    checkoutRoutes
-);
-
-
-// =====================================================
-// ORDER ROUTES
-// =====================================================
-
-const orderRoutes =
-    require("./routes/orderRoutes");
-
-app.use(
-    "/api/orders",
-    orderRoutes
-);
-
-
-// =====================================================
-// PROFILE ROUTES
-// =====================================================
-
-const profileRoutes =
-    require("./routes/profileRoutes");
-
-app.use(
-    profileRoutes
-);
-
-
-// =====================================================
-// ADDRESS ROUTES
-// =====================================================
-
-const addressRoutes =
-    require("./routes/addressRoutes");
-
-app.use(
-    addressRoutes
-);
-
-
-// =====================================================
-// OFFER ROUTES
-// =====================================================
-
-const offerRoutes =
-    require("./routes/offerRoutes");
-
-app.use(
-    offerRoutes
-);
-
-
-// =====================================================
-// SETTINGS ROUTES
-// =====================================================
-
-const settingsRoutes =
-    require("./routes/settingsRoutes");
-
-app.use(
-    settingsRoutes
-);
-
-
-// =====================================================
-// ADMIN ROUTES
-// =====================================================
-
-const adminRoutes =
-    require("./routes/adminRoutes");
-
-app.use(
-    "/admin",
-    requireAdmin,
-    adminRoutes
-);
-
-
-// =====================================================
-// 404
-// =====================================================
-
-app.use(
-    (req, res) => {
-
-        if (
-            req.path.startsWith("/api/")
-        ) {
-
-            return res.status(404).json({
-
-                success: false,
-
-                message:
-                    "API endpoint not found."
-
-            });
-
-        }
-
-
-        return res.status(404).send(
-            "404 - Page Not Found"
-        );
-
-    }
-);
-
-
-// =====================================================
-// GLOBAL ERROR
-// =====================================================
-
-app.use(
-    (
-        err,
-        req,
-        res,
-        next
-    ) => {
-
-        console.error(
-            "======================================"
-        );
-
-        console.error(
-            "SERVER ERROR:"
-        );
-
-        console.error(
-            err
-        );
-
-        console.error(
-            "======================================"
-        );
-
-
-        if (
-            req.path.startsWith("/api/")
-        ) {
-
-            return res.status(500).json({
-
-                success: false,
-
-                message:
-                    "Internal Server Error"
-
-            });
-
-        }
-
-
-        return res.status(500).send(
-            "500 - Internal Server Error"
-        );
-
-    }
-);
-
-
-// =====================================================
+    return res.status(500).send("500 - Internal Server Error");
+});
 // START SERVER
-// =====================================================
-
-const PORT =
-    process.env.PORT || 5000;
-
-
-app.listen(
-    PORT,
-    () => {
-
-        console.log(
-            "======================================"
-        );
-
-        console.log(
-            "🚀 Jigato Server Started"
-        );
-
-        console.log(
-            `🌐 http://localhost:${PORT}`
-        );
-
-        console.log(
-            `🔐 Session Generation: ${SESSION_GENERATION}`
-        );
-
-        console.log(
-            "======================================"
-        );
-
-    }
-);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log("======================================");
+    console.log("🚀 Jigato Server Started");
+    console.log(`🌐 http://localhost:${PORT}`);
+    console.log(`🔐 Session Generation: ${SESSION_GENERATION}`);
+    console.log("======================================");
+});

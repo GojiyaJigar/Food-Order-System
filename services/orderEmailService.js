@@ -1,8 +1,6 @@
 "use strict";
-
 require("dotenv").config();
 const nodemailer = require("nodemailer");
-
 const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -10,11 +8,9 @@ const transporter = nodemailer.createTransport({
         pass: process.env.EMAIL_PASSWORD
     }
 });
-
 /* =========================
-   HELPERS
+   HELPER FUNCTIONS
 ========================= */
-
 function escapeHTML(value) {
     return String(value ?? "")
         .replace(/&/g, "&amp;")
@@ -23,22 +19,18 @@ function escapeHTML(value) {
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
 }
-
 function money(value) {
     return Number(value || 0).toLocaleString("en-IN", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
     });
 }
-
 function normalizeStatus(status) {
     return String(status || "").trim().toLowerCase();
 }
-
 /* =========================
-   STATUS CONTENT
+   STATUS ACCORDING CONTENT
 ========================= */
-
 function getStatusContent(status) {
     const content = {
         pending: {
@@ -90,25 +82,20 @@ function getStatusContent(status) {
             color: "#dc2626"
         }
     };
-
     return content[normalizeStatus(status)] || content.pending;
 }
-
 /* =========================
-   ORDER ITEMS
+   ORDER ITEMS ROW HTML
 ========================= */
-
 function buildOrderItems(items) {
     if (!Array.isArray(items) || !items.length) {
         return `<tr><td colspan="2" style="padding:15px 0; color:#6b7280; font-size:14px;">No item details available.</td></tr>`;
     }
-
     return items.map(item => {
         const name = escapeHTML(item.name || "Delicious Item");
         const quantity = Number(item.quantity || 0);
         const price = Number(item.price || 0);
         const total = Number(item.total ?? price * quantity);
-
         return `
             <tr>
                 <td style="padding:12px 0; border-bottom:1px solid #f3f4f6;">
@@ -122,26 +109,21 @@ function buildOrderItems(items) {
         `;
     }).join("");
 }
-
 /* =========================
-   SEND ORDER EMAIL
+   ORDER EMAIL BHEJEIN
 ========================= */
-
 const sendOrderEmail = async ({ to, customerName, status, order }) => {
     if (!to) throw new Error("Customer email is required.");
-
     order = order || {};
     const statusInfo = getStatusContent(status);
     const safeCustomerName = escapeHTML(customerName || "Foodie");
     const orderNumber = escapeHTML(order.orderNumber || `JG-${order.id || "101"}`);
-    
     const addressLine = [
         escapeHTML(order.address),
         escapeHTML(order.city),
         escapeHTML(order.state),
         escapeHTML(order.pincode)
     ].filter(Boolean).join(", ");
-
     const subtotal = Number(order.subtotal || 0);
     const deliveryFee = Number(order.delivery_fee || 0);
     const gst = Number(order.gst || 0);
@@ -149,9 +131,7 @@ const sendOrderEmail = async ({ to, customerName, status, order }) => {
     const totalAmount = Number(order.total_amount || 0);
     const safePayment = escapeHTML(order.payment_method || "COD");
     const safePhone = escapeHTML(order.phone || "");
-
     const itemsHTML = buildOrderItems(order.items);
-
     const html = `
 <!DOCTYPE html>
 <html>
@@ -165,7 +145,6 @@ const sendOrderEmail = async ({ to, customerName, status, order }) => {
 <tr>
 <td align="center">
 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px; background:#ffffff; border-radius:16px; overflow:hidden; box-shadow:0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-
 <!-- HEADER BRANDING -->
 <tr>
 <td style="padding:24px 30px; background:#ffffff; border-bottom:1px solid #f3f4f6;">
@@ -181,7 +160,6 @@ const sendOrderEmail = async ({ to, customerName, status, order }) => {
     </table>
 </td>
 </tr>
-
 <!-- HERO STATUS BANNER -->
 <tr>
 <td align="center" style="padding:36px 30px 24px; background:linear-gradient(to bottom, #fffaf9, #ffffff);">
@@ -199,7 +177,6 @@ const sendOrderEmail = async ({ to, customerName, status, order }) => {
     </p>
 </td>
 </tr>
-
 <!-- ORDER TRACKER CARD -->
 <tr>
 <td style="padding:0 30px 20px;">
@@ -218,7 +195,6 @@ const sendOrderEmail = async ({ to, customerName, status, order }) => {
     </table>
 </td>
 </tr>
-
 <!-- ORDER ITEMS SECTION -->
 <tr>
 <td style="padding:10px 30px;">
@@ -228,7 +204,6 @@ const sendOrderEmail = async ({ to, customerName, status, order }) => {
     </table>
 </td>
 </tr>
-
 <!-- BILLING CALCULATION -->
 <tr>
 <td style="padding:16px 30px 0;">
@@ -260,7 +235,6 @@ const sendOrderEmail = async ({ to, customerName, status, order }) => {
     </table>
 </td>
 </tr>
-
 <!-- DELIVERY & PAYMENT INFO -->
 <tr>
 <td style="padding:24px 30px 0;">
@@ -280,7 +254,6 @@ const sendOrderEmail = async ({ to, customerName, status, order }) => {
     </table>
 </td>
 </tr>
-
 <!-- CALL TO ACTION -->
 <tr>
 <td align="center" style="padding:28px 30px;">
@@ -289,7 +262,6 @@ const sendOrderEmail = async ({ to, customerName, status, order }) => {
     </a>
 </td>
 </tr>
-
 <!-- FOOTER -->
 <tr>
 <td align="center" style="padding:20px 30px; background:#f9fafb; border-top:1px solid #e5e7eb;">
@@ -299,7 +271,6 @@ const sendOrderEmail = async ({ to, customerName, status, order }) => {
     </p>
 </td>
 </tr>
-
 </table>
 </td>
 </tr>
@@ -307,7 +278,6 @@ const sendOrderEmail = async ({ to, customerName, status, order }) => {
 </body>
 </html>
 `;
-
     const text = `
 Jigato - ${statusInfo.label}
 Hi ${customerName || "Customer"}, ${statusInfo.message}
@@ -327,7 +297,6 @@ Address: ${addressLine}
 
 Track your order: http://localhost:5000/orders
 `;
-
     await transporter.sendMail({
         from: `"Jigato Food Delivery" <${process.env.EMAIL_USER}>`,
         to,
@@ -337,7 +306,6 @@ Track your order: http://localhost:5000/orders
         html
     });
 };
-
 module.exports = {
     sendOrderEmail
 };

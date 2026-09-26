@@ -1,484 +1,272 @@
 const offerModel = require("../models/offerModel");
 const settingsModel = require("../models/admin/settingsModel");
-
-
 // =====================================================
 // GET APPLICATION SETTINGS
 // =====================================================
-
 async function getAppSettings() {
-
     return await settingsModel.getOrCreateSettings();
-
 }
-
-
 // =====================================================
 // GET ALL OFFERS
 // =====================================================
-
 const getOffers = async (req, res) => {
-
     try {
-
         const settings =
             await getAppSettings();
-
-
         // -------------------------------------------------
         // OFFERS DISABLED
         // -------------------------------------------------
-
         if (
             Number(
                 settings.offers_enabled
             ) !== 1
         ) {
-
             return res.json({
-
                 success: true,
-
                 offers: [],
-
                 offersEnabled: false
-
             });
-
         }
-
-
         offerModel.getAllOffers(
             (err, offers) => {
-
                 if (err) {
-
-                    console.error(
-                        "GET OFFERS CONTROLLER ERROR:",
-                        err
-                    );
-
                     return res.status(500).json({
-
                         success: false,
-
                         message:
                             "Unable to load offers."
-
                     });
-
                 }
-
-
                 return res.json({
-
                     success: true,
-
                     offers:
                         offers || [],
-
                     offersEnabled: true
-
                 });
-
             }
         );
-
     }
     catch (error) {
-
-        console.error(
-            "GET OFFERS SETTINGS ERROR:",
-            error
-        );
-
         return res.status(500).json({
-
             success: false,
-
             message:
                 "Unable to load offers."
-
         });
-
     }
-
 };
-
-
 // =====================================================
 // GET SINGLE OFFER
 // =====================================================
-
 const getOffer = async (
     req,
     res
 ) => {
-
     const offerId =
         Number(
             req.params.id
         );
-
-
     // =================================================
     // ID VALIDATION
     // =================================================
-
     if (
         !Number.isInteger(offerId) ||
         offerId <= 0
     ) {
-
         return res.status(400).json({
-
             success: false,
-
             message:
                 "Invalid offer ID."
-
         });
-
     }
-
-
     try {
-
         const settings =
             await getAppSettings();
-
-
         // -------------------------------------------------
         // OFFERS DISABLED
         // -------------------------------------------------
-
         if (
             Number(
                 settings.offers_enabled
             ) !== 1
         ) {
-
             return res.status(404).json({
-
                 success: false,
-
                 message:
                     "Offers are currently disabled."
-
             });
-
         }
-
-
         offerModel.getOfferById(
             offerId,
-
             (err, offer) => {
-
                 if (err) {
-
-                    console.error(
-                        "GET OFFER CONTROLLER ERROR:",
-                        err
-                    );
-
                     return res.status(500).json({
-
                         success: false,
-
                         message:
                             "Unable to load offer."
-
                     });
-
                 }
-
-
                 if (!offer) {
-
                     return res.status(404).json({
-
                         success: false,
-
                         message:
                             "Offer not found."
-
                     });
-
                 }
-
-
                 return res.json({
-
                     success: true,
-
                     offer: offer
-
                 });
-
             }
         );
-
     }
     catch (error) {
-
-        console.error(
-            "GET SINGLE OFFER SETTINGS ERROR:",
-            error
-        );
-
         return res.status(500).json({
-
             success: false,
-
             message:
                 "Unable to load offer."
-
         });
-
     }
-
 };
-
-
 // =====================================================
 // APPLY / VALIDATE COUPON
 // =====================================================
-
 const applyCoupon = async (
     req,
     res
 ) => {
-
     const body =
         req.body || {};
-
-
     // =================================================
     // CODE
     // =================================================
-
     const code =
         String(
             body.code || ""
         )
             .trim()
             .toUpperCase();
-
-
     // =================================================
     // SUBTOTAL
     // =================================================
-
     const subtotal =
         Number(
             body.subtotal || 0
         );
-
-
     // =================================================
     // BASIC VALIDATION
     // =================================================
-
     if (!code) {
-
         return res.status(400).json({
-
             success: false,
-
             message:
                 "Please enter a coupon code."
-
         });
-
     }
-
-
     if (
         !Number.isFinite(subtotal) ||
         subtotal < 0
     ) {
-
         return res.status(400).json({
-
             success: false,
-
             message:
                 "Invalid order amount."
-
         });
-
     }
-
-
     // =================================================
     // LOAD SETTINGS
     // =================================================
-
     let settings;
-
-
     try {
-
         settings =
             await getAppSettings();
-
     }
     catch (error) {
-
-        console.error(
-            "COUPON SETTINGS ERROR:",
-            error
-        );
-
         return res.status(500).json({
-
             success: false,
-
             message:
                 "Unable to load application settings."
-
         });
-
     }
-
-
     // =================================================
     // OFFERS ENABLED CHECK
     // =================================================
-
     if (
         Number(
             settings.offers_enabled
         ) !== 1
     ) {
-
         return res.status(400).json({
-
             success: false,
-
             message:
                 "Offers are currently disabled."
-
         });
-
     }
-
-
     // =================================================
     // COUPONS ENABLED CHECK
     // =================================================
-
     if (
         Number(
             settings.coupons_enabled
         ) !== 1
     ) {
-
         return res.status(400).json({
-
             success: false,
-
             message:
                 "Coupons are currently disabled."
-
         });
-
     }
-
-
     // =================================================
     // FIND COUPON
     // =================================================
-
     offerModel.getOfferByCode(
         code,
-
         (err, offer) => {
-
             // =================================================
             // DATABASE ERROR
             // =================================================
-
             if (err) {
-
-                console.error(
-                    "COUPON LOOKUP ERROR:",
-                    err
-                );
-
                 return res.status(500).json({
-
                     success: false,
-
                     message:
                         "Unable to verify coupon."
-
                 });
-
             }
-
-
             // =================================================
             // NOT FOUND
             // =================================================
-
             if (!offer) {
-
                 return res.status(404).json({
-
                     success: false,
-
                     message:
                         "Invalid coupon code."
-
                 });
-
             }
-
-
             // =================================================
             // ACTIVE CHECK
             // =================================================
-
             if (
                 Number(
                     offer.is_active
                 ) !== 1
             ) {
-
                 return res.status(400).json({
-
                     success: false,
-
                     message:
                         "This coupon is inactive."
-
                 });
-
             }
-
-
             // =================================================
             // DATE CHECK
             // =================================================
-
             const now =
                 new Date();
-
-
             const startDate =
                 new Date(
                     offer.start_date
                 );
-
-
             const endDate =
                 new Date(
                     offer.end_date
                 );
-
-
             if (
                 Number.isNaN(
                     startDate.getTime()
@@ -487,55 +275,33 @@ const applyCoupon = async (
                     endDate.getTime()
                 )
             ) {
-
                 return res.status(400).json({
-
                     success: false,
-
                     message:
                         "This coupon has invalid validity dates."
-
                 });
-
             }
-
-
             if (
                 now < startDate
             ) {
-
                 return res.status(400).json({
-
                     success: false,
-
                     message:
                         "This coupon is not active yet."
-
                 });
-
             }
-
-
             if (
                 now > endDate
             ) {
-
                 return res.status(400).json({
-
                     success: false,
-
                     message:
                         "This coupon has expired."
-
                 });
-
             }
-
-
             // =================================================
             // USAGE LIMIT
             // =================================================
-
             if (
                 offer.usage_limit !== null &&
                 Number(
@@ -545,89 +311,60 @@ const applyCoupon = async (
                     offer.usage_limit
                 )
             ) {
-
                 return res.status(400).json({
-
                     success: false,
-
                     message:
                         "This coupon usage limit has been reached."
-
                 });
-
             }
-
-
             // =================================================
             // MINIMUM ORDER
             // =================================================
-
             const minimumOrder =
                 Number(
                     offer.min_order_amount || 0
                 );
-
-
             if (
                 subtotal < minimumOrder
             ) {
-
                 return res.status(400).json({
-
                     success: false,
-
                     message:
                         `Minimum order amount is ₹${minimumOrder.toFixed(2)}.`
-
                 });
-
             }
-
-
             // =================================================
             // DISCOUNT INFORMATION
             // =================================================
-
             const discountType =
                 String(
                     offer.discount_type || ""
                 )
                     .trim()
                     .toLowerCase();
-
-
             const discountValue =
                 Number(
                     offer.discount_value || 0
                 );
-
-
             let discount = 0;
-
-
             // =================================================
             // PERCENTAGE
             // =================================================
-
             if (
                 discountType ===
                 "percentage"
             ) {
-
                 discount =
                     (
                         subtotal *
                         discountValue
                     ) / 100;
-
-
                 if (
                     offer.max_discount !== null &&
                     Number(
                         offer.max_discount
                     ) > 0
                 ) {
-
                     discount =
                         Math.min(
                             discount,
@@ -635,32 +372,23 @@ const applyCoupon = async (
                                 offer.max_discount
                             )
                         );
-
                 }
-
             }
-
-
             // =================================================
             // FLAT
             // =================================================
-
             else if (
                 discountType ===
                 "flat"
             ) {
-
                 discount =
                     discountValue;
-
-
                 if (
                     offer.max_discount !== null &&
                     Number(
                         offer.max_discount
                     ) > 0
                 ) {
-
                     discount =
                         Math.min(
                             discount,
@@ -668,72 +396,46 @@ const applyCoupon = async (
                                 offer.max_discount
                             )
                         );
-
                 }
-
             }
-
-
             // =================================================
             // FREE DELIVERY
             // =================================================
-
             else if (
                 discountType ===
                 "free_delivery"
             ) {
-
                 // ---------------------------------------------
                 // FREE DELIVERY SETTING CHECK
                 // ---------------------------------------------
-
                 if (
                     Number(
                         settings.free_delivery_offers
                     ) !== 1
                 ) {
-
                     return res.status(400).json({
-
                         success: false,
-
                         message:
                             "Free delivery offers are currently disabled."
-
                     });
-
                 }
-
-
                 // Free delivery itself is handled
                 // during checkout delivery calculation.
                 discount = 0;
-
             }
-
-
             // =================================================
             // INVALID DISCOUNT TYPE
             // =================================================
-
             else {
-
                 return res.status(400).json({
-
                     success: false,
-
                     message:
                         "Invalid coupon type."
-
                 });
-
             }
-
-
             // =================================================
             // SAFETY
             // =================================================
-
             discount =
                 Math.max(
                     0,
@@ -742,83 +444,54 @@ const applyCoupon = async (
                         subtotal
                     )
                 );
-
-
             discount =
                 Number(
                     discount.toFixed(2)
                 );
-
-
             // =================================================
             // RESPONSE
             // =================================================
-
             return res.json({
-
                 success: true,
-
                 message:
                     "Coupon applied successfully.",
-
                 coupon: {
-
                     id:
                         offer.id,
-
                     code:
                         offer.code,
-
                     title:
                         offer.title,
-
                     description:
                         offer.description,
-
                     discountType:
                         offer.discount_type,
-
                     discountValue:
                         Number(
                             offer.discount_value
                         ),
-
                     discount:
                         discount,
-
                     maxDiscount:
                         offer.max_discount !== null
                             ? Number(
                                 offer.max_discount
                             )
                             : null,
-
                     minOrderAmount:
                         minimumOrder,
-
                     offerType:
                         offer.offer_type
-
                 }
-
             });
-
         }
     );
-
 };
-
-
 // =====================================================
 // EXPORT
 // =====================================================
-
 module.exports = {
-
     getOffers,
-
     getOffer,
-
     applyCoupon
-
 };

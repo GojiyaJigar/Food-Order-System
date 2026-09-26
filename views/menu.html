@@ -1,228 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
+    <!-- Document Metadata -->
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menu | Jigato</title>
 
-
-    <!-- NAVBAR -->
-
-    <link
-        rel="stylesheet"
-        href="/header/navbar.css"
-    >
-
-
-    <!-- FOOTER -->
-
-    <link
-        rel="stylesheet"
-        href="/footer/footer.css"
-    >
-
-
-    <!-- MENU CSS -->
-
-    <link
-        rel="stylesheet"
-        href="/css/menu.css"
-    >
-
-
-    <!-- FONT AWESOME -->
-
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
-    >
-
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="/header/navbar.css"> <!-- Navbar Stylesheet -->
+    <link rel="stylesheet" href="/footer/footer.css"> <!-- Footer Stylesheet -->
+    <link rel="stylesheet" href="/css/menu.css"> <!-- Menu Page Stylesheet -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"> <!-- Icons Library -->
 </head>
-
-
 <body>
 
-
-<!-- =====================================================
-     NAVBAR
-===================================================== -->
-
-<div id="navbar"></div>
-
-
-
-<!-- =====================================================
-     MENU HERO
-===================================================== -->
-
-<section class="menu-hero">
-
-    <div class="menu-hero-content">
-
-        <span class="section-label">
-            JIGATO MENU
-        </span>
-
-        <h1>
-            Delicious Food,
-            <br>
-            Delivered To You 🍽️
-        </h1>
-
-        <p>
-            Explore our delicious food collection
-            and order your favourites.
-        </p>
-
-    </div>
-
-</section>
-
-
-
-<!-- =====================================================
-     FOOD SEARCH
-===================================================== -->
-
-<section class="search-section">
-
-    <div class="search-box">
-
-        <i class="fa-solid fa-magnifying-glass"></i>
-
-        <input
-            type="text"
-            id="searchFood"
-            placeholder="Search your favourite food..."
-            autocomplete="off"
-        >
-
-    </div>
-
-</section>
-
-
-
-<!-- =====================================================
-     FOOD CATEGORIES
-===================================================== -->
-
-<section class="category-section" id="categorySection">
-
-    <button
-        class="category-btn active"
-        data-category="All"
-        type="button"
-    >
-        All
-    </button>
-
-</section>
-
-
-
-<!-- =====================================================
-     FOOD SECTION
-===================================================== -->
-
-<section class="food-section">
-
-    <div class="food-heading">
-
-        <div>
-
-            <span class="section-label">
-                MENU
-            </span>
-
-            <h2>
-                Explore Our Food 🍽️
-            </h2>
-
-            <p>
-                Choose from our delicious food collection.
-            </p>
-
-        </div>
-
-    </div>
-
-
-    <!-- FOOD CONTAINER -->
-
-    <div
-        class="food-container"
-        id="foodContainer"
-    >
-
-        <div class="food-loading">
-            Loading delicious food...
-        </div>
-
-    </div>
-
-
-    <!-- EMPTY FOOD -->
-
-    <div
-        class="empty-food"
-        id="emptyFood"
-        style="display:none;"
-    >
-
-        <div class="empty-food-icon">
-            🍽️
-        </div>
-
-        <h3>
-            No food found
-        </h3>
-
-        <p>
-            Try another food or category.
-        </p>
-
-    </div>
-
-</section>
-
-
-
-<!-- FOOTER -->
-
-<div id="footer"></div>
-
-
-
-<!-- SWEET ALERT -->
-
-<script
-    src="https://cdn.jsdelivr.net/npm/sweetalert2@11">
-</script>
-
-
-<!-- NAVBAR JS -->
-
-<script src="/header/navbar.js"></script>
-
-
-<!-- MENU JS -->
-
-<script src="/js/menu.js"></script>
-
-
-<!-- FOOTER JS -->
-
-<script src="/footer/footer.js"></script>
-
+    <!-- Navigation Bar Container (Injected via JS) -->
+    <div id="navbar"></div>
+
+    <!-- Main Content Area -->
+    <main>
+        <!-- Menu Hero Banner Section -->
+        <section class="menu-hero">
+            <div class="menu-hero-content">
+                <span class="section-label">JIGATO MENU</span>
+                <h1>Delicious Food, <br> Delivered To You 🍽️</h1>
+                <p>Explore our delicious food collection and order your favourites.</p>
+            </div>
+        </section>
+
+        <!-- Search Bar Section -->
+        <section class="search-section">
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="searchFood" placeholder="Search your favourite food..." autocomplete="off">
+            </div>
+        </section>
+
+        <!-- Dynamic Category Filter Buttons Section -->
+        <section class="category-section" id="categorySection">
+            <button class="category-btn active" data-category="All" type="button">All</button>
+        </section>
+
+        <!-- Food Display Section -->
+        <section class="food-section">
+            <div class="food-heading">
+                <div>
+                    <span class="section-label">MENU</span>
+                    <h2>Explore Our Food 🍽️</h2>
+                    <p>Choose from our delicious food collection.</p>
+                </div>
+            </div>
+
+            <!-- Dynamic Food Items Grid -->
+            <div class="food-container" id="foodContainer">
+                <div class="food-loading">Loading delicious food...</div>
+            </div>
+
+            <!-- No Results Found Fallback Message -->
+            <div class="empty-food" id="emptyFood" style="display:none;">
+                <div class="empty-food-icon">🍽️</div>
+                <h3>No food found</h3>
+                <p>Try another food or category.</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer Container (Injected via JS) -->
+    <div id="footer"></div>
+
+    <!-- Third-Party Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <!-- Popup Alerts Library -->
+
+    <!-- Scripts -->
+    <script src="/header/navbar.js"></script> <!-- Header Functionality -->
+    <script src="/js/menu.js"></script> <!-- Dynamic Menu Page Logic -->
+    <script src="/footer/footer.js"></script> <!-- Footer Functionality -->
 
 </body>
-
 </html>

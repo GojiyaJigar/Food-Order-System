@@ -1,262 +1,174 @@
 document.addEventListener(
     "DOMContentLoaded",
     () => {
-
-
         /* ==================================================
            ELEMENTS
         ================================================== */
-
         const form =
             document.getElementById(
                 "registerForm"
             );
-
-
         const name =
             document.getElementById(
                 "name"
             );
-
-
         const email =
             document.getElementById(
                 "email"
             );
-
-
         const phone =
             document.getElementById(
                 "phone"
             );
-
-
         const city =
             document.getElementById(
                 "city"
             );
-
-
         const password =
             document.getElementById(
                 "password"
             );
-
-
         const confirmPassword =
             document.getElementById(
                 "confirmPassword"
             );
-
-
         const terms =
             document.getElementById(
                 "terms"
             );
-
-
         const submit =
             document.getElementById(
                 "registerSubmit"
             );
-
-
         const message =
             document.getElementById(
                 "registerMessage"
             );
-
-
         const togglePassword =
             document.getElementById(
                 "togglePassword"
             );
-
-
         const toggleConfirm =
             document.getElementById(
                 "toggleConfirm"
             );
-
-
         const strengthText =
             document.getElementById(
                 "strengthText"
             );
-
-
         const strengthBars =
             document.querySelectorAll(
                 ".strength-bar span"
             );
-
-
         /* ==================================================
            MESSAGE
         ================================================== */
-
         function showMessage(
             text,
             type
         ) {
-
             if (!message)
                 return;
-
-
             message.textContent =
                 text;
-
-
             message.className =
                 "register-message " +
                 type;
-
-
             message.style.display =
                 "block";
-
         }
-
-
         function hideMessage() {
-
             if (!message)
                 return;
-
-
             message.textContent =
                 "";
-
-
             message.className =
                 "register-message";
-
-
             message.style.display =
                 "none";
-
         }
-
-
         /* ==================================================
            CLEAR ERROR WHEN USER STARTS TYPING
         ================================================== */
-
         email?.addEventListener(
             "input",
             () => {
-
                 if (
                     message &&
                     message.classList.contains("error")
                 ) {
                     hideMessage();
                 }
-
             }
         );
-
-
         phone?.addEventListener(
             "input",
             () => {
-
                 if (
                     message &&
                     message.classList.contains("error")
                 ) {
                     hideMessage();
                 }
-
             }
         );
-
-
         /* ==================================================
            PASSWORD TOGGLE
         ================================================== */
-
         togglePassword?.addEventListener(
             "click",
             () => {
-
                 if (
                     password.type ===
                     "password"
                 ) {
-
                     password.type =
                         "text";
-
-
                     togglePassword.innerHTML =
                         `
                         <i class="fa-solid fa-eye-slash"></i>
                         `;
-
                 }
                 else {
-
                     password.type =
                         "password";
-
-
                     togglePassword.innerHTML =
                         `
                         <i class="fa-solid fa-eye"></i>
                         `;
-
                 }
-
             }
         );
-
-
         /* ==================================================
            CONFIRM PASSWORD TOGGLE
         ================================================== */
-
         toggleConfirm?.addEventListener(
             "click",
             () => {
-
                 if (
                     confirmPassword.type ===
                     "password"
                 ) {
-
                     confirmPassword.type =
                         "text";
-
-
                     toggleConfirm.innerHTML =
                         `
                         <i class="fa-solid fa-eye-slash"></i>
                         `;
-
                 }
                 else {
-
                     confirmPassword.type =
                         "password";
-
-
                     toggleConfirm.innerHTML =
                         `
                         <i class="fa-solid fa-eye"></i>
                         `;
-
                 }
-
             }
         );
-
-
         /* ==================================================
            BACK BUTTON
         ================================================== */
-
         document
             .getElementById(
                 "backButton"
@@ -264,36 +176,25 @@ document.addEventListener(
             ?.addEventListener(
                 "click",
                 () => {
-
                     if (
                         document.referrer &&
                         document.referrer.includes(
                             window.location.host
                         )
                     ) {
-
                         window.history.back();
-
                         return;
-
                     }
-
-
                     window.location.href =
                         "/";
-
                 }
             );
-
-
         /* ==================================================
            PHONE
         ================================================== */
-
         phone?.addEventListener(
             "input",
             () => {
-
                 phone.value =
                     phone.value
                         .replace(
@@ -304,56 +205,38 @@ document.addEventListener(
                             0,
                             10
                         );
-
             }
         );
-
-
         /* ==================================================
            PASSWORD STRENGTH
         ================================================== */
-
         password?.addEventListener(
             "input",
             () => {
-
                 const value =
                     password.value;
-
-
                 let score = 0;
-
-
                 if (
                     value.length >= 8
                 )
                     score++;
-
-
                 if (
                     /[A-Z]/.test(value)
                 )
                     score++;
-
-
                 if (
                     /[0-9]/.test(value)
                 )
                     score++;
-
-
                 if (
                     /[^A-Za-z0-9]/.test(value)
                 )
                     score++;
-
-
                 strengthBars.forEach(
                     (
                         bar,
                         index
                     ) => {
-
                         bar.style.background =
                             index < score
                                 ? (
@@ -364,452 +247,288 @@ document.addEventListener(
                                             : "#22c55e"
                                 )
                                 : "#e8e8e8";
-
                     }
                 );
-
-
                 if (!value) {
-
                     strengthText.textContent =
                         "Use 8+ characters";
-
                 }
                 else if (
                     score <= 1
                 ) {
-
                     strengthText.textContent =
                         "Weak password";
-
                 }
                 else if (
                     score === 2
                 ) {
-
                     strengthText.textContent =
                         "Medium password";
-
                 }
                 else if (
                     score === 3
                 ) {
-
                     strengthText.textContent =
                         "Good password";
-
                 }
                 else {
-
                     strengthText.textContent =
                         "Strong password";
-
                 }
-
             }
         );
-
-
         /* ==================================================
            REGISTER
         ================================================== */
-
         form?.addEventListener(
             "submit",
             async event => {
-
                 event.preventDefault();
-
-
                 hideMessage();
-
-
                 const userName =
                     name.value.trim();
-
-
                 const userEmail =
                     email.value.trim().toLowerCase();
-
-
                 const userPhone =
                     phone.value
                         .replace(/\D/g, "")
                         .trim();
-
-
                 const userCity =
                     city.value.trim();
-
-
                 const userPassword =
                     password.value;
-
-
                 const userConfirm =
                     confirmPassword.value;
-
-
                 /* =========================================
                    NAME
                 ========================================= */
-
                 if (
                     userName.length < 2
                 ) {
-
                     showMessage(
                         "Please enter your full name.",
                         "error"
                     );
-
                     name.focus();
-
                     return;
-
                 }
-
-
                 /* =========================================
                    EMAIL
                 ========================================= */
-
                 const emailPattern =
                     /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-
                 if (
                     !emailPattern.test(
                         userEmail
                     )
                 ) {
-
                     showMessage(
                         "Please enter a valid email address.",
                         "error"
                     );
-
                     email.focus();
-
                     return;
-
                 }
-
-
                 /* =========================================
                    PHONE
                 ========================================= */
-
                 if (
                     userPhone.length !== 10
                 ) {
-
                     showMessage(
                         "Please enter a valid 10-digit mobile number.",
                         "error"
                     );
-
                     phone.focus();
-
                     return;
-
                 }
-
-
                 /* =========================================
                    CITY
                 ========================================= */
-
                 if (
                     userCity.length < 2
                 ) {
-
                     showMessage(
                         "Please enter your city.",
                         "error"
                     );
-
                     city.focus();
-
                     return;
-
                 }
-
-
                 /* =========================================
                    PASSWORD
                 ========================================= */
-
                 if (
                     userPassword.length < 8
                 ) {
-
                     showMessage(
                         "Password must be at least 8 characters.",
                         "error"
                     );
-
                     password.focus();
-
                     return;
-
                 }
-
-
                 /* =========================================
                    CONFIRM PASSWORD
                 ========================================= */
-
                 if (
                     userPassword !==
                     userConfirm
                 ) {
-
                     showMessage(
                         "Passwords do not match.",
                         "error"
                     );
-
                     confirmPassword.focus();
-
                     return;
-
                 }
-
-
                 /* =========================================
                    TERMS
                 ========================================= */
-
                 if (
                     !terms.checked
                 ) {
-
                     showMessage(
                         "Please accept the Terms and Privacy Policy.",
                         "error"
                     );
-
                     return;
-
                 }
-
-
                 /* =========================================
                    LOADING
                 ========================================= */
-
                 submit.disabled =
                     true;
-
-
                 submit.innerHTML =
                     `
                     <span>
                         Creating Account...
                     </span>
-
                     <i class="fa-solid fa-spinner fa-spin"></i>
                     `;
-
-
                 try {
-
                     /* =====================================
                        REGISTER REQUEST
                     ===================================== */
-
                     const response =
                         await fetch(
                             "/register",
                             {
                                 method:
                                     "POST",
-
                                 credentials:
                                     "include",
-
                                 headers: {
                                     "Content-Type":
                                         "application/json",
-
                                     "Accept":
                                         "application/json"
                                 },
-
                                 body:
                                     JSON.stringify({
-
                                         name:
                                             userName,
-
                                         email:
                                             userEmail,
-
                                         phone:
                                             userPhone,
-
                                         city:
                                             userCity,
-
                                         password:
                                             userPassword
-
                                     })
-
                             }
                         );
-
-
                     /* =====================================
                        READ RESPONSE
                     ===================================== */
-
                     const data =
                         await response.json();
-
-
-                    console.log(
-                        "REGISTER RESPONSE:",
-                        data
-                    );
-
-
                     /* =====================================
                        REGISTRATION ERROR
                     ===================================== */
-
                     if (
                         !response.ok ||
                         data.success !== true
                     ) {
-
                         /*
                          * MOBILE DUPLICATE
                          */
-
                         if (
                             data.field === "phone"
                         ) {
-
                             showMessage(
                                 "This mobile number is already registered.",
                                 "error"
                             );
-
-
                             phone.focus();
-
                             return;
-
                         }
-
-
                         /*
                          * EMAIL DUPLICATE
                          */
-
                         if (
                             data.field === "email"
                         ) {
-
                             showMessage(
                                 "This email is already registered.",
                                 "error"
                             );
-
-
                             email.focus();
-
                             return;
-
                         }
-
-
                         /*
                          * OTHER ERROR
                          */
-
                         showMessage(
                             data.message ||
                             "Registration failed. Please try again.",
                             "error"
                         );
-
-
                         return;
-
                     }
-
-
                     /* =====================================
                        SUCCESS
                     ===================================== */
-
                     showMessage(
                         "🎉 Account created successfully! Redirecting to login...",
                         "success"
                     );
-
-
                     setTimeout(
                         () => {
-
                             window.location.href =
                                 "/login";
-
                         },
                         1000
                     );
-
-
                 }
                 catch (error) {
-
-                    console.error(
-                        "REGISTER ERROR:",
-                        error
-                    );
-
-
                     showMessage(
                         "Unable to connect to server. Please try again.",
                         "error"
                     );
-
                 }
                 finally {
-
                     setTimeout(
                         () => {
-
                             submit.disabled =
                                 false;
-
-
                             submit.innerHTML =
                                 `
                                 <span>
                                     Create Account
                                 </span>
-
                                 <i class="fa-solid fa-arrow-right"></i>
                                 `;
-
                         },
                         1100
                     );
-
                 }
-
             }
         );
-
-
         /* ==================================================
            GOOGLE REGISTER
         ================================================== */
-
         // document
         //     .getElementById(
         //         "googleRegister"
@@ -817,13 +536,9 @@ document.addEventListener(
         //     ?.addEventListener(
         //         "click",
         //         () => {
-                            
         //             window.location.href =
         //                 "/auth/google";
-
         //         }
         //     );
-
-
     }
 );

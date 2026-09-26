@@ -1,47 +1,32 @@
 const express = require("express");
-
 const router = express.Router();
-
-
 const {
     getProfile,
     createProfile,
     updateProfile
 } = require("../controllers/profileController");
-
-
 // =====================================================
-// GET PROFILE
+// PROFILE PRAPT KAREIN
 // =====================================================
-
 router.get(
     "/api/profile",
     getProfile
 );
-
-
 // =====================================================
-// CREATE PROFILE
+// PROFILE BANAYEIN
 // =====================================================
-
 router.post(
     "/api/profile",
     createProfile
 );
-
-
 // =====================================================
-// UPDATE PROFILE
+// PROFILE UPDATE KAREIN
 // =====================================================
-
 router.put(
     "/api/profile",
     updateProfile
 );
-
-
 // =====================================================
 // EXPORT
 // =====================================================
-
 module.exports = router;

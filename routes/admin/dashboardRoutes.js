@@ -1,37 +1,28 @@
 const express = require("express");
 const path = require("path");
-
 const db = require("../../config/db");
-
 const {
     requireAdmin,
     requireAdminAPI
 } = require("../../middleware/adminMiddleware");
-
 const router = express.Router();
-
 /* =========================================================
    PROMISE WRAPPER
 ========================================================= */
-
 function query(sql, params = []) {
     return new Promise((resolve, reject) => {
         db.query(sql, params, (error, results) => {
             if (error) {
                 return reject(error);
             }
-
             resolve(results || []);
         });
     });
 }
-
-
 /* =========================================================
    DASHBOARD PAGE
    GET /admin/dashboard
 ========================================================= */
-
 router.get(
     "/dashboard",
     requireAdmin,
@@ -44,53 +35,39 @@ router.get(
         );
     }
 );
-
-
 /* =========================================================
    DASHBOARD DATA
    GET /admin/api/dashboard
 ========================================================= */
-
 async function getDashboardData(req, res) {
     try {
-
         /* =================================================
            TOTAL CUSTOMERS
-           Only role = customer
+           Keval role = customer
         ================================================= */
-
         const customerRows = await query(`
             SELECT COUNT(*) AS totalUsers
             FROM users
             WHERE role = 'customer'
         `);
-
-
         /* =================================================
            TOTAL FOODS
         ================================================= */
-
         const foodRows = await query(`
             SELECT COUNT(*) AS totalFoods
             FROM foods
         `);
-
-
         /* =================================================
            TOTAL ORDERS
         ================================================= */
-
         const orderRows = await query(`
             SELECT COUNT(*) AS totalOrders
             FROM orders
         `);
-
-
         /* =================================================
            TOTAL REVENUE
-           Cancelled orders excluded
+           Cancelled orders ko chhodkar
         ================================================= */
-
         const revenueRows = await query(`
             SELECT
                 COALESCE(
@@ -105,12 +82,9 @@ async function getDashboardData(req, res) {
                 ) AS totalRevenue
             FROM orders
         `);
-
-
         /* =================================================
            ORDER STATUS COUNTS
         ================================================= */
-
         const statusRows = await query(`
             SELECT
                 order_status,
@@ -118,8 +92,6 @@ async function getDashboardData(req, res) {
             FROM orders
             GROUP BY order_status
         `);
-
-
         const statusMap = {
             Pending: 0,
             Confirmed: 0,
@@ -128,13 +100,10 @@ async function getDashboardData(req, res) {
             Delivered: 0,
             Cancelled: 0
         };
-
-
         statusRows.forEach(row => {
             const status = String(
                 row.order_status || ""
             );
-
             if (
                 Object.prototype.hasOwnProperty.call(
                     statusMap,
@@ -145,15 +114,11 @@ async function getDashboardData(req, res) {
                     Number(row.total || 0);
             }
         });
-
-
         /* =================================================
            ACTIVE OFFERS
-           Safe fallback = 0 if offers structure differs
+           Agar offers structure alag hai toh fallback = 0
         ================================================= */
-
         let activeOffers = 0;
-
         try {
             const offerRows = await query(`
                 SELECT COUNT(*) AS total
@@ -168,25 +133,15 @@ async function getDashboardData(req, res) {
                       OR end_date >= NOW()
                   )
             `);
-
             activeOffers = Number(
                 offerRows[0]?.total || 0
             );
-
         } catch (offerError) {
-            console.warn(
-                "Dashboard offers query skipped:",
-                offerError.message
-            );
-
             activeOffers = 0;
         }
-
-
         /* =================================================
            RECENT ORDERS
         ================================================= */
-
         const recentOrders = await query(`
             SELECT
                 o.id,
@@ -213,67 +168,45 @@ async function getDashboardData(req, res) {
                 o.id DESC
             LIMIT 8
         `);
-
-
         /* =================================================
            RESPONSE
         ================================================= */
-
         return res.json({
             success: true,
-
             stats: {
                 totalUsers:
                     Number(
                         customerRows[0]?.totalUsers || 0
                     ),
-
                 totalFoods:
                     Number(
                         foodRows[0]?.totalFoods || 0
                     ),
-
                 totalOrders:
                     Number(
                         orderRows[0]?.totalOrders || 0
                     ),
-
                 totalRevenue:
                     Number(
                         revenueRows[0]?.totalRevenue || 0
                     ),
-
                 pendingOrders:
                     statusMap.Pending,
-
                 confirmedOrders:
                     statusMap.Confirmed,
-
                 preparingOrders:
                     statusMap.Preparing,
-
                 outForDeliveryOrders:
                     statusMap["Out For Delivery"],
-
                 deliveredOrders:
                     statusMap.Delivered,
-
                 cancelledOrders:
                     statusMap.Cancelled,
-
                 activeOffers
             },
-
             recentOrders
         });
-
     } catch (error) {
-
-        console.error(
-            "DASHBOARD API ERROR:",
-            error
-        );
-
         return res.status(500).json({
             success: false,
             message:
@@ -281,33 +214,26 @@ async function getDashboardData(req, res) {
         });
     }
 }
-
-
 /* =========================================================
    DASHBOARD API ROUTES
 
    Main:
    /admin/api/dashboard
 
-   Extra aliases are kept so frontend route mismatch
-   does not break the dashboard.
+   Anya aliases rakhe gaye hain taaki frontend route mismatch
+   se dashboard na toote.
 ========================================================= */
-
 router.get(
     "/api/dashboard",
     requireAdminAPI,
     getDashboardData
 );
-
 router.get(
     "/dashboard/data",
     requireAdminAPI,
     getDashboardData
 );
-
-
 /* =========================================================
    EXPORT
 ========================================================= */
-
 module.exports = router;

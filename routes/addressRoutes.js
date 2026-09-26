@@ -1,57 +1,52 @@
+"use strict";
 const express = require("express");
-
-const router = express.Router();
-
+const router =
+    express.Router();
 const {
     getAddresses,
+    getDefaultAddress,
     createAddress,
     updateAddress,
     deleteAddress
 } = require("../controllers/addressController");
-
-
-/* =====================================================
-   GET ALL ADDRESSES
-   GET /api/addresses
-===================================================== */
-
+// =====================================================
+// SABHI USER ADDRESSES PRAPT KAREIN
+// GET /api/addresses
+// =====================================================
 router.get(
     "/api/addresses",
     getAddresses
 );
-
-
-/* =====================================================
-   CREATE ADDRESS
-   POST /api/addresses
-===================================================== */
-
+// =====================================================
+// DEFAULT USER ADDRESS PRAPT KAREIN
+// GET /api/addresses/default
+// =====================================================
+router.get(
+    "/api/addresses/default",
+    getDefaultAddress
+);
+// =====================================================
+// NAYA ADDRESS BANAYEIN
+// POST /api/addresses
+// =====================================================
 router.post(
     "/api/addresses",
     createAddress
 );
-
-
-/* =====================================================
-   UPDATE ADDRESS
-   PUT /api/addresses/:id
-===================================================== */
-
+// =====================================================
+// ADDRESS UPDATE KAREIN
+// PUT /api/addresses/:id
+// =====================================================
 router.put(
     "/api/addresses/:id",
     updateAddress
 );
-
-
-/* =====================================================
-   DELETE ADDRESS
-   DELETE /api/addresses/:id
-===================================================== */
-
+// =====================================================
+// ADDRESS DELETE KAREIN
+// DELETE /api/addresses/:id
+// =====================================================
 router.delete(
     "/api/addresses/:id",
     deleteAddress
 );
-
-
 module.exports = router;

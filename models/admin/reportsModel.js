@@ -1,9 +1,7 @@
 const db = require("../../config/db");
-
 function query(sql, params = [], callback) {
     db.query(sql, params, callback);
 }
-
 function getRange(range, start, end) {
     if (range === "custom" && start && end) {
         return {
@@ -11,7 +9,6 @@ function getRange(range, start, end) {
             end: `${end} 23:59:59`
         };
     }
-
     if (range === "today") {
         return {
             start: `
@@ -25,7 +22,6 @@ function getRange(range, start, end) {
             `
         };
     }
-
     if (range === "week") {
         return {
             start: `
@@ -42,7 +38,6 @@ function getRange(range, start, end) {
             `
         };
     }
-
     return {
         start: `
             DATE_FORMAT(
@@ -61,28 +56,21 @@ function getRange(range, start, end) {
         `
     };
 }
-
-
 const getReports = (
     range,
     start,
     end,
     callback
 ) => {
-
     const r = getRange(
         range,
         start,
         end
     );
-
-
     const rangeWhere = `
         o.created_at >= ${r.start}
         AND o.created_at < ${r.end}
     `;
-
-
     const overviewSql = `
         SELECT
             COUNT(*) AS orders,
@@ -99,16 +87,12 @@ const getReports = (
         FROM orders o
         WHERE ${rangeWhere}
     `;
-
-
     const customersSql = `
         SELECT COUNT(DISTINCT o.user_id) AS customers
         FROM orders o
         WHERE ${rangeWhere}
           AND o.order_status <> 'Cancelled'
     `;
-
-
     const revenueSql = `
         SELECT
             DATE(o.created_at) AS report_date,
@@ -127,8 +111,6 @@ const getReports = (
         GROUP BY DATE(o.created_at)
         ORDER BY DATE(o.created_at)
     `;
-
-
     const statusSql = `
         SELECT
             o.order_status,
@@ -137,8 +119,6 @@ const getReports = (
         WHERE ${rangeWhere}
         GROUP BY o.order_status
     `;
-
-
     const foodsSql = `
         SELECT
             f.name,
@@ -155,8 +135,6 @@ const getReports = (
         ORDER BY quantity DESC
         LIMIT 10
     `;
-
-
     const paymentSql = `
         SELECT
             o.payment_method,
@@ -175,8 +153,6 @@ const getReports = (
         WHERE ${rangeWhere}
         GROUP BY o.payment_method
     `;
-
-
     const customerInsightSql = `
         SELECT
             COUNT(*) AS total,
@@ -198,8 +174,6 @@ const getReports = (
         FROM users u
         WHERE u.role = 'customer'
     `;
-
-
     const offerSql = `
         SELECT
             COUNT(*) AS total,
@@ -218,8 +192,6 @@ const getReports = (
             ) AS used
         FROM offers
     `;
-
-
     const discountSql = `
         SELECT
             COALESCE(
@@ -235,58 +207,41 @@ const getReports = (
         FROM orders o
         WHERE ${rangeWhere}
     `;
-
-
     query(
         overviewSql,
         [],
         (error, overviewRows) => {
-
             if (error) {
                 return callback(error);
             }
-
-
             query(
                 customersSql,
                 [],
                 (error, customerRows) => {
-
                     if (error) {
                         return callback(error);
                     }
-
-
                     query(
                         revenueSql,
                         [],
                         (error, revenueRows) => {
-
                             if (error) {
                                 return callback(error);
                             }
-
-
                             query(
                                 statusSql,
                                 [],
                                 (error, statusRows) => {
-
                                     if (error) {
                                         return callback(error);
                                     }
-
-
                                     query(
                                         foodsSql,
                                         [],
                                         (error, foodRows) => {
-
                                             if (error) {
                                                 return callback(error);
                                             }
-
-
                                             query(
                                                 paymentSql,
                                                 [],
@@ -294,12 +249,9 @@ const getReports = (
                                                     error,
                                                     paymentRows
                                                 ) => {
-
                                                     if (error) {
                                                         return callback(error);
                                                     }
-
-
                                                     query(
                                                         customerInsightSql,
                                                         [],
@@ -307,12 +259,9 @@ const getReports = (
                                                             error,
                                                             customerInsightRows
                                                         ) => {
-
                                                             if (error) {
                                                                 return callback(error);
                                                             }
-
-
                                                             query(
                                                                 offerSql,
                                                                 [],
@@ -320,12 +269,9 @@ const getReports = (
                                                                     error,
                                                                     offerRows
                                                                 ) => {
-
                                                                     if (error) {
                                                                         return callback(error);
                                                                     }
-
-
                                                                     query(
                                                                         discountSql,
                                                                         [],
@@ -333,12 +279,9 @@ const getReports = (
                                                                             error,
                                                                             discountRows
                                                                         ) => {
-
                                                                             if (error) {
                                                                                 return callback(error);
                                                                             }
-
-
                                                                             callback(
                                                                                 null,
                                                                                 {
@@ -347,17 +290,14 @@ const getReports = (
                                                                                             Number(
                                                                                                 overviewRows[0]?.revenue || 0
                                                                                             ),
-
                                                                                         orders:
                                                                                             Number(
                                                                                                 overviewRows[0]?.orders || 0
                                                                                             ),
-
                                                                                         customers:
                                                                                             Number(
                                                                                                 customerRows[0]?.customers || 0
                                                                                             ),
-
                                                                                         average_order:
                                                                                             Number(
                                                                                                 overviewRows[0]?.orders
@@ -372,7 +312,6 @@ const getReports = (
                                                                                                     : 0
                                                                                             )
                                                                                     },
-
                                                                                     revenue:
                                                                                         revenueRows.map(
                                                                                             row => ({
@@ -386,21 +325,18 @@ const getReports = (
                                                                                                             month: "short"
                                                                                                         }
                                                                                                     ),
-
                                                                                                 revenue:
                                                                                                     Number(
                                                                                                         row.revenue || 0
                                                                                                     )
                                                                                             })
                                                                                         ),
-
                                                                                     order_status:
                                                                                         statusRows.reduce(
                                                                                             (
                                                                                                 obj,
                                                                                                 row
                                                                                             ) => {
-
                                                                                                 const key =
                                                                                                     String(
                                                                                                         row.order_status
@@ -410,42 +346,35 @@ const getReports = (
                                                                                                             / /g,
                                                                                                             "_"
                                                                                                         );
-
                                                                                                 obj[key] =
                                                                                                     Number(
                                                                                                         row.total || 0
                                                                                                     );
-
                                                                                                 return obj;
                                                                                             },
                                                                                             {}
                                                                                         ),
-
                                                                                     top_foods:
                                                                                         foodRows.map(
                                                                                             row => ({
                                                                                                 name:
                                                                                                     row.name,
-
                                                                                                 quantity:
                                                                                                     Number(
                                                                                                         row.quantity || 0
                                                                                                     ),
-
                                                                                                 revenue:
                                                                                                     Number(
                                                                                                         row.revenue || 0
                                                                                                     )
                                                                                             })
                                                                                         ),
-
                                                                                     payments:
                                                                                         paymentRows.reduce(
                                                                                             (
                                                                                                 obj,
                                                                                                 row
                                                                                             ) => {
-
                                                                                                 obj[
                                                                                                     row.payment_method
                                                                                                 ] = {
@@ -453,53 +382,44 @@ const getReports = (
                                                                                                         Number(
                                                                                                             row.orders || 0
                                                                                                         ),
-
                                                                                                     amount:
                                                                                                         Number(
                                                                                                             row.amount || 0
                                                                                                         )
                                                                                                 };
-
                                                                                                 return obj;
                                                                                             },
                                                                                             {}
                                                                                         ),
-
                                                                                     customer_insights:
                                                                                         {
                                                                                             total:
                                                                                                 Number(
                                                                                                     customerInsightRows[0]?.total || 0
                                                                                                 ),
-
                                                                                             new:
                                                                                                 Number(
                                                                                                     customerInsightRows[0]?.new_customers || 0
                                                                                                 ),
-
                                                                                             active:
                                                                                                 Number(
                                                                                                     customerInsightRows[0]?.active_customers || 0
                                                                                                 )
                                                                                         },
-
                                                                                     offers:
                                                                                         {
                                                                                             total:
                                                                                                 Number(
                                                                                                     offerRows[0]?.total || 0
                                                                                                 ),
-
                                                                                             active:
                                                                                                 Number(
                                                                                                     offerRows[0]?.active || 0
                                                                                                 ),
-
                                                                                             used:
                                                                                                 Number(
                                                                                                     offerRows[0]?.used || 0
                                                                                                 ),
-
                                                                                             discount:
                                                                                                 Number(
                                                                                                     discountRows[0]?.discount || 0
@@ -526,8 +446,6 @@ const getReports = (
         }
     );
 };
-
-
 module.exports = {
     getReports
 };

@@ -2,489 +2,196 @@
 <html lang="en">
 
 <head>
-
+    <!-- Page Document Encoding and Responsive Viewport Meta Settings -->
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
+    <!-- Page Title -->
     <title>Jigato | Login</title>
 
+    <!-- Custom Stylesheet for Login Page UI -->
+    <link rel="stylesheet" href="/css/login.css">
 
-    <link
-        rel="stylesheet"
-        href="/css/login.css"
-    >
+    <!-- Google Poppins Typography Font Library -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    >
-
-
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-    >
-
+    <!-- Font Awesome Icon Library -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
-
 
 <body>
 
-
-<div class="background-blur"></div>
-
-
-
-<!-- ==================================================
-     NAVBAR
-================================================== -->
-
-<header class="login-header">
-
-    <nav class="login-navbar">
-
-
-        <div class="nav-left">
-
-
-            <button
-                type="button"
-                class="back-button"
-                id="backButton"
-                aria-label="Go back"
-            >
-
-                <i class="fa-solid fa-arrow-left"></i>
-
-            </button>
-
-
-            <a
-                href="/"
-                class="login-logo"
-            >
-
-                <span class="logo-icon">
-                    🍔
-                </span>
-
-                <span class="logo-text">
-                    Jigato
-                </span>
-
-            </a>
-
-
-        </div>
-
-
-
-        <div class="nav-right">
-
-            <span>
-                New to Jigato?
-            </span>
-
-
-            <a href="/register">
-                Create Account
-            </a>
-
-        </div>
-
-
-    </nav>
-
-</header>
-
-
-
-<!-- ==================================================
-     MAIN
-================================================== -->
-
-<main class="login-page">
-
-
-    <!-- LEFT -->
-
-    <section class="left-panel">
-
-
-        <div class="brand-label">
-
-            <span class="brand-dot"></span>
-
-            FOOD DELIVERY MADE SMART
-
-        </div>
-
-
-        <h1>
-
-            Good food.
-
-            <br>
-
-            <span>
-                Good mood.
-            </span>
-
-        </h1>
-
-
-        <p class="hero-text">
-
-            Your favourite meals from the Jigato menu
-            are just a few clicks away.
-
-            <br><br>
-
-            Login and let Jigato bring happiness
-            straight to your doorstep.
-
-        </p>
-
-
-        <div class="feature-list">
-
-
-            <div class="feature-item">
-
-                <div class="feature-icon">
-
-                    <i class="fa-solid fa-burger"></i>
-
-                </div>
-
-
-                <div>
-
-                    <strong>
-                        Fresh & Delicious
-                    </strong>
-
-                    <p>
-                        Quality food from the
-                        Jigato menu.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-
-            <div class="feature-item">
-
-                <div class="feature-icon">
-
-                    <i class="fa-solid fa-bolt"></i>
-
-                </div>
-
-
-                <div>
-
-                    <strong>
-                        Lightning Fast
-                    </strong>
-
-                    <p>
-                        Fast delivery right to
-                        your doorstep.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-
-            <div class="feature-item">
-
-                <div class="feature-icon">
-
-                    <i class="fa-solid fa-heart"></i>
-
-                </div>
-
-
-                <div>
-
-                    <strong>
-                        Made For Food Lovers
-                    </strong>
-
-                    <p>
-                        Discover meals you'll love.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-        </div>
-
-
-    </section>
-
-
-
-    <!-- RIGHT -->
-
-    <section class="right-panel">
-
-
-        <div class="form-card">
-
-
-            <div class="form-header">
-
-
-                <div class="login-icon">
-
-                    <i class="fa-solid fa-user"></i>
-
-                </div>
-
-
-                <div>
-
-                    <span class="small-title">
-                        WELCOME BACK
-                    </span>
-
-
-                    <h2>
-                        Login to Jigato
-                    </h2>
-
-                </div>
-
-
-            </div>
-
-
-            <p class="form-description">
-
-                Enter your details to continue
-                your food journey.
-
-            </p>
-
-
-            <div
-                id="loginMessage"
-                class="login-message"
-            ></div>
-
-
-
-            <!-- FORM -->
-
-            <form id="loginForm">
-
-
-                <!-- EMAIL -->
-
-                <div class="input-box">
-
-                    <label for="email">
-                        Email Address
-                    </label>
-
-
-                    <div class="input-field">
-
-                        <span class="field-icon">
-
-                            <i class="fa-solid fa-envelope"></i>
-
-                        </span>
-
-
-                        <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            placeholder="you@example.com"
-                            autocomplete="email"
-                            required
-                        >
-
-                    </div>
-
-                </div>
-
-
-
-                <!-- PASSWORD -->
-
-                <div class="input-box">
-
-                    <div class="label-row">
-
-                        <label for="password">
-                            Password
-                        </label>
-
-
-                        <a href="/forgot-password">
-                            Forgot password?
-                        </a>
-
-                    </div>
-
-
-                    <div class="input-field">
-
-                        <span class="field-icon">
-
-                            <i class="fa-solid fa-lock"></i>
-
-                        </span>
-
-
-                        <input
-                            type="password"
-                            id="password"
-                            name="password"
-                            placeholder="Enter your password"
-                            autocomplete="current-password"
-                            required
-                        >
-
-
-                        <button
-                            type="button"
-                            class="password-toggle"
-                            id="togglePassword"
-                            aria-label="Show password"
-                        >
-
-                            <i class="fa-solid fa-eye"></i>
-
-                        </button>
-
-                    </div>
-
-                </div>
-
-
-
-                <!-- REMEMBER -->
-
-                <div class="remember-row">
-
-                    <label>
-
-                        <input
-                            type="checkbox"
-                            id="rememberMe"
-                        >
-
-                        <span>
-                            Remember me
-                        </span>
-
-                    </label>
-
-                </div>
-
-
-
-                <!-- LOGIN -->
-
-                <button
-                    type="submit"
-                    class="login-btn"
-                    id="loginSubmit"
-                >
-
-                    <span>
-                        Login
-                    </span>
-
-
-                    <i class="fa-solid fa-arrow-right"></i>
-
+    <!-- Visual Backdrop Overlay for Blur Effects -->
+    <div class="background-blur"></div>
+
+    <!-- Header Navigation Section -->
+    <header class="login-header">
+        <nav class="login-navbar">
+            <!-- Left Side Controls: Navigation Back Action & Brand Logo -->
+            <div class="nav-left">
+                <button type="button" class="back-button" id="backButton" aria-label="Go back">
+                    <i class="fa-solid fa-arrow-left"></i>
                 </button>
 
-
-            </form>
-
-
-
-            <!-- DIVIDER -->
-
-            <div class="divider">
-
-                <span></span>
-
-                <b>
-                    OR
-                </b>
-
-                <span></span>
-
-            </div>
-
-
-
-            <!-- GOOGLE -->
-
-            <!-- <button
-                type="button"
-                class="google-btn"
-                id="googleLogin"
-            >
-
-                <span class="google-icon">
-                    G
-                </span>
-
-
-                <span>
-                    Continue with Google
-                </span>
-
-            </button> -->
-
-
-
-            <!-- REGISTER -->
-
-            <div class="register-link">
-
-                <span>
-                    Don't have an account?
-                </span>
-
-
-                <a href="/register">
-                    Create one
+                <a href="/" class="login-logo">
+                    <span class="logo-icon">🍔</span>
+                    <span class="logo-text">Jigato</span>
                 </a>
-
             </div>
 
+            <!-- Right Side Link: Quick Shortcut to Registration -->
+            <div class="nav-right">
+                <span>New to Jigato?</span>
+                <a href="/register">Create Account</a>
+            </div>
+        </nav>
+    </header>
 
-        </div>
+    <!-- Main Content Area: Dual-Panel Login Layout -->
+    <main class="login-page">
 
-    </section>
+        <!-- Left Side Hero Panel: Branding and Key Product Features -->
+        <section class="left-panel">
+            <!-- Tagline Badge -->
+            <div class="brand-label">
+                <span class="brand-dot"></span> FOOD DELIVERY MADE SMART
+            </div>
 
+            <!-- Main Heading -->
+            <h1>Good food. <br><span>Good mood.</span></h1>
 
-</main>
+            <!-- Descriptive Text -->
+            <p class="hero-text">
+                Your favourite meals from the Jigato menu are just a few clicks away. <br><br>
+                Login and let Jigato bring happiness straight to your doorstep.
+            </p>
 
+            <!-- Feature Value Highlights List -->
+            <div class="feature-list">
+                <!-- Highlight Item 1: Quality Food -->
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fa-solid fa-burger"></i>
+                    </div>
+                    <div>
+                        <strong>Fresh &amp; Delicious</strong>
+                        <p>Quality food from the Jigato menu.</p>
+                    </div>
+                </div>
 
+                <!-- Highlight Item 2: Delivery Speed -->
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <div>
+                        <strong>Lightning Fast</strong>
+                        <p>Fast delivery right to your doorstep.</p>
+                    </div>
+                </div>
 
-<script src="/js/login.js"></script>
+                <!-- Highlight Item 3: Customer Satisfaction -->
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fa-solid fa-heart"></i>
+                    </div>
+                    <div>
+                        <strong>Made For Food Lovers</strong>
+                        <p>Discover meals you'll love.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Side Panel: Interactive User Authentication Card -->
+        <section class="right-panel">
+            <div class="form-card">
+
+                <!-- Form Title Header and Branding Icon -->
+                <div class="form-header">
+                    <div class="login-icon">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                    <div>
+                        <span class="small-title">WELCOME BACK</span>
+                        <h2>Login to Jigato</h2>
+                    </div>
+                </div>
+
+                <!-- Form Instruction Text -->
+                <p class="form-description">Enter your details to continue your food journey.</p>
+
+                <!-- Dynamic Notification Message Banner (Errors / Success Alerts) -->
+                <div id="loginMessage" class="login-message"></div>
+
+                <!-- User Credentials Submission Form -->
+                <form id="loginForm">
+
+                    <!-- User Email Input Group -->
+                    <div class="input-box">
+                        <label for="email">Email Address</label>
+                        <div class="input-field">
+                            <span class="field-icon">
+                                <i class="fa-solid fa-envelope"></i>
+                            </span>
+                            <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" required>
+                        </div>
+                    </div>
+
+                    <!-- User Password Input Group -->
+                    <div class="input-box">
+                        <div class="label-row">
+                            <label for="password">Password</label>
+                            <a href="/forgot-password">Forgot password?</a>
+                        </div>
+                        <div class="input-field">
+                            <span class="field-icon">
+                                <i class="fa-solid fa-lock"></i>
+                            </span>
+                            <input type="password" id="password" name="password" placeholder="Enter your password" autocomplete="current-password" required>
+                            <!-- Interactive Password Mask / Unmask Toggle Button -->
+                            <button type="button" class="password-toggle" id="togglePassword" aria-label="Show password">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Remember User Credentials Checkbox -->
+                    <div class="remember-row">
+                        <label>
+                            <input type="checkbox" id="rememberMe">
+                            <span>Remember me</span>
+                        </label>
+                    </div>
+
+                    <!-- Form Action Trigger: Submit Credentials Button -->
+                    <button type="submit" class="login-btn" id="loginSubmit">
+                        <span>Login</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+
+                </form>
+
+                <!-- Section Divider -->
+                <div class="divider">
+                    <span></span>
+                    <b>OR</b>
+                    <span></span>
+                </div>
+
+                <!-- Account Registration Navigation Option -->
+                <div class="register-link">
+                    <span>Don't have an account?</span>
+                    <a href="/register">Create one</a>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- External JavaScript Module for Login Functionality -->
+    <script src="/js/login.js"></script>
 
 </body>
 

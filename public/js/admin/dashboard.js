@@ -1,50 +1,42 @@
 document.addEventListener("DOMContentLoaded", () => {
-
     const $ = (id) => document.getElementById(id);
-
     const refreshBtn = $("refreshBtn");
-  
-
+    const notificationBtn = $("notificationBtn");
+    const notificationModal = $("notificationModal");
+    const closeNotificationModal = $("closeNotificationModal");
+    const notificationBadge = document.querySelector(".notification-badge");
+    const notificationListContainer = $("notificationListContainer");
 
     /* ======================================================
        HELPERS
     ====================================================== */
-
     function setText(id, value) {
         const element = $(id);
         if (element) {
             element.textContent = value;
         }
     }
-
     function numberFormat(value) {
         return Number(value || 0).toLocaleString("en-IN");
     }
-
     function moneyFormat(value) {
         return "₹" + Number(value || 0).toLocaleString("en-IN", {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
     }
-
     function getInitial(name) {
         return String(name || "A")
             .trim()
             .charAt(0)
             .toUpperCase();
     }
-
     function formatDate(date) {
-
         if (!date) return "-";
-
         const d = new Date(date);
-
         if (Number.isNaN(d.getTime())) {
             return "-";
         }
-
         return d.toLocaleDateString("en-IN", {
             day: "2-digit",
             month: "short",
@@ -52,32 +44,98 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-
     /* ======================================================
        STATUS CLASS
     ====================================================== */
-
     function getStatusClass(status) {
-
         return String(status || "Pending")
             .trim()
             .toLowerCase()
             .replace(/\s+/g, "");
     }
 
+    /* ======================================================
+       NOTIFICATIONS MODAL & LOGIC
+    ====================================================== */
+    function handleNotifications(recentOrders) {
+        if (!recentOrders || !recentOrders.length) {
+            if (notificationBadge) notificationBadge.style.display = "none";
+            if (notificationListContainer) {
+                notificationListContainer.innerHTML = `<p style="text-align: center; color: #777; font-size: 14px; margin: 20px 0;">No new notifications</p>`;
+            }
+            return;
+        }
+
+        const latestOrder = recentOrders[0];
+        const latestId = latestOrder.id;
+        const viewedOrderId = localStorage.getItem("jigato_viewed_order_id");
+
+        // Show/hide red badge dot
+        if (notificationBadge) {
+            if (!viewedOrderId || Number(latestId) > Number(viewedOrderId)) {
+                notificationBadge.style.display = "block";
+            } else {
+                notificationBadge.style.display = "none";
+            }
+        }
+
+        // Render orders inside notification popup
+        if (notificationListContainer) {
+            notificationListContainer.innerHTML = recentOrders.slice(0, 5).map(order => {
+                return `
+                    <div style="padding: 10px 12px; border-bottom: 1px solid #f5f5f5; display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="window.location.href='/admin/orders'">
+                        <div>
+                            <strong style="font-size: 13px; color: #111;">Order #${order.id}</strong>
+                            <p style="margin: 2px 0 0; font-size: 12px; color: #666;">${order.customer_name || 'Customer'} - ${moneyFormat(order.total_amount)}</p>
+                        </div>
+                        <span class="status-badge ${getStatusClass(order.order_status)}" style="font-size: 10px; padding: 3px 8px; border-radius: 4px;">${order.order_status || 'Pending'}</span>
+                    </div>
+                `;
+            }).join("");
+        }
+    }
+
+    // Toggle notification modal on click
+    if (notificationBtn && notificationModal) {
+        notificationBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const isVisible = notificationModal.style.display === "block";
+            notificationModal.style.display = isVisible ? "none" : "block";
+
+            // When opening modal, mark latest order as viewed
+            if (!isVisible && notificationListContainer) {
+                const recentRows = window.latestDashboardOrders || [];
+                if (recentRows.length > 0) {
+                    localStorage.setItem("jigato_viewed_order_id", recentRows[0].id);
+                    if (notificationBadge) notificationBadge.style.display = "none";
+                }
+            }
+        });
+    }
+
+    // Close modal when clicking close button
+    if (closeNotificationModal && notificationModal) {
+        closeNotificationModal.addEventListener("click", () => {
+            notificationModal.style.display = "none";
+        });
+    }
+
+    // Close modal when clicking outside
+    window.addEventListener("click", (e) => {
+        if (notificationModal && notificationBtn) {
+            if (!notificationModal.contains(e.target) && !notificationBtn.contains(e.target)) {
+                notificationModal.style.display = "none";
+            }
+        }
+    });
 
     /* ======================================================
        RECENT ORDERS
     ====================================================== */
-
     function renderRecentOrders(orders) {
-
         const body = $("recentOrdersBody");
-
         if (!body) return;
-
         if (!orders || !orders.length) {
-
             body.innerHTML = `
                 <tr>
                     <td colspan="6" class="table-state">
@@ -86,340 +144,156 @@ document.addEventListener("DOMContentLoaded", () => {
                     </td>
                 </tr>
             `;
-
             return;
         }
-
         body.innerHTML = orders.map(order => {
-
-            const customer =
-                order.customer_name || "Customer";
-
-            const status =
-                order.order_status || "Pending";
-
-            const statusClass =
-                getStatusClass(status);
-
+            const customer = order.customer_name || "Customer";
+            const status = order.order_status || "Pending";
+            const statusClass = getStatusClass(status);
             return `
                 <tr>
-
                     <td>
                         <span class="order-id">
                             #${order.id}
                         </span>
                     </td>
-
                     <td>
                         <div class="customer-cell">
-
                             <span class="customer-avatar-small">
                                 ${getInitial(customer)}
                             </span>
-
                             <span>
                                 ${customer}
                             </span>
-
                         </div>
                     </td>
-
                     <td>
                         <span class="amount-text">
                             ${moneyFormat(order.total_amount)}
                         </span>
                     </td>
-
                     <td>
                         ${order.payment_method || "-"}
                     </td>
-
                     <td>
                         <span class="status-badge ${statusClass}">
                             ${status}
                         </span>
                     </td>
-
                     <td>
                         ${formatDate(order.created_at)}
                     </td>
-
                 </tr>
             `;
-
         }).join("");
     }
-
 
     /* ======================================================
        ORDER FLOW
     ====================================================== */
-
     function updateProgress(id, count, total) {
-
         const progress = $(id);
-
         if (!progress) return;
-
         const value = Number(count || 0);
         const max = Number(total || 0);
-
-        const percentage =
-            max > 0
-                ? (value / max) * 100
-                : 0;
-
-        progress.style.width =
-            `${Math.min(percentage, 100)}%`;
+        const percentage = max > 0 ? (value / max) * 100 : 0;
+        progress.style.width = `${Math.min(percentage, 100)}%`;
     }
-
 
     function updateOrderFlow(stats) {
-
-        const totalOrders =
-            Number(stats.totalOrders || 0);
-
-        setText(
-            "statusPending",
-            numberFormat(stats.pendingOrders)
-        );
-
-        setText(
-            "statusConfirmed",
-            numberFormat(stats.confirmedOrders)
-        );
-
-        setText(
-            "statusPreparing",
-            numberFormat(stats.preparingOrders)
-        );
-
-        setText(
-            "statusOutForDelivery",
-            numberFormat(stats.outForDeliveryOrders)
-        );
-
-        setText(
-            "statusDelivered",
-            numberFormat(stats.deliveredOrders)
-        );
-
-        setText(
-            "statusCancelled",
-            numberFormat(stats.cancelledOrders)
-        );
-
-
-        updateProgress(
-            "progressPending",
-            stats.pendingOrders,
-            totalOrders
-        );
-
-        updateProgress(
-            "progressConfirmed",
-            stats.confirmedOrders,
-            totalOrders
-        );
-
-        updateProgress(
-            "progressPreparing",
-            stats.preparingOrders,
-            totalOrders
-        );
-
-        updateProgress(
-            "progressOutForDelivery",
-            stats.outForDeliveryOrders,
-            totalOrders
-        );
-
-        updateProgress(
-            "progressDelivered",
-            stats.deliveredOrders,
-            totalOrders
-        );
-
-        updateProgress(
-            "progressCancelled",
-            stats.cancelledOrders,
-            totalOrders
-        );
+        const totalOrders = Number(stats.totalOrders || 0);
+        setText("statusPending", numberFormat(stats.pendingOrders));
+        setText("statusConfirmed", numberFormat(stats.confirmedOrders));
+        setText("statusPreparing", numberFormat(stats.preparingOrders));
+        setText("statusOutForDelivery", numberFormat(stats.outForDeliveryOrders));
+        setText("statusDelivered", numberFormat(stats.deliveredOrders));
+        setText("statusCancelled", numberFormat(stats.cancelledOrders));
+        
+        updateProgress("progressPending", stats.pendingOrders, totalOrders);
+        updateProgress("progressConfirmed", stats.confirmedOrders, totalOrders);
+        updateProgress("progressPreparing", stats.preparingOrders, totalOrders);
+        updateProgress("progressOutForDelivery", stats.outForDeliveryOrders, totalOrders);
+        updateProgress("progressDelivered", stats.deliveredOrders, totalOrders);
+        updateProgress("progressCancelled", stats.cancelledOrders, totalOrders);
     }
-
 
     /* ======================================================
        UPDATE DASHBOARD
     ====================================================== */
-
     function updateDashboard(data) {
-
         if (!data || !data.success) {
-            throw new Error(
-                data?.message ||
-                "Dashboard data unavailable."
-            );
+            throw new Error(data?.message || "Dashboard data unavailable.");
         }
-
         const stats = data.stats || {};
-
-
+        
         /* MAIN STATS */
-
-        setText(
-            "totalUsers",
-            numberFormat(stats.totalUsers)
-        );
-
-        setText(
-            "totalFoods",
-            numberFormat(stats.totalFoods)
-        );
-
-        setText(
-            "totalOrders",
-            numberFormat(stats.totalOrders)
-        );
-
-        setText(
-            "totalRevenue",
-            moneyFormat(stats.totalRevenue)
-        );
-
-
+        setText("totalUsers", numberFormat(stats.totalUsers));
+        setText("totalFoods", numberFormat(stats.totalFoods));
+        setText("totalOrders", numberFormat(stats.totalOrders));
+        setText("totalRevenue", moneyFormat(stats.totalRevenue));
+        
         /* SMALL STATS */
-
-        setText(
-            "pendingOrders",
-            numberFormat(stats.pendingOrders)
-        );
-
-        setText(
-            "deliveredOrders",
-            numberFormat(stats.deliveredOrders)
-        );
-
-        setText(
-            "activeOffers",
-            numberFormat(stats.activeOffers)
-        );
-
-
+        setText("pendingOrders", numberFormat(stats.pendingOrders));
+        setText("deliveredOrders", numberFormat(stats.deliveredOrders));
+        setText("activeOffers", numberFormat(stats.activeOffers));
+        
         /* ORDER FLOW */
-
         updateOrderFlow(stats);
-
-
+        
         /* SNAPSHOT */
-
-        setText(
-            "summaryOrders",
-            numberFormat(stats.totalOrders)
-        );
-
-        setText(
-            "summaryAwaiting",
-            numberFormat(stats.pendingOrders)
-        );
-
-        setText(
-            "summaryDelivered",
-            numberFormat(stats.deliveredOrders)
-        );
-
-        setText(
-            "summaryOffers",
-            numberFormat(stats.activeOffers)
-        );
-
-
+        setText("summaryOrders", numberFormat(stats.totalOrders));
+        setText("summaryAwaiting", numberFormat(stats.pendingOrders));
+        setText("summaryDelivered", numberFormat(stats.deliveredOrders));
+        setText("summaryOffers", numberFormat(stats.activeOffers));
+        
         /* RECENT ORDERS */
+        const recentOrders = data.recentOrders || [];
+        window.latestDashboardOrders = recentOrders;
+        renderRecentOrders(recentOrders);
 
-        renderRecentOrders(
-            data.recentOrders || []
-        );
-
+        /* NOTIFICATIONS */
+        handleNotifications(recentOrders);
 
         /* LAST UPDATED */
-
         const now = new Date();
-
-        setText(
-            "lastUpdated",
-            now.toLocaleTimeString("en-IN", {
-                hour: "2-digit",
-                minute: "2-digit"
-            })
-        );
+        setText("lastUpdated", now.toLocaleTimeString("en-IN", {
+            hour: "2-digit",
+            minute: "2-digit"
+        }));
     }
-
 
     /* ======================================================
        LOAD DASHBOARD
     ====================================================== */
-
     async function loadDashboard() {
-
         try {
-
             if (refreshBtn) {
                 refreshBtn.disabled = true;
                 refreshBtn.classList.add("loading");
             }
-
-
-            const response = await fetch(
-                "/admin/api/dashboard",
-                {
-                    method: "GET",
-                    credentials: "include",
-                    cache: "no-store"
-                }
-            );
-
-
-            /* NOT LOGGED IN */
-
+            const response = await fetch("/admin/api/dashboard", {
+                method: "GET",
+                credentials: "include",
+                cache: "no-store"
+            });
+            
             if (response.status === 401) {
                 window.location.replace("/login");
                 return;
             }
-
-
-            /* NOT ADMIN */
-
             if (response.status === 403) {
                 window.location.replace("/");
                 return;
             }
-
-
             if (!response.ok) {
-                throw new Error(
-                    `Request failed: ${response.status}`
-                );
+                throw new Error(`Request failed: ${response.status}`);
             }
-
-
-            const data =
-                await response.json();
-
+            const data = await response.json();
             updateDashboard(data);
-
         }
-
         catch (error) {
-
-            console.error(
-                "Dashboard error:",
-                error
-            );
-
-            const body =
-                $("recentOrdersBody");
-
+            const body = $("recentOrdersBody");
             if (body) {
-
                 body.innerHTML = `
                     <tr>
                         <td colspan="6" class="table-state">
@@ -430,9 +304,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 `;
             }
         }
-
         finally {
-
             if (refreshBtn) {
                 refreshBtn.disabled = false;
                 refreshBtn.classList.remove("loading");
@@ -440,83 +312,38 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-
     /* ======================================================
        ADMIN INFO
     ====================================================== */
-
     async function loadAdminInfo() {
-
         try {
-
-            const response = await fetch(
-                "/admin/api/dashboard",
-                {
-                    credentials: "include",
-                    cache: "no-store"
-                }
-            );
-
+            const response = await fetch("/admin/api/dashboard", {
+                credentials: "include",
+                cache: "no-store"
+            });
             if (!response.ok) return;
-
-            const data =
-                await response.json();
-
-            const name =
-                data.adminName ||
-                data.admin?.name ||
-                "Admin";
-
-
-            setText(
-                "adminName",
-                name
-            );
-
-            setText(
-                "adminNameText",
-                name
-            );
-
-
-            const avatar =
-                $("adminAvatar");
-
+            const data = await response.json();
+            const name = data.adminName || data.admin?.name || "Admin";
+            setText("adminName", name);
+            setText("adminNameText", name);
+            const avatar = $("adminAvatar");
             if (avatar) {
-                avatar.textContent =
-                    getInitial(name);
+                avatar.textContent = getInitial(name);
             }
-
         }
-
-        catch (error) {
-
-            console.warn(
-                "Admin info unavailable:",
-                error
-            );
-        }
+        catch (error) {}
     }
-
-
 
     /* ======================================================
        REFRESH
     ====================================================== */
-
     if (refreshBtn) {
-
-        refreshBtn.addEventListener(
-            "click",
-            loadDashboard
-        );
+        refreshBtn.addEventListener("click", loadDashboard);
     }
-
 
     /* ======================================================
        INITIAL LOAD
     ====================================================== */
-
     loadDashboard();
-
+    loadAdminInfo();
 });

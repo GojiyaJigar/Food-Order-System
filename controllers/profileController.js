@@ -1,280 +1,133 @@
-const db = require("../config/db");
+"use strict";
 
+const profileModel = require("../models/profileModel");
 
 // =====================================================
 // GET PROFILE
 // =====================================================
 
 const getProfile = (req, res) => {
-
     if (!req.session || !req.session.userId) {
-
         return res.status(401).json({
             success: false,
             message: "Please login first."
         });
-
     }
 
     const userId = req.session.userId;
 
-
-    const sql = `
-        SELECT
-            u.id AS user_id,
-            u.name AS user_name,
-            u.email,
-            u.phone AS user_phone,
-            u.city AS user_city,
-
-            p.id AS profile_id,
-            p.full_name AS profile_name,
-            p.phone AS profile_phone,
-            p.date_of_birth,
-            p.gender
-
-        FROM users u
-
-        LEFT JOIN profiles p
-            ON p.user_id = u.id
-
-        WHERE u.id = ?
-
-        LIMIT 1
-    `;
-
-
-    db.query(
-        sql,
-        [userId],
-        (err, results) => {
-
-            if (err) {
-
-                console.error(
-                    "GET PROFILE ERROR:",
-                    err
-                );
-
-                return res.status(500).json({
-                    success: false,
-                    message: "Database error."
-                });
-
-            }
-
-
-            if (!results.length) {
-
-                return res.status(404).json({
-                    success: false,
-                    message: "User not found."
-                });
-
-            }
-
-
-            const user = results[0];
-
-
-            return res.json({
-
-                success: true,
-
-                profileExists:
-                    !!user.profile_id,
-
-                profile: {
-
-                    user_id:
-                        user.user_id,
-
-                    /*
-                     * Name:
-                     * users aur profiles dono same rakhenge.
-                     * Agar kisi reason se profile empty ho,
-                     * users ka name show hoga.
-                     */
-
-                    full_name:
-                        user.profile_name ||
-                        user.user_name ||
-                        "",
-
-                    email:
-                        user.email ||
-                        "",
-
-                    /*
-                     * Phone:
-                     * profiles priority,
-                     * fallback users.
-                     */
-
-                    phone:
-                        user.profile_phone ||
-                        user.user_phone ||
-                        "",
-
-                    city:
-                        user.user_city ||
-                        "",
-
-                    date_of_birth:
-                        user.date_of_birth ||
-                        "",
-
-                    gender:
-                        user.gender ||
-                        ""
-
-                }
-
+    profileModel.getProfile(userId, (err, results) => {
+        if (err) {
+            return res.status(500).json({
+                success: false,
+                message: "Database error."
             });
-
         }
-    );
 
+        if (!results || results.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found."
+            });
+        }
+
+        const user = results[0];
+
+        return res.json({
+            success: true,
+            profileExists: Boolean(user.profile_id),
+            profile: {
+                // USERS TABLE IS THE MAIN SOURCE
+                user_id: user.user_id,
+                full_name: user.user_name || "",
+                email: user.user_email || "",
+                phone: user.user_phone || "",
+                city: user.user_city || "",
+                state: user.user_state || "",
+                pincode: user.user_pincode || "",
+                address: user.user_address || "",
+                status: user.user_status || "",
+                // PROFILE TABLE DATA
+                date_of_birth: user.date_of_birth || "",
+                gender: user.gender || "",
+                profile_image: user.profile_image || ""
+            }
+        });
+    });
 };
-
 
 // =====================================================
 // CREATE PROFILE
 // =====================================================
 
 const createProfile = (req, res) => {
-
     if (!req.session || !req.session.userId) {
-
         return res.status(401).json({
             success: false,
             message: "Please login first."
         });
-
     }
 
-
     const userId = req.session.userId;
-
 
     const {
         full_name,
         phone,
         date_of_birth,
-        gender
+        gender,
+        profile_image
     } = req.body;
 
-
-    if (
-        !full_name ||
-        !String(full_name).trim()
-    ) {
-
+    if (!full_name || !String(full_name).trim()) {
         return res.status(400).json({
             success: false,
             message: "Full name is required."
         });
-
     }
 
-
-    const cleanName =
-        String(full_name).trim();
-
-    const cleanPhone =
-        phone
+    const data = {
+        full_name: String(full_name).trim(),
+        phone: phone
             ? String(phone).trim()
-            : "";
+            : "",
+        date_of_birth:
+            date_of_birth || null,
+        gender:
+            gender || null,
+        profile_image:
+            profile_image || null
+    };
 
-
-    /*
-     * Pehle check karenge profile already hai
-     */
-
-    const checkSQL = `
-        SELECT id
-        FROM profiles
-        WHERE user_id = ?
-        LIMIT 1
-    `;
-
-
-    db.query(
-        checkSQL,
-        [userId],
+    profileModel.profileExists(
+        userId,
         (checkErr, results) => {
-
             if (checkErr) {
-
-                console.error(
-                    "CHECK PROFILE ERROR:",
-                    checkErr
-                );
-
                 return res.status(500).json({
                     success: false,
                     message: "Database error."
                 });
-
             }
 
-
-            if (results.length > 0) {
-
+            if (results && results.length > 0) {
                 return res.status(409).json({
                     success: false,
                     message: "Profile already exists."
                 });
-
             }
 
-
-            const insertSQL = `
-                INSERT INTO profiles
-                (
-                    user_id,
-                    full_name,
-                    phone,
-                    date_of_birth,
-                    gender
-                )
-                VALUES (?, ?, ?, ?, ?)
-            `;
-
-
-            db.query(
-                insertSQL,
-                [
-                    userId,
-                    cleanName,
-                    cleanPhone,
-                    date_of_birth || null,
-                    gender || null
-                ],
+            profileModel.createProfile(
+                userId,
+                data,
                 (insertErr, result) => {
-
                     if (insertErr) {
-
-                        console.error(
-                            "CREATE PROFILE ERROR:",
-                            insertErr
-                        );
-
                         return res.status(500).json({
                             success: false,
-                            message:
-                                "Unable to create profile."
+                            message: "Unable to create profile."
                         });
-
                     }
 
-
-                    /*
-                     * Profile create hone ke saath
-                     * users table bhi sync karenge.
-                     */
-
-                    const updateUserSQL = `
+                    // Keep users table synchronized
+                    const syncSQL = `
                         UPDATE users
                         SET
                             name = ?,
@@ -282,390 +135,204 @@ const createProfile = (req, res) => {
                         WHERE id = ?
                     `;
 
+                    const db = require("../config/db");
 
                     db.query(
-                        updateUserSQL,
+                        syncSQL,
                         [
-                            cleanName,
-                            cleanPhone,
+                            data.full_name,
+                            data.phone,
                             userId
                         ],
-                        (userErr) => {
-
-                            if (userErr) {
-
-                                console.error(
-                                    "SYNC USER ERROR:",
-                                    userErr
-                                );
-
+                        (syncErr) => {
+                            if (syncErr) {
                                 return res.status(500).json({
-
                                     success: false,
-
                                     message:
                                         "Profile created but account sync failed."
-
                                 });
-
                             }
 
-
                             return res.status(201).json({
-
                                 success: true,
-
                                 message:
                                     "Profile created successfully.",
-
                                 profileId:
                                     result.insertId
-
                             });
-
                         }
                     );
-
                 }
             );
-
         }
     );
-
 };
-
 
 // =====================================================
 // UPDATE PROFILE
 // =====================================================
 
 const updateProfile = (req, res) => {
-
     if (!req.session || !req.session.userId) {
-
         return res.status(401).json({
             success: false,
             message: "Please login first."
         });
-
     }
 
-
     const userId = req.session.userId;
-
 
     const {
         full_name,
         phone,
         city,
         date_of_birth,
-        gender
+        gender,
+        profile_image
     } = req.body;
 
-
-    // =================================================
-    // VALIDATION
-    // =================================================
-
-    if (
-        !full_name ||
-        !String(full_name).trim()
-    ) {
-
+    if (!full_name || !String(full_name).trim()) {
         return res.status(400).json({
-
             success: false,
-
-            message:
-                "Full name is required."
-
+            message: "Full name is required."
         });
-
     }
 
-
-    const cleanName =
-        String(full_name).trim();
-
-    const cleanPhone =
-        phone
-            ? String(phone).trim()
-            : "";
-
-    const cleanCity =
-        city
-            ? String(city).trim()
-            : "";
-
+    const data = {
+        full_name:
+            String(full_name).trim(),
+        phone:
+            phone
+                ? String(phone).trim()
+                : "",
+        city:
+            city
+                ? String(city).trim()
+                : "",
+        date_of_birth:
+            date_of_birth || null,
+        gender:
+            gender || null,
+        profile_image:
+            profile_image || null
+    };
 
     // =================================================
     // UPDATE USERS TABLE
     // =================================================
 
+    const db = require("../config/db");
+
     const updateUsersSQL = `
-
         UPDATE users
-
         SET
             name = ?,
             phone = ?,
             city = ?
-
         WHERE id = ?
-
     `;
 
-
     db.query(
-
         updateUsersSQL,
-
         [
-            cleanName,
-            cleanPhone,
-            cleanCity,
+            data.full_name,
+            data.phone,
+            data.city,
             userId
         ],
-
         (userErr) => {
-
             if (userErr) {
-
-                console.error(
-                    "UPDATE USERS ERROR:",
-                    userErr
-                );
-
                 return res.status(500).json({
-
                     success: false,
-
                     message:
                         "Unable to update account details."
-
                 });
-
             }
 
-
-            // =============================================
+            // =================================================
             // CHECK PROFILE
-            // =============================================
+            // =================================================
 
-            const checkProfileSQL = `
-
-                SELECT id
-
-                FROM profiles
-
-                WHERE user_id = ?
-
-                LIMIT 1
-
-            `;
-
-
-            db.query(
-
-                checkProfileSQL,
-
-                [userId],
-
-                (profileErr, results) => {
-
-                    if (profileErr) {
-
-                        console.error(
-                            "CHECK PROFILE ERROR:",
-                            profileErr
-                        );
-
+            profileModel.profileExists(
+                userId,
+                (checkErr, results) => {
+                    if (checkErr) {
                         return res.status(500).json({
-
                             success: false,
-
                             message:
                                 "Unable to check profile."
-
                         });
-
                     }
 
-
-                    // =====================================
+                    // =================================================
                     // PROFILE DOES NOT EXIST
-                    // =====================================
+                    // =================================================
 
-                    if (results.length === 0) {
-
-                        const insertProfileSQL = `
-
-                            INSERT INTO profiles
-
-                            (
-                                user_id,
-                                full_name,
-                                phone,
-                                date_of_birth,
-                                gender
-                            )
-
-                            VALUES (?, ?, ?, ?, ?)
-
-                        `;
-
-
-                        db.query(
-
-                            insertProfileSQL,
-
-                            [
-                                userId,
-                                cleanName,
-                                cleanPhone,
-                                date_of_birth || null,
-                                gender || null
-                            ],
-
+                    if (!results || results.length === 0) {
+                        profileModel.createProfile(
+                            userId,
+                            data,
                             (insertErr, result) => {
-
                                 if (insertErr) {
-
-                                    console.error(
-                                        "CREATE PROFILE DURING UPDATE ERROR:",
-                                        insertErr
-                                    );
-
                                     return res.status(500).json({
-
                                         success: false,
-
                                         message:
                                             "Account updated but profile could not be created."
-
                                     });
-
                                 }
 
-
                                 return res.json({
-
                                     success: true,
-
                                     message:
                                         "Profile updated successfully.",
-
                                     city:
-                                        cleanCity,
-
+                                        data.city,
                                     profileId:
                                         result.insertId
-
                                 });
-
                             }
-
                         );
 
-
                         return;
-
                     }
 
-
-                    // =====================================
+                    // =================================================
                     // PROFILE EXISTS
-                    // =====================================
+                    // =================================================
 
-                    const updateProfileSQL = `
-
-                        UPDATE profiles
-
-                        SET
-                            full_name = ?,
-                            phone = ?,
-                            date_of_birth = ?,
-                            gender = ?
-
-                        WHERE user_id = ?
-
-                    `;
-
-
-                    db.query(
-
-                        updateProfileSQL,
-
-                        [
-                            cleanName,
-                            cleanPhone,
-                            date_of_birth || null,
-                            gender || null,
-                            userId
-                        ],
-
-                        (profileUpdateErr) => {
-
-                            if (profileUpdateErr) {
-
-                                console.error(
-                                    "UPDATE PROFILES ERROR:",
-                                    profileUpdateErr
-                                );
-
+                    profileModel.updateProfile(
+                        userId,
+                        data,
+                        (profileErr) => {
+                            if (profileErr) {
                                 return res.status(500).json({
-
                                     success: false,
-
                                     message:
                                         "Account updated but profile could not be updated."
-
                                 });
-
                             }
 
-
-                            // =================================
-                            // EVERYTHING SUCCESSFUL
-                            // =================================
-
                             return res.json({
-
                                 success: true,
-
                                 message:
                                     "Profile updated successfully.",
-
                                 city:
-                                    cleanCity
-
+                                    data.city
                             });
-
                         }
-
                     );
-
                 }
-
             );
-
         }
-
     );
-
 };
-
 
 // =====================================================
 // EXPORT
 // =====================================================
 
 module.exports = {
-
     getProfile,
-
     createProfile,
-
     updateProfile
-
 };

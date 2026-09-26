@@ -1,22 +1,19 @@
-const addressModel =
-    require("../models/addressModel");
+"use strict";
+
+const addressModel = require("../models/addressModel");
 
 
 // =====================================================
-// LOGIN CHECK
+// CHECK LOGIN
 // =====================================================
 
-function isLoggedIn(req, res) {
+function checkLogin(req, res) {
 
     if (!req.session || !req.session.userId) {
 
         res.status(401).json({
-
             success: false,
-
-            message:
-                "Please login first."
-
+            message: "Please login first."
         });
 
         return false;
@@ -27,164 +24,117 @@ function isLoggedIn(req, res) {
 
 
 // =====================================================
-// VALIDATE ADDRESS
+// BOOLEAN HELPER
 // =====================================================
 
-function validateAddress(data) {
+function isTrue(value) {
 
-    if (
-        !data.fullName ||
-        !data.phone ||
-        !data.address ||
-        !data.city ||
-        !data.state ||
-        !data.pincode
-    ) {
-
-        return "Please fill all address details.";
-
-    }
-
-
-    if (
-        !/^[0-9]{10}$/.test(
-            String(data.phone).trim()
-        )
-    ) {
-
-        return "Please enter a valid 10 digit phone number.";
-
-    }
-
-
-    if (
-        !/^[0-9]{6}$/.test(
-            String(data.pincode).trim()
-        )
-    ) {
-
-        return "Please enter a valid 6 digit pincode.";
-
-    }
-
-
-    return null;
+    return (
+        value === true ||
+        value === 1 ||
+        value === "1" ||
+        value === "true"
+    );
 }
 
 
 // =====================================================
-// FORMAT ADDRESS DATA
-// =====================================================
-
-function getAddressData(req) {
-
-    return {
-
-        addressLabel:
-            String(
-                req.body.addressLabel ||
-                "Home"
-            ).trim(),
-
-        fullName:
-            String(
-                req.body.fullName ||
-                ""
-            ).trim(),
-
-        phone:
-            String(
-                req.body.phone ||
-                ""
-            ).trim(),
-
-        address:
-            String(
-                req.body.address ||
-                ""
-            ).trim(),
-
-        city:
-            String(
-                req.body.city ||
-                ""
-            ).trim(),
-
-        state:
-            String(
-                req.body.state ||
-                ""
-            ).trim(),
-
-        pincode:
-            String(
-                req.body.pincode ||
-                ""
-            ).trim(),
-
-        isDefault:
-            req.body.isDefault === true ||
-            req.body.isDefault === 1 ||
-            req.body.isDefault === "1"
-
-    };
-}
-
-
-// =====================================================
-// GET ADDRESSES
+// GET ALL ADDRESSES
 // =====================================================
 
 const getAddresses = (req, res) => {
 
-    if (!isLoggedIn(req, res)) {
-        return;
-    }
+    if (!checkLogin(req, res)) return;
 
-
-    const userId =
-        req.session.userId;
-
+    const userId = req.session.userId;
 
     addressModel.getAddresses(
         userId,
-        (err, addresses) => {
+        (error, addresses) => {
 
-            if (err) {
+            if (error) {
 
                 console.error(
                     "GET ADDRESSES ERROR:",
-                    err
+                    error
                 );
 
                 return res.status(500).json({
-
                     success: false,
-
-                    message:
-                        "Unable to load addresses.",
-
-                    error:
-                        err.sqlMessage ||
-                        err.message
-
+                    message: "Database error."
                 });
-
             }
 
+            const list = addresses || [];
 
-            return res.status(200).json({
+            const defaultAddress =
+                list.find(
+                    address =>
+                        Number(address.is_default) === 1
+                ) || null;
+
+            return res.json({
 
                 success: true,
 
-                addresses:
-                    addresses || []
+                count: list.length,
+
+                addresses: list,
+
+                defaultAddress
 
             });
 
         }
     );
+};
 
+
+// =====================================================
+// GET DEFAULT ADDRESS
+// =====================================================
+
+const getDefaultAddress = (req, res) => {
+
+    if (!checkLogin(req, res)) return;
+
+    const userId = req.session.userId;
+
+    addressModel.getAddresses(
+        userId,
+        (error, addresses) => {
+
+            if (error) {
+
+                console.error(
+                    "GET DEFAULT ADDRESS ERROR:",
+                    error
+                );
+
+                return res.status(500).json({
+                    success: false,
+                    message: "Database error."
+                });
+            }
+
+            const list = addresses || [];
+
+            const defaultAddress =
+                list.find(
+                    address =>
+                        Number(address.is_default) === 1
+                ) || null;
+
+            return res.json({
+
+                success: true,
+
+                address: defaultAddress
+
+            });
+
+        }
+    );
 };
 
 
@@ -194,183 +144,179 @@ const getAddresses = (req, res) => {
 
 const createAddress = (req, res) => {
 
-    if (!isLoggedIn(req, res)) {
-        return;
-    }
+    if (!checkLogin(req, res)) return;
 
+    const userId = req.session.userId;
 
-    const userId =
-        req.session.userId;
+    const data = req.body || {};
 
+    const addressLabel = String(
+        data.addressLabel ||
+        data.address_label ||
+        "Home"
+    ).trim();
 
-    console.log(
-        "LOGGED USER ID:",
-        userId
-    );
+    const fullName = String(
+        data.fullName ||
+        data.full_name ||
+        ""
+    ).trim();
 
+    const phone = String(
+        data.phone || ""
+    ).trim();
 
-    const data =
-        getAddressData(req);
+    const address = String(
+        data.address || ""
+    ).trim();
 
+    const city = String(
+        data.city || ""
+    ).trim();
 
-    console.log(
-        "ADDRESS DATA:",
-        data
-    );
+    const state = String(
+        data.state || ""
+    ).trim();
 
+    const pincode = String(
+        data.pincode || ""
+    ).trim();
 
-    // =============================================
+    // -------------------------------------------------
     // VALIDATION
-    // =============================================
+    // -------------------------------------------------
 
-    const validationError =
-        validateAddress(data);
-
-
-    if (validationError) {
+    if (
+        !fullName ||
+        !phone ||
+        !address ||
+        !city ||
+        !state ||
+        !pincode
+    ) {
 
         return res.status(400).json({
-
             success: false,
-
-            message:
-                validationError
-
+            message: "Please fill all address details."
         });
-
     }
 
+    // -------------------------------------------------
+    // GET EXISTING ADDRESSES
+    // -------------------------------------------------
 
-    // =============================================
-    // INSERT ADDRESS
-    // =============================================
+    addressModel.getAddresses(
+        userId,
+        (getError, existingAddresses) => {
 
-    const insertAddress = () => {
+            if (getError) {
 
-        addressModel.createAddress(
-
-            userId,
-
-            data,
-
-            (err, result) => {
-
-                if (err) {
-
-                    console.error(
-                        "================================"
-                    );
-
-                    console.error(
-                        "CREATE ADDRESS ERROR"
-                    );
-
-                    console.error(
-                        "CODE:",
-                        err.code
-                    );
-
-                    console.error(
-                        "MESSAGE:",
-                        err.message
-                    );
-
-                    console.error(
-                        "SQL MESSAGE:",
-                        err.sqlMessage
-                    );
-
-                    console.error(
-                        "SQL:",
-                        err.sql
-                    );
-
-                    console.error(
-                        "================================"
-                    );
-
-
-                    return res.status(500).json({
-
-                        success: false,
-
-                        message:
-                            err.sqlMessage ||
-                            err.message ||
-                            "Unable to save address."
-
-                    });
-
-                }
-
-
-                console.log(
-                    "ADDRESS CREATED:",
-                    result.insertId
+                console.error(
+                    "CHECK ADDRESS ERROR:",
+                    getError
                 );
 
-
-                return res.status(201).json({
-
-                    success: true,
-
-                    message:
-                        "Address saved successfully.",
-
-                    addressId:
-                        result.insertId
-
+                return res.status(500).json({
+                    success: false,
+                    message: "Database error."
                 });
-
             }
-        );
 
-    };
+            const list =
+                existingAddresses || [];
 
+            /*
+             * First address automatically becomes default.
+             *
+             * If user selected "Make Default",
+             * new address also becomes default.
+             */
 
-    // =============================================
-    // DEFAULT ADDRESS
-    // =============================================
+            const shouldBeDefault =
+                list.length === 0 ||
+                isTrue(data.isDefault);
 
-    if (data.isDefault) {
+            const saveAddress = () => {
 
-        addressModel.removeDefault(
+                addressModel.createAddress(
+                    userId,
+                    {
+                        addressLabel,
+                        fullName,
+                        phone,
+                        address,
+                        city,
+                        state,
+                        pincode,
+                        isDefault: shouldBeDefault
+                    },
+                    (error, result) => {
 
-            userId,
+                        if (error) {
 
-            (err) => {
+                            console.error(
+                                "CREATE ADDRESS ERROR:",
+                                error
+                            );
 
-                if (err) {
+                            return res.status(500).json({
+                                success: false,
+                                message:
+                                    "Unable to save address."
+                            });
+                        }
 
-                    console.error(
-                        "REMOVE DEFAULT ERROR:",
-                        err
-                    );
+                        return res.status(201).json({
 
-                    return res.status(500).json({
+                            success: true,
 
-                        success: false,
+                            message:
+                                "Address saved successfully.",
 
-                        message:
-                            err.sqlMessage ||
-                            "Unable to save address."
+                            addressId:
+                                result.insertId
 
-                    });
+                        });
 
-                }
+                    }
+                );
 
+            };
 
-                insertAddress();
+            // -------------------------------------------------
+            // NEW ADDRESS BECOMES DEFAULT
+            // -------------------------------------------------
 
+            if (shouldBeDefault) {
+
+                return addressModel.removeDefault(
+                    userId,
+                    removeError => {
+
+                        if (removeError) {
+
+                            console.error(
+                                "REMOVE OLD DEFAULT ERROR:",
+                                removeError
+                            );
+
+                            return res.status(500).json({
+                                success: false,
+                                message:
+                                    "Unable to update default address."
+                            });
+                        }
+
+                        saveAddress();
+
+                    }
+                );
             }
-        );
 
-    } else {
+            saveAddress();
 
-        insertAddress();
-
-    }
-
+        }
+    );
 };
 
 
@@ -380,157 +326,320 @@ const createAddress = (req, res) => {
 
 const updateAddress = (req, res) => {
 
-    if (!isLoggedIn(req, res)) {
-        return;
-    }
+    if (!checkLogin(req, res)) return;
 
-
-    const userId =
-        req.session.userId;
-
+    const userId = req.session.userId;
 
     const addressId =
         Number(req.params.id);
 
-
-    if (!addressId) {
-
-        return res.status(400).json({
-
-            success: false,
-
-            message:
-                "Invalid address ID."
-
-        });
-
-    }
-
-
-    const data =
-        getAddressData(req);
-
-
-    const validationError =
-        validateAddress(data);
-
-
-    if (validationError) {
+    if (
+        !Number.isInteger(addressId) ||
+        addressId <= 0
+    ) {
 
         return res.status(400).json({
-
             success: false,
-
-            message:
-                validationError
-
+            message: "Invalid address ID."
         });
-
     }
 
+    const data = req.body || {};
 
-    const update = () => {
+    const addressLabel = String(
+        data.addressLabel ||
+        data.address_label ||
+        "Home"
+    ).trim();
 
-        addressModel.updateAddress(
+    const fullName = String(
+        data.fullName ||
+        data.full_name ||
+        ""
+    ).trim();
 
-            userId,
+    const phone = String(
+        data.phone || ""
+    ).trim();
 
-            addressId,
+    const address = String(
+        data.address || ""
+    ).trim();
 
-            data,
+    const city = String(
+        data.city || ""
+    ).trim();
 
-            (err, result) => {
+    const state = String(
+        data.state || ""
+    ).trim();
 
-                if (err) {
+    const pincode = String(
+        data.pincode || ""
+    ).trim();
 
-                    console.error(
-                        "UPDATE ADDRESS ERROR:",
-                        err
-                    );
+    if (
+        !fullName ||
+        !phone ||
+        !address ||
+        !city ||
+        !state ||
+        !pincode
+    ) {
 
-                    return res.status(500).json({
+        return res.status(400).json({
+            success: false,
+            message:
+                "Please fill all address details."
+        });
+    }
 
-                        success: false,
+    // -------------------------------------------------
+    // CHECK ADDRESS BELONGS TO USER
+    // -------------------------------------------------
 
-                        message:
-                            err.sqlMessage ||
-                            err.message ||
-                            "Unable to update address."
+    addressModel.getAddressById(
+        userId,
+        addressId,
+        (findError, rows) => {
 
-                    });
+            if (findError) {
 
-                }
+                console.error(
+                    "FIND ADDRESS ERROR:",
+                    findError
+                );
 
-
-                if (
-                    result.affectedRows === 0
-                ) {
-
-                    return res.status(404).json({
-
-                        success: false,
-
-                        message:
-                            "Address not found."
-
-                    });
-
-                }
-
-
-                return res.json({
-
-                    success: true,
-
-                    message:
-                        "Address updated successfully."
-
+                return res.status(500).json({
+                    success: false,
+                    message: "Database error."
                 });
-
             }
-        );
 
-    };
+            if (!rows || !rows.length) {
 
-
-    if (data.isDefault) {
-
-        addressModel.removeDefault(
-
-            userId,
-
-            (err) => {
-
-                if (err) {
-
-                    console.error(
-                        "REMOVE DEFAULT ERROR:",
-                        err
-                    );
-
-                    return res.status(500).json({
-
-                        success: false,
-
-                        message:
-                            "Unable to update address."
-
-                    });
-
-                }
-
-
-                update();
-
+                return res.status(404).json({
+                    success: false,
+                    message: "Address not found."
+                });
             }
-        );
 
-    } else {
+            const oldAddress = rows[0];
 
-        update();
+            const wantsDefault =
+                isTrue(data.isDefault);
 
-    }
+            // -------------------------------------------------
+            // UPDATE FUNCTION
+            // -------------------------------------------------
 
+            const saveUpdate = isDefault => {
+
+                addressModel.updateAddress(
+                    userId,
+                    addressId,
+                    {
+                        addressLabel,
+                        fullName,
+                        phone,
+                        address,
+                        city,
+                        state,
+                        pincode,
+                        isDefault
+                    },
+                    (error, result) => {
+
+                        if (error) {
+
+                            console.error(
+                                "UPDATE ADDRESS ERROR:",
+                                error
+                            );
+
+                            return res.status(500).json({
+                                success: false,
+                                message:
+                                    "Unable to update address."
+                            });
+                        }
+
+                        if (!result.affectedRows) {
+
+                            return res.status(404).json({
+                                success: false,
+                                message:
+                                    "Address not found."
+                            });
+                        }
+
+                        return res.json({
+
+                            success: true,
+
+                            message:
+                                "Address updated successfully."
+
+                        });
+
+                    }
+                );
+            };
+
+
+            // -------------------------------------------------
+            // MAKE THIS ADDRESS DEFAULT
+            // -------------------------------------------------
+
+            if (wantsDefault) {
+
+                return addressModel.removeDefault(
+                    userId,
+                    removeError => {
+
+                        if (removeError) {
+
+                            console.error(
+                                "REMOVE DEFAULT ERROR:",
+                                removeError
+                            );
+
+                            return res.status(500).json({
+                                success: false,
+                                message:
+                                    "Unable to update default address."
+                            });
+                        }
+
+                        saveUpdate(true);
+
+                    }
+                );
+            }
+
+
+            // -------------------------------------------------
+            // IF CURRENT ADDRESS WAS DEFAULT
+            // KEEP ANOTHER ADDRESS AS DEFAULT
+            // -------------------------------------------------
+
+            if (
+                Number(oldAddress.is_default) === 1
+            ) {
+
+                return addressModel.getAddresses(
+                    userId,
+                    (listError, addresses) => {
+
+                        if (listError) {
+
+                            console.error(
+                                "GET ADDRESSES ERROR:",
+                                listError
+                            );
+
+                            return res.status(500).json({
+                                success: false,
+                                message:
+                                    "Database error."
+                            });
+                        }
+
+                        const otherAddress =
+                            (addresses || []).find(
+                                item =>
+                                    Number(item.id) !==
+                                    addressId
+                            );
+
+                        // No other address exists.
+                        // Keep this address default.
+                        if (!otherAddress) {
+
+                            return saveUpdate(true);
+                        }
+
+                        // Remove all defaults first.
+                        addressModel.removeDefault(
+                            userId,
+                            removeError => {
+
+                                if (removeError) {
+
+                                    console.error(
+                                        "REMOVE DEFAULT ERROR:",
+                                        removeError
+                                    );
+
+                                    return res.status(500).json({
+                                        success: false,
+                                        message:
+                                            "Unable to update address."
+                                    });
+                                }
+
+                                // Update current address
+                                saveUpdate(false);
+
+                                // Make another address default
+                                addressModel.updateAddress(
+                                    userId,
+                                    otherAddress.id,
+                                    {
+                                        addressLabel:
+                                            otherAddress.address_label,
+
+                                        fullName:
+                                            otherAddress.full_name,
+
+                                        phone:
+                                            otherAddress.phone,
+
+                                        address:
+                                            otherAddress.address,
+
+                                        city:
+                                            otherAddress.city,
+
+                                        state:
+                                            otherAddress.state,
+
+                                        pincode:
+                                            otherAddress.pincode,
+
+                                        isDefault: true
+                                    },
+                                    defaultError => {
+
+                                        if (defaultError) {
+
+                                            console.error(
+                                                "MAKE NEXT DEFAULT ERROR:",
+                                                defaultError
+                                            );
+
+                                        }
+
+                                    }
+                                );
+
+                            }
+                        );
+
+                        return;
+                    }
+                );
+            }
+
+
+            // -------------------------------------------------
+            // NORMAL UPDATE
+            // -------------------------------------------------
+
+            saveUpdate(false);
+
+        }
+    );
 };
 
 
@@ -540,90 +649,221 @@ const updateAddress = (req, res) => {
 
 const deleteAddress = (req, res) => {
 
-    if (!isLoggedIn(req, res)) {
-        return;
-    }
+    if (!checkLogin(req, res)) return;
 
-
-    const userId =
-        req.session.userId;
-
+    const userId = req.session.userId;
 
     const addressId =
         Number(req.params.id);
 
-
-    if (!addressId) {
+    if (
+        !Number.isInteger(addressId) ||
+        addressId <= 0
+    ) {
 
         return res.status(400).json({
-
             success: false,
-
-            message:
-                "Invalid address ID."
-
+            message: "Invalid address ID."
         });
-
     }
 
+    // -------------------------------------------------
+    // FIND ADDRESS FIRST
+    // -------------------------------------------------
 
-    addressModel.deleteAddress(
-
+    addressModel.getAddressById(
         userId,
-
         addressId,
+        (findError, rows) => {
 
-        (err, result) => {
-
-            if (err) {
+            if (findError) {
 
                 console.error(
-                    "DELETE ADDRESS ERROR:",
-                    err
+                    "DELETE ADDRESS FIND ERROR:",
+                    findError
                 );
 
                 return res.status(500).json({
-
                     success: false,
-
-                    message:
-                        err.sqlMessage ||
-                        err.message ||
-                        "Unable to delete address."
-
+                    message: "Database error."
                 });
-
             }
 
-
-            if (
-                result.affectedRows === 0
-            ) {
+            if (!rows || !rows.length) {
 
                 return res.status(404).json({
-
                     success: false,
-
-                    message:
-                        "Address not found."
-
+                    message: "Address not found."
                 });
-
             }
 
+            const deletedAddress =
+                rows[0];
 
-            return res.json({
+            const wasDefault =
+                Number(
+                    deletedAddress.is_default
+                ) === 1;
 
-                success: true,
 
-                message:
-                    "Address deleted successfully."
+            // -------------------------------------------------
+            // DELETE
+            // -------------------------------------------------
 
-            });
+            addressModel.deleteAddress(
+                userId,
+                addressId,
+                (deleteError, result) => {
+
+                    if (deleteError) {
+
+                        console.error(
+                            "DELETE ADDRESS ERROR:",
+                            deleteError
+                        );
+
+                        return res.status(500).json({
+                            success: false,
+                            message:
+                                "Unable to delete address."
+                        });
+                    }
+
+                    if (!result.affectedRows) {
+
+                        return res.status(404).json({
+                            success: false,
+                            message:
+                                "Address not found."
+                        });
+                    }
+
+
+                    // -------------------------------------------------
+                    // IF DELETED ADDRESS WAS DEFAULT
+                    // MAKE NEXT ADDRESS DEFAULT
+                    // -------------------------------------------------
+
+                    if (wasDefault) {
+
+                        return addressModel.getAddresses(
+                            userId,
+                            (listError, addresses) => {
+
+                                if (listError) {
+
+                                    console.error(
+                                        "GET NEXT ADDRESS ERROR:",
+                                        listError
+                                    );
+
+                                    return res.json({
+                                        success: true,
+                                        message:
+                                            "Address deleted successfully."
+                                    });
+                                }
+
+                                const nextAddress =
+                                    (addresses || [])[0];
+
+                                if (!nextAddress) {
+
+                                    return res.json({
+                                        success: true,
+                                        message:
+                                            "Address deleted successfully."
+                                    });
+                                }
+
+
+                                addressModel.removeDefault(
+                                    userId,
+                                    removeError => {
+
+                                        if (removeError) {
+
+                                            console.error(
+                                                "REMOVE DEFAULT ERROR:",
+                                                removeError
+                                            );
+
+                                            return res.json({
+                                                success: true,
+                                                message:
+                                                    "Address deleted successfully."
+                                            });
+                                        }
+
+
+                                        addressModel.updateAddress(
+                                            userId,
+                                            nextAddress.id,
+                                            {
+                                                addressLabel:
+                                                    nextAddress.address_label,
+
+                                                fullName:
+                                                    nextAddress.full_name,
+
+                                                phone:
+                                                    nextAddress.phone,
+
+                                                address:
+                                                    nextAddress.address,
+
+                                                city:
+                                                    nextAddress.city,
+
+                                                state:
+                                                    nextAddress.state,
+
+                                                pincode:
+                                                    nextAddress.pincode,
+
+                                                isDefault: true
+                                            },
+                                            defaultError => {
+
+                                                if (defaultError) {
+
+                                                    console.error(
+                                                        "MAKE NEXT DEFAULT ERROR:",
+                                                        defaultError
+                                                    );
+                                                }
+
+                                                return res.json({
+                                                    success: true,
+                                                    message:
+                                                        "Address deleted successfully."
+                                                });
+
+                                            }
+                                        );
+
+                                    }
+                                );
+
+                            }
+                        );
+                    }
+
+
+                    return res.json({
+
+                        success: true,
+
+                        message:
+                            "Address deleted successfully."
+
+                    });
+
+                }
+            );
 
         }
     );
-
 };
 
 
@@ -634,6 +874,8 @@ const deleteAddress = (req, res) => {
 module.exports = {
 
     getAddresses,
+
+    getDefaultAddress,
 
     createAddress,
 

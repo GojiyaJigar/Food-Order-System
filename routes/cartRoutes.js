@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-
 const {
     addToCart,
     getCartItems,
@@ -8,30 +7,24 @@ const {
     increaseQuantity,
     decreaseQuantity
 } = require("../controllers/cartController");
-
 // ==========================
-// Add Item To Cart
+// Cart Me Item Jodein
 // ==========================
 router.post("/cart/add", addToCart);
-
 // ==========================
-// Get User Cart
+// User Cart Prapt Karein
 // ==========================
 router.get("/cart", getCartItems);
-
 // ==========================
-// Increase Quantity
+// Quantity Badhayein
 // ==========================
 router.put("/cart/increase/:cartId", increaseQuantity);
-
 // ==========================
-// Decrease Quantity
+// Quantity Ghatayein
 // ==========================
 router.put("/cart/decrease/:cartId", decreaseQuantity);
-
 // ==========================
-// Remove Cart Item
+// Cart Item Hataayein
 // ==========================
 router.delete("/cart/:cartId", removeCartItem);
-
 module.exports = router;

@@ -39,14 +39,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const initials = name => {
         const p = String(name || "Customer").trim().split(/\s+/);
+        if (!p[0]) return "CU";
         return p.length > 1
             ? (p[0][0] + p[p.length - 1][0]).toUpperCase()
             : p[0].substring(0, 2).toUpperCase();
     };
 
     const date = value => {
+        if (!value) return "-";
         const d = new Date(value);
-        return isNaN(d) ? "-" : d.toLocaleDateString("en-IN", {
+        return isNaN(d.getTime()) ? "-" : d.toLocaleDateString("en-IN", {
             day: "2-digit",
             month: "short",
             year: "numeric"
@@ -110,7 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
             throw new Error("Access denied.");
         }
 
-        const data = await res.json();
+        const data = await res.json().catch(() => ({}));
 
         if (!res.ok || !data.success) {
             throw new Error(data.message || "Request failed.");
@@ -126,14 +128,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function loadUsers() {
 
-        body.innerHTML = `
-            <tr>
-                <td colspan="7" class="users-loading">
-                    <i class="fa-solid fa-spinner fa-spin"></i>
-                    Loading customers...
-                </td>
-            </tr>
-        `;
+        if (body) {
+            body.innerHTML = `
+                <tr>
+                    <td colspan="7" class="users-loading">
+                        <i class="fa-solid fa-spinner fa-spin"></i>
+                        Loading customers...
+                    </td>
+                </tr>
+            `;
+        }
 
         refresh?.classList.add("loading");
 
@@ -148,24 +152,29 @@ document.addEventListener("DOMContentLoaded", () => {
             updateStats();
             apply();
 
-            $("usersLastUpdated").textContent =
-                new Date().toLocaleTimeString("en-IN", {
-                    hour: "2-digit",
-                    minute: "2-digit"
-                });
+            const lastUpdatedEl = $("usersLastUpdated");
+            if (lastUpdatedEl) {
+                lastUpdatedEl.textContent =
+                    new Date().toLocaleTimeString("en-IN", {
+                        hour: "2-digit",
+                        minute: "2-digit"
+                    });
+            }
 
         } catch (err) {
 
             console.error(err);
 
-            body.innerHTML = `
-                <tr>
-                    <td colspan="7" class="users-empty">
-                        <i class="fa-solid fa-triangle-exclamation"></i>
-                        Unable to load customers.
-                    </td>
-                </tr>
-            `;
+            if (body) {
+                body.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="users-empty">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            Unable to load customers.
+                        </td>
+                    </tr>
+                `;
+            }
 
             alertBox("error", "Failed", err.message);
 
@@ -183,8 +192,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function apply() {
 
-        const q = search.value.trim().toLowerCase();
-        const status = filter.value;
+        const q = search ? search.value.trim().toLowerCase() : "";
+        const status = filter ? filter.value : "all";
 
         state.filtered = state.users.filter(u => {
 
@@ -201,7 +210,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return matchSearch && matchStatus;
         });
 
-        const mode = sort.value;
+        const mode = sort ? sort.value : "newest";
 
         state.filtered.sort((a, b) => {
 
@@ -249,42 +258,53 @@ document.addEventListener("DOMContentLoaded", () => {
                 start + state.perPage
             );
 
-        $("visibleUsersCount").textContent = total;
+        const countEl = $("visibleUsersCount");
+        if (countEl) countEl.textContent = total;
 
-        $("usersResultText").textContent = total
-            ? `Showing ${start + 1}-${Math.min(start + state.perPage, total)} of ${total} customers`
-            : "Showing 0 customers";
+        const textEl = $("usersResultText");
+        if (textEl) {
+            textEl.textContent = total
+                ? `Showing ${start + 1}-${Math.min(start + state.perPage, total)} of ${total} customers`
+                : "Showing 0 customers";
+        }
 
+        if (body) {
+            body.innerHTML = users.length
+                ? users.map(row).join("")
+                : `
+                    <tr>
+                        <td colspan="7" class="users-empty">
+                            <i class="fa-solid fa-users-slash"></i>
+                            No customers found.
+                        </td>
+                    </tr>
+                `;
+        }
 
-        body.innerHTML = users.length
-            ? users.map(row).join("")
-            : `
-                <tr>
-                    <td colspan="7" class="users-empty">
-                        <i class="fa-solid fa-users-slash"></i>
-                        No customers found.
-                    </td>
-                </tr>
-            `;
+        const prevBtn = $("prevUsersBtn");
+        if (prevBtn) prevBtn.disabled = state.page === 1;
 
-        $("prevUsersBtn").disabled = state.page === 1;
-        $("nextUsersBtn").disabled = state.page === pages;
+        const nextBtn = $("nextUsersBtn");
+        if (nextBtn) nextBtn.disabled = state.page === pages;
 
-        $("usersPages").innerHTML =
-            pages <= 1
-                ? ""
-                : Array.from(
-                    { length: pages },
-                    (_, i) => `
-                        <button
-                            type="button"
-                            class="page-number ${i + 1 === state.page ? "active" : ""}"
-                            data-page="${i + 1}"
-                        >
-                            ${i + 1}
-                        </button>
-                    `
-                ).join("");
+        const pagesEl = $("usersPages");
+        if (pagesEl) {
+            pagesEl.innerHTML =
+                pages <= 1
+                    ? ""
+                    : Array.from(
+                        { length: pages },
+                        (_, i) => `
+                            <button
+                                type="button"
+                                class="page-number ${i + 1 === state.page ? "active" : ""}"
+                                data-page="${i + 1}"
+                            >
+                                ${i + 1}
+                            </button>
+                        `
+                    ).join("");
+        }
     }
 
 
@@ -404,13 +424,20 @@ document.addEventListener("DOMContentLoaded", () => {
             Date.now() - 30 * 24 * 60 * 60 * 1000;
 
         const newest = state.users.filter(
-            u => new Date(u.created_at).getTime() >= monthAgo
+            u => u.created_at && new Date(u.created_at).getTime() >= monthAgo
         ).length;
 
-        $("totalCustomers").textContent = state.users.length;
-        $("activeCustomers").textContent = active;
-        $("inactiveCustomers").textContent = inactive;
-        $("newCustomers").textContent = newest;
+        const totalEl = $("totalCustomers");
+        if (totalEl) totalEl.textContent = state.users.length;
+
+        const activeEl = $("activeCustomers");
+        if (activeEl) activeEl.textContent = active;
+
+        const inactiveEl = $("inactiveCustomers");
+        if (inactiveEl) inactiveEl.textContent = inactive;
+
+        const newEl = $("newCustomers");
+        if (newEl) newEl.textContent = newest;
     }
 
 
@@ -429,7 +456,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             fillView(data.user);
 
-            viewModal.classList.add("show");
+            viewModal?.classList.add("show");
             document.body.style.overflow = "hidden";
 
         } catch (err) {
@@ -442,35 +469,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function fillView(u) {
 
-        $("modalUserAvatar").textContent =
-            initials(u.name);
+        const avatar = $("modalUserAvatar");
+        if (avatar) avatar.textContent = initials(u.name);
 
-        $("modalUserName").textContent =
-            u.name || "Customer";
+        const name = $("modalUserName");
+        if (name) name.textContent = u.name || "Customer";
 
-        $("modalUserEmail").textContent =
-            u.email || "-";
+        const email = $("modalUserEmail");
+        if (email) email.textContent = u.email || "-";
 
-        $("modalUserPhone").textContent =
-            u.phone || "-";
+        const phone = $("modalUserPhone");
+        if (phone) phone.textContent = u.phone || "-";
 
-        $("modalUserCity").textContent =
-            u.city || "-";
+        const city = $("modalUserCity");
+        if (city) city.textContent = u.city || "-";
 
-        $("modalUserJoined").textContent =
-            date(u.created_at);
+        const joined = $("modalUserJoined");
+        if (joined) joined.textContent = date(u.created_at);
 
-        $("modalUserStatus").textContent =
-            String(u.status || "active")
-                .toLowerCase() === "inactive"
-                ? "Inactive"
-                : "Active";
+        const status = $("modalUserStatus");
+        if (status) {
+            status.textContent =
+                String(u.status || "active").toLowerCase() === "inactive"
+                    ? "Inactive"
+                    : "Active";
+        }
 
-        $("modalUserOrders").textContent =
-            Number(u.total_orders || 0);
+        const orders = $("modalUserOrders");
+        if (orders) orders.textContent = Number(u.total_orders || 0);
 
-        $("modalUserSpent").textContent =
-            money(u.total_spent);
+        const spent = $("modalUserSpent");
+        if (spent) spent.textContent = money(u.total_spent);
     }
 
 
@@ -489,21 +518,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const u = data.user;
 
-            $("editUserId").value = u.id;
+            const editId = $("editUserId");
+            if (editId) editId.value = u.id;
 
-            $("editUserName").value = u.name || "";
-            $("editUserEmail").value = u.email || "";
-            $("editUserPhone").value = u.phone || "";
-            $("editUserCity").value = u.city || "";
-            $("editUserState").value = u.state || "";
-            $("editUserPincode").value = u.pincode || "";
-            $("editUserAddress").value = u.address || "";
+            const editName = $("editUserName");
+            if (editName) editName.value = u.name || "";
 
-            $("editUserPreviewName").textContent =
-                u.name || "Customer";
+            const editEmail = $("editUserEmail");
+            if (editEmail) editEmail.value = u.email || "";
 
-            $("editUserAvatar").textContent =
-                initials(u.name);
+            const editPhone = $("editUserPhone");
+            if (editPhone) editPhone.value = u.phone || "";
+
+            const editCity = $("editUserCity");
+            if (editCity) editCity.value = u.city || "";
+
+            const editState = $("editUserState");
+            if (editState) editState.value = u.state || "";
+
+            const editPincode = $("editUserPincode");
+            if (editPincode) editPincode.value = u.pincode || "";
+
+            const editAddress = $("editUserAddress");
+            if (editAddress) editAddress.value = u.address || "";
+
+            const previewName = $("editUserPreviewName");
+            if (previewName) previewName.textContent = u.name || "Customer";
+
+            const editAvatar = $("editUserAvatar");
+            if (editAvatar) editAvatar.textContent = initials(u.name);
 
             state.editStatus =
                 String(u.status || "active").toLowerCase() === "inactive"
@@ -512,8 +555,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             updateEditStatus();
 
-            viewModal.classList.remove("show");
-            editModal.classList.add("show");
+            viewModal?.classList.remove("show");
+            editModal?.classList.add("show");
 
             document.body.style.overflow = "hidden";
 
@@ -530,16 +573,19 @@ document.addEventListener("DOMContentLoaded", () => {
         const active =
             state.editStatus === "active";
 
-        $("editUserStatusIndicator")
-            .classList.toggle("inactive", !active);
+        const indicator = $("editUserStatusIndicator");
+        if (indicator) indicator.classList.toggle("inactive", !active);
 
-        $("editUserStatusText").textContent =
-            active ? "Active" : "Inactive";
+        const statusText = $("editUserStatusText");
+        if (statusText) statusText.textContent = active ? "Active" : "Inactive";
 
-        $("editUserStatusBtn").innerHTML =
-            active
-                ? `<i class="fa-solid fa-user-lock"></i> Block Customer`
-                : `<i class="fa-solid fa-user-check"></i> Activate Customer`;
+        const statusBtn = $("editUserStatusBtn");
+        if (statusBtn) {
+            statusBtn.innerHTML =
+                active
+                    ? `<i class="fa-solid fa-user-lock"></i> Block Customer`
+                    : `<i class="fa-solid fa-user-check"></i> Activate Customer`;
+        }
     }
 
 
@@ -547,16 +593,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
         e.preventDefault();
 
-        const id = Number($("editUserId").value);
+        const idEl = $("editUserId");
+        const id = idEl ? Number(idEl.value) : null;
 
         const payload = {
-            name: $("editUserName").value.trim(),
-            email: $("editUserEmail").value.trim(),
-            phone: $("editUserPhone").value.trim(),
-            city: $("editUserCity").value.trim(),
-            state: $("editUserState").value.trim(),
-            pincode: $("editUserPincode").value.trim(),
-            address: $("editUserAddress").value.trim()
+            name: $("editUserName")?.value.trim() || "",
+            email: $("editUserEmail")?.value.trim() || "",
+            phone: $("editUserPhone")?.value.trim() || "",
+            city: $("editUserCity")?.value.trim() || "",
+            state: $("editUserState")?.value.trim() || "",
+            pincode: $("editUserPincode")?.value.trim() || "",
+            address: $("editUserAddress")?.value.trim() || ""
         };
 
         if (
@@ -574,9 +621,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const btn = $("saveUserBtn");
 
-        btn.disabled = true;
-        btn.innerHTML =
-            `<i class="fa-solid fa-spinner fa-spin"></i> Saving...`;
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML =
+                `<i class="fa-solid fa-spinner fa-spin"></i> Saving...`;
+        }
 
         try {
 
@@ -598,7 +647,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
             }
 
-            editModal.classList.remove("show");
+            editModal?.classList.remove("show");
             document.body.style.overflow = "";
 
             await loadUsers();
@@ -619,9 +668,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         } finally {
 
-            btn.disabled = false;
-            btn.innerHTML =
-                `<i class="fa-solid fa-floppy-disk"></i> Save Changes`;
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML =
+                    `<i class="fa-solid fa-floppy-disk"></i> Save Changes`;
+            }
 
         }
     }
@@ -730,14 +781,13 @@ document.addEventListener("DOMContentLoaded", () => {
        EVENTS
     ================================================== */
 
-    search.addEventListener("input", apply);
-    filter.addEventListener("change", apply);
-    sort.addEventListener("change", apply);
+    search?.addEventListener("input", apply);
+    filter?.addEventListener("change", apply);
+    sort?.addEventListener("change", apply);
 
-    refresh.addEventListener("click", loadUsers);
+    refresh?.addEventListener("click", loadUsers);
 
-
-    body.addEventListener("click", e => {
+    body?.addEventListener("click", e => {
 
         const btn =
             e.target.closest("[data-action]");
@@ -756,8 +806,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (action === "delete") deleteUser(id);
     });
 
-
-    $("usersPages").addEventListener("click", e => {
+    $("usersPages")?.addEventListener("click", e => {
 
         const btn =
             e.target.closest("[data-page]");
@@ -770,8 +819,7 @@ document.addEventListener("DOMContentLoaded", () => {
         render();
     });
 
-
-    $("prevUsersBtn").addEventListener("click", () => {
+    $("prevUsersBtn")?.addEventListener("click", () => {
 
         if (state.page > 1) {
             state.page--;
@@ -779,8 +827,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-
-    $("nextUsersBtn").addEventListener("click", () => {
+    $("nextUsersBtn")?.addEventListener("click", () => {
 
         const pages =
             Math.max(
@@ -797,26 +844,23 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-
-    $("closeUserModal").addEventListener(
+    $("closeUserModal")?.addEventListener(
         "click",
         () => {
-            viewModal.classList.remove("show");
+            viewModal?.classList.remove("show");
             document.body.style.overflow = "";
         }
     );
 
-
-    $("userModalOverlay").addEventListener(
+    $("userModalOverlay")?.addEventListener(
         "click",
         () => {
-            viewModal.classList.remove("show");
+            viewModal?.classList.remove("show");
             document.body.style.overflow = "";
         }
     );
 
-
-    $("modalEditUserBtn").addEventListener(
+    $("modalEditUserBtn")?.addEventListener(
         "click",
         () => {
             if (state.selected) {
@@ -825,36 +869,32 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     );
 
-
-    $("closeEditUserModal").addEventListener(
+    $("closeEditUserModal")?.addEventListener(
         "click",
         closeEdit
     );
 
-    $("editUserModalOverlay").addEventListener(
+    $("editUserModalOverlay")?.addEventListener(
         "click",
         closeEdit
     );
 
-    $("cancelEditUserBtn").addEventListener(
+    $("cancelEditUserBtn")?.addEventListener(
         "click",
         closeEdit
     );
-
 
     function closeEdit() {
-        editModal.classList.remove("show");
+        editModal?.classList.remove("show");
         document.body.style.overflow = "";
     }
 
-
-    $("editUserForm").addEventListener(
+    $("editUserForm")?.addEventListener(
         "submit",
         saveUser
     );
 
-
-    $("editUserStatusBtn").addEventListener(
+    $("editUserStatusBtn")?.addEventListener(
         "click",
         () => {
             state.editStatus =
@@ -866,27 +906,28 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     );
 
-
-    $("editUserName").addEventListener(
+    $("editUserName")?.addEventListener(
         "input",
         () => {
 
             const name =
-                $("editUserName").value.trim() ||
+                $("editUserName")?.value.trim() ||
                 "Customer";
 
-            $("editUserPreviewName").textContent = name;
-            $("editUserAvatar").textContent = initials(name);
+            const previewName = $("editUserPreviewName");
+            if (previewName) previewName.textContent = name;
+
+            const avatar = $("editUserAvatar");
+            if (avatar) avatar.textContent = initials(name);
         }
     );
-
 
     document.addEventListener("keydown", e => {
 
         if (e.key !== "Escape") return;
 
-        viewModal.classList.remove("show");
-        editModal.classList.remove("show");
+        viewModal?.classList.remove("show");
+        editModal?.classList.remove("show");
 
         document.body.style.overflow = "";
     });
@@ -925,4 +966,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
     loadUsers();
 
-});         
+});

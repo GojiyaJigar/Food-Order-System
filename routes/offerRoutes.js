@@ -1,46 +1,32 @@
 const express = require("express");
-
 const router = express.Router();
-
 const {
     getOffers,
     getOffer,
     applyCoupon
 } = require("../controllers/offerController");
-
-
 // =====================================================
-// GET ALL ACTIVE OFFERS
+// SABHI ACTIVE OFFERS PRAPT KAREIN
 // =====================================================
-
 router.get(
     "/api/offers",
     getOffers
 );
-
-
 // =====================================================
-// GET SINGLE OFFER
+// EK OFFER PRAPT KAREIN
 // =====================================================
-
 router.get(
     "/api/offers/:id",
     getOffer
 );
-
-
 // =====================================================
-// APPLY COUPON
+// COUPON APPLY KAREIN
 // =====================================================
-
 router.post(
     "/api/offers/apply",
     applyCoupon
 );
-
-
 // =====================================================
 // EXPORT
 // =====================================================
-
 module.exports = router;

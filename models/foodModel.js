@@ -1,12 +1,7 @@
 const db = require("../config/db");
 
-
-/* =====================================================
-   GET ALL AVAILABLE FOODS
-===================================================== */
-
+// GET ALL AVAILABLE FOODS
 const getAllFoods = (callback) => {
-
     const sql = `
         SELECT
             id,
@@ -23,9 +18,7 @@ const getAllFoods = (callback) => {
     `;
 
     db.query(sql, callback);
-
 };
-
 
 module.exports = {
     getAllFoods

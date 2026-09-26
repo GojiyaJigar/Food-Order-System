@@ -1,57 +1,22 @@
+// Import MySQL2 module
 const mysql = require("mysql2");
 
-
-// =====================================================
-// DATABASE CONNECTION
-// =====================================================
-
+// Create MySQL database connection configuration
 const db = mysql.createConnection({
-
-    host:
-        process.env.MYSQLHOST || "localhost",
-
-    port:
-        process.env.MYSQLPORT || 3306,
-
-    user:
-        process.env.MYSQLUSER || "root",
-
-    password:
-        process.env.MYSQLPASSWORD || "",
-
-    database:
-        process.env.MYSQLDATABASE || "food_order_system"
-
+    host: process.env.MYSQLHOST || "localhost",
+    port: process.env.MYSQLPORT || 3306,
+    user: process.env.MYSQLUSER || "root",
+    password: process.env.MYSQLPASSWORD || "",
+    database: process.env.MYSQLDATABASE || "food_order_system"
 });
 
-
-// =====================================================
-// CONNECT DATABASE
-// =====================================================
-
+// Establish database connection with error handling
 db.connect((err) => {
-
     if (err) {
-
-        console.error(
-            "❌ MySQL Connection Error:",
-            err.message
-        );
-
+        console.error("❌ MySQL Connection Error:", err.message);
         return;
-
     }
-
-
-    console.log(
-        "✅ MySQL Connected"
-    );
-
 });
 
-
-// =====================================================
-// EXPORT
-// =====================================================
-
+// Export database connection module
 module.exports = db;

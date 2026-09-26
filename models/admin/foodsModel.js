@@ -1,12 +1,8 @@
 const db = require("../../config/db");
-
-
 /* =========================================================
    GET ALL FOODS
 ========================================================= */
-
 const getAllFoods = (callback) => {
-
     const sql = `
         SELECT
             id,
@@ -17,20 +13,15 @@ const getAllFoods = (callback) => {
             image,
             is_available,
             created_at
-
         FROM foods
-
         ORDER BY created_at DESC, id DESC
     `;
-
     db.query(
         sql,
         (error, rows) => {
-
             if (error) {
                 return callback(error);
             }
-
             callback(
                 null,
                 rows || []
@@ -38,17 +29,13 @@ const getAllFoods = (callback) => {
         }
     );
 };
-
-
 /* =========================================================
    GET FOOD BY ID
 ========================================================= */
-
 const getFoodById = (
     foodId,
     callback
 ) => {
-
     const sql = `
         SELECT
             id,
@@ -59,23 +46,17 @@ const getFoodById = (
             image,
             is_available,
             created_at
-
         FROM foods
-
         WHERE id = ?
-
         LIMIT 1
     `;
-
     db.query(
         sql,
         [foodId],
         (error, rows) => {
-
             if (error) {
                 return callback(error);
             }
-
             callback(
                 null,
                 rows && rows.length
@@ -85,17 +66,13 @@ const getFoodById = (
         }
     );
 };
-
-
 /* =========================================================
    CREATE FOOD
 ========================================================= */
-
 const createFood = (
     data,
     callback
 ) => {
-
     const sql = `
         INSERT INTO foods (
             name,
@@ -105,10 +82,8 @@ const createFood = (
             image,
             is_available
         )
-
         VALUES (?, ?, ?, ?, ?, ?)
     `;
-
     db.query(
         sql,
         [
@@ -122,21 +97,16 @@ const createFood = (
         callback
     );
 };
-
-
 /* =========================================================
    UPDATE FOOD
 ========================================================= */
-
 const updateFood = (
     foodId,
     data,
     callback
 ) => {
-
     const sql = `
         UPDATE foods
-
         SET
             name = ?,
             description = ?,
@@ -144,10 +114,8 @@ const updateFood = (
             category = ?,
             image = ?,
             is_available = ?
-
         WHERE id = ?
     `;
-
     db.query(
         sql,
         [
@@ -162,26 +130,19 @@ const updateFood = (
         callback
     );
 };
-
-
 /* =========================================================
    UPDATE AVAILABILITY
 ========================================================= */
-
 const updateFoodStatus = (
     foodId,
     status,
     callback
 ) => {
-
     const sql = `
         UPDATE foods
-
         SET is_available = ?
-
         WHERE id = ?
     `;
-
     db.query(
         sql,
         [
@@ -191,35 +152,26 @@ const updateFoodStatus = (
         callback
     );
 };
-
-
 /* =========================================================
    CHECK FOOD ORDER HISTORY
 ========================================================= */
-
 const getFoodOrderCount = (
     foodId,
     callback
 ) => {
-
     const sql = `
         SELECT
             COUNT(*) AS total_usage
-
         FROM order_items
-
         WHERE food_id = ?
     `;
-
     db.query(
         sql,
         [foodId],
         (error, rows) => {
-
             if (error) {
                 return callback(error);
             }
-
             callback(
                 null,
                 rows && rows.length
@@ -231,48 +183,32 @@ const getFoodOrderCount = (
         }
     );
 };
-
-
 /* =========================================================
    DELETE FOOD
 ========================================================= */
-
 const deleteFood = (
     foodId,
     callback
 ) => {
-
     const sql = `
         DELETE FROM foods
-
         WHERE id = ?
     `;
-
     db.query(
         sql,
         [foodId],
         callback
     );
 };
-
-
 /* =========================================================
    EXPORT
 ========================================================= */
-
 module.exports = {
-
     getAllFoods,
-
     getFoodById,
-
     createFood,
-
     updateFood,
-
     updateFoodStatus,
-
     getFoodOrderCount,
-
     deleteFood
 };

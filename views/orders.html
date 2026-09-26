@@ -2,296 +2,148 @@
 <html lang="en">
 
 <head>
-
+    <!-- Document Metadata -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>My Orders | Jigato</title>
 
-    <title>My Orders | Foodie Hub</title>
-
-    <link rel="stylesheet" href="/css/orders.css">
-
-    <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="/header/navbar.css"> <!-- Navbar Stylesheet -->
+    <link rel="stylesheet" href="/css/orders.css"> <!-- Orders Page Stylesheet -->
+    <link rel="stylesheet" href="/footer/footer.css"> <!-- Footer Stylesheet -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"> <!-- Icons Library -->
 </head>
 
 <body>
 
-    <!-- =========================
-            Navbar
-    ========================== -->
+    <!-- Navigation Bar Container (Injected via JS) -->
+    <div id="navbar"></div>
 
-    <nav class="navbar">
+    <!-- Main Content Area -->
+    <main class="orders-page">
 
-        <div class="logo">
-            🍔 Foodie Hub
-        </div>
-
-        <ul class="nav-links">
-
-            <li>
-                <a href="/">Home</a>
-            </li>
-
-            <li>
-                <a href="/restaurants">Restaurants</a>
-            </li>
-
-            <li>
-                <a href="/cart">Cart</a>
-            </li>
-
-            <li>
-                <a href="/orders" class="active">My Orders</a>
-            </li>
-
-            <li id="profileName" style="display:none;"></li>
-
-            <li>
-                <button id="logoutBtn" style="display:none;">
-                    Logout
-                </button>
-            </li>
-
-        </ul>
-
-        <div class="menu-toggle" id="menuToggle">
-            <i class="fa-solid fa-bars"></i>
-        </div>
-
-    </nav>
-
-
-    <!-- =========================
-            Mobile Menu
-    ========================== -->
-
-    <div class="mobile-menu" id="mobileMenu">
-
-        <a href="/">Home</a>
-
-        <a href="/restaurants">Restaurants</a>
-
-        <a href="/cart">Cart</a>
-
-        <a href="/orders">My Orders</a>
-
-        <button id="mobileLogoutBtn"
-            style="display:none;">
-            Logout
-        </button>
-
-    </div>
-
-
-    <!-- =========================
-            Orders Header
-    ========================== -->
-
-    <section class="orders-header">
-
-        <h1>
-            <i class="fa-solid fa-box-open"></i>
-            My Orders
-        </h1>
-
-        <p>
-            Track your orders in real-time and view your complete order history.
-        </p>
-
-    </section>
-
-
-    <!-- =========================
-            Orders Container
-    ========================== -->
-
-    <section class="orders-container">
-
-        <div id="ordersList">
-
-            <!-- Orders will come from orders.js -->
-
-        </div>
-                <!-- =========================
-                Order Card Template
-        ========================== -->
-
-        <!--
-            This is only a reference template.
-            orders.js will generate these cards dynamically.
-        -->
-
-        <template id="orderTemplate">
-
-            <div class="order-card">
-
-                <div class="order-top">
-
-                    <img class="food-image" src="" alt="Food Image">
-
-                    <div class="order-details">
-
-                        <h2 class="food-name"></h2>
-
-                        <p class="restaurant-name"></p>
-
-                        <div class="order-info">
-
-                            <span class="order-id"></span>
-
-                            <span class="order-date"></span>
-
-                        </div>
-
-                        <div class="payment-info">
-
-                            <span class="payment-method"></span>
-
-                            <span class="total-amount"></span>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <!-- Status -->
-
-                <div class="status-section">
-
-                    <h3>Order Status</h3>
-
-                    <div class="status-badge"></div>
-
-                </div>
-
-
-                <!-- Progress Tracker -->
-
-                <div class="progress-container">
-
-                    <div class="progress-line">
-
-                        <div class="progress-fill"></div>
-
-                    </div>
-
-                    <div class="progress-steps">
-
-                        <div class="step pending">
-
-                            <div class="circle"></div>
-
-                            <span>Pending</span>
-
-                        </div>
-
-                        <div class="step confirmed">
-
-                            <div class="circle"></div>
-
-                            <span>Confirmed</span>
-
-                        </div>
-
-                        <div class="step preparing">
-
-                            <div class="circle"></div>
-
-                            <span>Preparing</span>
-
-                        </div>
-
-                        <div class="step delivery">
-
-                            <div class="circle"></div>
-
-                            <span>Out For Delivery</span>
-
-                        </div>
-
-                        <div class="step delivered">
-
-                            <div class="circle"></div>
-
-                            <span>Delivered</span>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </template>
-
-    </section>
         <!-- =========================
-            Empty Orders Message
-    ========================== -->
+             Orders Header
+        ========================== -->
+        <section class="orders-header">
+            <div class="orders-header-content">
+                <span class="orders-label">ORDER TRACKER</span>
+                <h1>
+                    <i class="fa-solid fa-box-open"></i>
+                    My Orders
+                </h1>
+                <p>Track your food status in real-time and view your complete order history.</p>
+            </div>
+        </section>
 
-    <div id="emptyOrders" class="empty-orders" style="display: none;">
+        <!-- =========================
+             Orders Container
+        ========================== -->
+        <section class="orders-container">
 
-        <i class="fa-solid fa-box-open"></i>
-
-        <h2>No Orders Yet</h2>
-
-        <p>
-            Looks like you haven't placed any orders yet.
-        </p>
-
-        <a href="/restaurants" class="order-btn">
-            Order Now
-        </a>
-
-    </div>
-
-
-    <!-- =========================
-            Footer
-    ========================== -->
-
-    <footer class="footer">
-
-        <div class="footer-content">
-
-            <h2>🍔 Foodie Hub</h2>
-
-            <p>
-                Delicious food delivered to your doorstep with love.
-            </p>
-
-            <div class="footer-links">
-
-                <a href="/">Home</a>
-
-                <a href="/restaurants">Restaurants</a>
-
-                <a href="/cart">Cart</a>
-
-                <a href="/orders">My Orders</a>
-
+            <!-- Dynamic Orders List -->
+            <div id="ordersList">
+                <!-- Orders will be rendered here dynamically via orders.js -->
             </div>
 
-            <p class="copyright">
-                © 2026 Foodie Hub. All Rights Reserved.
-            </p>
+            <!-- =========================
+                 Order Card Template
+            ========================== -->
+            <!-- Reference template used by orders.js to clone and render order cards -->
+            <template id="orderTemplate">
+                <div class="order-card">
 
-        </div>
+                    <div class="order-top">
+                        <img class="food-image" src="" alt="Food Image">
 
-    </footer>
+                        <div class="order-details">
+                            <h2 class="food-name"></h2>
+                            <p class="restaurant-name"></p>
 
+                            <div class="order-info">
+                                <span class="order-id"></span>
+                                <span class="order-date"></span>
+                            </div>
 
-    <!-- =========================
-            JavaScript
-    ========================== -->
+                            <div class="payment-info">
+                                <span class="payment-method"></span>
+                                <span class="total-amount"></span>
+                            </div>
+                        </div>
+                    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                    <!-- Status Badge Section -->
+                    <div class="status-section">
+                        <h3>Order Status</h3>
+                        <div class="status-badge"></div>
+                    </div>
 
-    <script src="/js/orders.js"></script>
+                    <!-- Progress Tracker -->
+                    <div class="progress-container">
+                        <div class="progress-line">
+                            <div class="progress-fill"></div>
+                        </div>
+
+                        <div class="progress-steps">
+                            <div class="step pending">
+                                <div class="circle"></div>
+                                <span>Pending</span>
+                            </div>
+
+                            <div class="step confirmed">
+                                <div class="circle"></div>
+                                <span>Confirmed</span>
+                            </div>
+
+                            <div class="step preparing">
+                                <div class="circle"></div>
+                                <span>Preparing</span>
+                            </div>
+
+                            <div class="step delivery">
+                                <div class="circle"></div>
+                                <span>Out For Delivery</span>
+                            </div>
+
+                            <div class="step delivered">
+                                <div class="circle"></div>
+                                <span>Delivered</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </template>
+
+            <!-- =========================
+                 Empty Orders State
+            ========================== -->
+            <div id="emptyOrders" class="empty-orders" style="display: none;">
+                <div class="empty-icon">
+                    <i class="fa-solid fa-box-open"></i>
+                </div>
+                <h2>No Orders Yet</h2>
+                <p>Looks like you haven't placed any orders yet. Discover delicious dishes nearby!</p>
+                <a href="/restaurant" class="order-btn">
+                    <i class="fa-solid fa-utensils"></i> Order Now
+                </a>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Footer Container (Injected via JS) -->
+    <div id="footer"></div>
+
+    <!-- Third-Party Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <!-- Popup Alerts Library -->
+
+    <!-- Scripts -->
+    <script src="/header/navbar.js"></script> <!-- Header Functionality -->
+    <script src="/js/orders.js"></script> <!-- Dynamic Orders Page Logic -->
+    <script src="/footer/footer.js"></script> <!-- Footer Functionality -->
 
 </body>
 

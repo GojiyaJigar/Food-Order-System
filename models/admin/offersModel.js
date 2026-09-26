@@ -1,5 +1,4 @@
 const db = require("../../config/db");
-
 const getAllOffers = (callback) => {
     const sql = `
         SELECT
@@ -22,14 +21,11 @@ const getAllOffers = (callback) => {
         FROM offers
         ORDER BY created_at DESC, id DESC
     `;
-
     db.query(sql, (error, rows) => {
         if (error) return callback(error);
         callback(null, rows || []);
     });
 };
-
-
 const getOfferById = (id, callback) => {
     const sql = `
         SELECT
@@ -53,18 +49,14 @@ const getOfferById = (id, callback) => {
         WHERE id = ?
         LIMIT 1
     `;
-
     db.query(sql, [id], (error, rows) => {
         if (error) return callback(error);
-
         callback(
             null,
             rows && rows.length ? rows[0] : null
         );
     });
 };
-
-
 const getOfferByCode = (code, callback) => {
     const sql = `
         SELECT
@@ -88,13 +80,11 @@ const getOfferByCode = (code, callback) => {
         WHERE code = ?
         LIMIT 1
     `;
-
     db.query(
         sql,
         [code],
         (error, rows) => {
             if (error) return callback(error);
-
             callback(
                 null,
                 rows && rows.length
@@ -104,8 +94,6 @@ const getOfferByCode = (code, callback) => {
         }
     );
 };
-
-
 const createOffer = (data, callback) => {
     const sql = `
         INSERT INTO offers (
@@ -125,7 +113,6 @@ const createOffer = (data, callback) => {
         )
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
-
     db.query(
         sql,
         [
@@ -146,8 +133,6 @@ const createOffer = (data, callback) => {
         callback
     );
 };
-
-
 const updateOffer = (id, data, callback) => {
     const sql = `
         UPDATE offers
@@ -166,7 +151,6 @@ const updateOffer = (id, data, callback) => {
             is_active = ?
         WHERE id = ?
     `;
-
     db.query(
         sql,
         [
@@ -187,8 +171,6 @@ const updateOffer = (id, data, callback) => {
         callback
     );
 };
-
-
 const updateOfferStatus = (
     id,
     isActive,
@@ -199,29 +181,23 @@ const updateOfferStatus = (
         SET is_active = ?
         WHERE id = ?
     `;
-
     db.query(
         sql,
         [isActive, id],
         callback
     );
 };
-
-
 const deleteOffer = (id, callback) => {
     const sql = `
         DELETE FROM offers
         WHERE id = ?
     `;
-
     db.query(
         sql,
         [id],
         callback
     );
 };
-
-
 const incrementUsedCount = (
     id,
     callback
@@ -231,15 +207,12 @@ const incrementUsedCount = (
         SET used_count = used_count + 1
         WHERE id = ?
     `;
-
     db.query(
         sql,
         [id],
         callback
     );
 };
-
-
 module.exports = {
     getAllOffers,
     getOfferById,

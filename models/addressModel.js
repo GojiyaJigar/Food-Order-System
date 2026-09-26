@@ -1,249 +1,242 @@
-const db = require("../config/db");
+const addressModel = require("../models/addressModel");
 
+// Verify if request session contains an authenticated user ID
+function isLoggedIn(req, res) {
+    if (!req || !req.session || !req.session.userId) {
+        res.status(401).json({
+            success: false,
+            message: "Please login first."
+        });
+        return false;
+    }
+    return true;
+}
 
-// =====================================================
-// GET ALL ADDRESSES
-// =====================================================
+// Validate input fields, phone number format, and postal pincode
+function validateAddress(data) {
+    if (
+        !data ||
+        !data.fullName ||
+        !data.phone ||
+        !data.address ||
+        !data.city ||
+        !data.state ||
+        !data.pincode
+    ) {
+        return "Please fill all address details.";
+    }
 
-const getAddresses = (userId, callback) => {
+    if (!/^[0-9]{10}$/.test(String(data.phone).trim())) {
+        return "Please enter a valid 10 digit phone number.";
+    }
 
-    const sql = `
-        SELECT
-            id,
-            user_id,
-            address_label,
-            full_name,
-            phone,
-            address,
-            city,
-            state,
-            pincode,
-            is_default,
-            created_at
-        FROM addresses
-        WHERE user_id = ?
-        ORDER BY is_default DESC, id DESC
-    `;
+    if (!/^[0-9]{6}$/.test(String(data.pincode).trim())) {
+        return "Please enter a valid 6 digit pincode.";
+    }
 
-    db.query(sql, [userId], callback);
+    return null;
+}
+
+// Extract and format request body address payload fields
+function getAddressData(req) {
+    const body = req.body || {};
+    return {
+        addressLabel: String(body.addressLabel || "Home").trim(),
+        fullName: String(body.fullName || "").trim(),
+        phone: String(body.phone || "").trim(),
+        address: String(body.address || "").trim(),
+        city: String(body.city || "").trim(),
+        state: String(body.state || "").trim(),
+        pincode: String(body.pincode || "").trim(),
+        isDefault:
+            body.isDefault === true ||
+            body.isDefault === 1 ||
+            body.isDefault === "1" ||
+            body.isDefault === "true"
+    };
+}
+
+// Retrieve all saved user addresses for current session user
+const getAddresses = (req, res) => {
+    if (!isLoggedIn(req, res)) {
+        return;
+    }
+
+    const userId = req.session.userId;
+
+    addressModel.getAddresses(userId, (err, addresses) => {
+        if (err) {
+            return res.status(500).json({
+                success: false,
+                message: "Unable to load addresses.",
+                error: err.sqlMessage || err.message
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            addresses: addresses || []
+        });
+    });
 };
 
+// Create and save a new user address record
+const createAddress = (req, res) => {
+    if (!isLoggedIn(req, res)) {
+        return;
+    }
 
-// =====================================================
-// GET SINGLE ADDRESS
-// =====================================================
+    const userId = req.session.userId;
+    const data = getAddressData(req);
+    const validationError = validateAddress(data);
 
-const getAddressById = (userId, addressId, callback) => {
+    if (validationError) {
+        return res.status(400).json({
+            success: false,
+            message: validationError
+        });
+    }
 
-    const sql = `
-        SELECT
-            id,
-            user_id,
-            address_label,
-            full_name,
-            phone,
-            address,
-            city,
-            state,
-            pincode,
-            is_default,
-            created_at
-        FROM addresses
-        WHERE user_id = ?
-        AND id = ?
-        LIMIT 1
-    `;
+    const insertAddress = () => {
+        addressModel.createAddress(userId, data, (err, result) => {
+            if (err) {
+                return res.status(500).json({
+                    success: false,
+                    message: err.sqlMessage || err.message || "Unable to save address."
+                });
+            }
 
-    db.query(
-        sql,
-        [userId, addressId],
-        callback
-    );
+            return res.status(201).json({
+                success: true,
+                message: "Address saved successfully.",
+                addressId: result ? result.insertId : null
+            });
+        });
+    };
+
+    if (data.isDefault) {
+        addressModel.removeDefault(userId, (err) => {
+            if (err) {
+                return res.status(500).json({
+                    success: false,
+                    message: err.sqlMessage || err.message || "Unable to save address."
+                });
+            }
+            insertAddress();
+        });
+    } else {
+        insertAddress();
+    }
 };
 
+// Update an existing user address record by ID
+const updateAddress = (req, res) => {
+    if (!isLoggedIn(req, res)) {
+        return;
+    }
 
-// =====================================================
-// REMOVE DEFAULT ADDRESS
-// =====================================================
+    const userId = req.session.userId;
+    const addressId = Number(req.params.id);
 
-const removeDefault = (userId, callback) => {
+    if (!addressId || isNaN(addressId)) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid address ID."
+        });
+    }
 
-    const sql = `
-        UPDATE addresses
-        SET is_default = 0
-        WHERE user_id = ?
-    `;
+    const data = getAddressData(req);
+    const validationError = validateAddress(data);
 
-    db.query(
-        sql,
-        [userId],
-        callback
-    );
+    if (validationError) {
+        return res.status(400).json({
+            success: false,
+            message: validationError
+        });
+    }
+
+    const update = () => {
+        addressModel.updateAddress(userId, addressId, data, (err, result) => {
+            if (err) {
+                return res.status(500).json({
+                    success: false,
+                    message: err.sqlMessage || err.message || "Unable to update address."
+                });
+            }
+
+            if (!result || result.affectedRows === 0) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Address not found."
+                });
+            }
+
+            return res.status(200).json({
+                success: true,
+                message: "Address updated successfully."
+            });
+        });
+    };
+
+    if (data.isDefault) {
+        addressModel.removeDefault(userId, (err) => {
+            if (err) {
+                return res.status(500).json({
+                    success: false,
+                    message: err.sqlMessage || err.message || "Unable to update address."
+                });
+            }
+            update();
+        });
+    } else {
+        update();
+    }
 };
 
+// Delete a specified user address record by ID
+const deleteAddress = (req, res) => {
+    if (!isLoggedIn(req, res)) {
+        return;
+    }
 
-// =====================================================
-// CREATE ADDRESS
-// =====================================================
+    const userId = req.session.userId;
+    const addressId = Number(req.params.id);
 
-const createAddress = (
-    userId,
-    data,
-    callback
-) => {
+    if (!addressId || isNaN(addressId)) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid address ID."
+        });
+    }
 
-    const sql = `
-        INSERT INTO addresses
-        (
-            user_id,
-            address_label,
-            full_name,
-            phone,
-            address,
-            city,
-            state,
-            pincode,
-            is_default
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
+    addressModel.deleteAddress(userId, addressId, (err, result) => {
+        if (err) {
+            return res.status(500).json({
+                success: false,
+                message: err.sqlMessage || err.message || "Unable to delete address."
+            });
+        }
 
-    const values = [
+        if (!result || result.affectedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Address not found."
+            });
+        }
 
-        userId,
-
-        data.addressLabel,
-
-        data.fullName,
-
-        data.phone,
-
-        data.address,
-
-        data.city,
-
-        data.state,
-
-        data.pincode,
-
-        data.isDefault ? 1 : 0
-
-    ];
-
-
-    console.log(
-        "ADDRESS INSERT VALUES:",
-        values
-    );
-
-
-    db.query(
-        sql,
-        values,
-        callback
-    );
+        return res.status(200).json({
+            success: true,
+            message: "Address deleted successfully."
+        });
+    });
 };
-
-
-// =====================================================
-// UPDATE ADDRESS
-// =====================================================
-
-const updateAddress = (
-    userId,
-    addressId,
-    data,
-    callback
-) => {
-
-    const sql = `
-        UPDATE addresses
-        SET
-            address_label = ?,
-            full_name = ?,
-            phone = ?,
-            address = ?,
-            city = ?,
-            state = ?,
-            pincode = ?,
-            is_default = ?
-        WHERE user_id = ?
-        AND id = ?
-    `;
-
-    const values = [
-
-        data.addressLabel,
-
-        data.fullName,
-
-        data.phone,
-
-        data.address,
-
-        data.city,
-
-        data.state,
-
-        data.pincode,
-
-        data.isDefault ? 1 : 0,
-
-        userId,
-
-        addressId
-
-    ];
-
-
-    db.query(
-        sql,
-        values,
-        callback
-    );
-};
-
-
-// =====================================================
-// DELETE ADDRESS
-// =====================================================
-
-const deleteAddress = (
-    userId,
-    addressId,
-    callback
-) => {
-
-    const sql = `
-        DELETE FROM addresses
-        WHERE user_id = ?
-        AND id = ?
-    `;
-
-    db.query(
-        sql,
-        [userId, addressId],
-        callback
-    );
-};
-
-
-// =====================================================
-// EXPORT
-// =====================================================
 
 module.exports = {
-
+    isLoggedIn,
+    validateAddress,
+    getAddressData,
     getAddresses,
-
-    getAddressById,
-
-    removeDefault,
-
     createAddress,
-
     updateAddress,
-
     deleteAddress
-
 };

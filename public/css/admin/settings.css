@@ -1,6 +1,6 @@
 /* =========================================================
    JIGATO ADMIN SETTINGS
-========================================================= */
+   ========================================================= */
 
 :root {
     --primary: #ff5a1f;
@@ -23,10 +23,9 @@
     --radius: 16px;
 }
 
-
 /* =========================================================
-   RESET
-========================================================= */
+   RESET & BASE STYLES
+   ========================================================= */
 
 * {
     box-sizing: border-box;
@@ -40,9 +39,9 @@ html {
 
 body {
     min-height: 100vh;
-    font-family: "Plus Jakarta Sans", Arial, sans-serif;
     background: var(--bg-page);
     color: var(--text);
+    font-family: "Plus Jakarta Sans", Arial, sans-serif;
     overflow-x: hidden;
 }
 
@@ -57,20 +56,14 @@ button {
     cursor: pointer;
 }
 
-
 /* =========================================================
-   ADMIN PAGE
-========================================================= */
+   LAYOUT
+   ========================================================= */
 
 .admin-page {
-    min-height: 100vh;
     width: 100%;
+    min-height: 100vh;
 }
-
-
-/* =========================================================
-   MAIN
-========================================================= */
 
 .settings-main {
     min-height: 100vh;
@@ -78,10 +71,9 @@ button {
     padding: 28px;
 }
 
-
 /* =========================================================
-   HEADER
-========================================================= */
+   HEADER SECTION
+   ========================================================= */
 
 .settings-header {
     display: flex;
@@ -92,10 +84,10 @@ button {
 }
 
 .settings-header-left {
+    min-width: 0;
     display: flex;
     align-items: center;
     gap: 14px;
-    min-width: 0;
 }
 
 .settings-title {
@@ -109,13 +101,14 @@ button {
     font-size: 10px;
     font-weight: 800;
     letter-spacing: 1.5px;
+    text-transform: uppercase;
 }
 
 .settings-title h1 {
     color: var(--text-dark);
     font-size: 28px;
-    line-height: 1.2;
     font-weight: 800;
+    line-height: 1.2;
 }
 
 .settings-title p {
@@ -128,21 +121,16 @@ button {
     flex-shrink: 0;
 }
 
-
-/* =========================================================
-   STATUS
-========================================================= */
-
 .settings-status {
     min-height: 38px;
-    padding: 0 13px;
     display: inline-flex;
     align-items: center;
     gap: 7px;
+    padding: 0 13px;
     border: 1px solid var(--border);
     border-radius: 10px;
-    background: #fff;
-    color: #666;
+    background: #ffffff;
+    color: #666666;
     font-size: 11px;
     font-weight: 700;
     box-shadow: var(--shadow-sm);
@@ -153,42 +141,36 @@ button {
     font-size: 10px;
 }
 
-
-/* =========================================================
-   MOBILE MENU
-========================================================= */
-
 .mobile-menu-btn {
-    display: none;
     width: 40px;
     height: 40px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: #fff;
-    color: var(--text-dark);
+    display: none;
     align-items: center;
     justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #ffffff;
+    color: var(--text-dark);
     font-size: 15px;
     box-shadow: var(--shadow-sm);
 }
 
 .mobile-menu-btn:hover {
-    color: var(--primary);
     background: #fff7f2;
+    color: var(--primary);
 }
-
 
 /* =========================================================
    SETTINGS CARD
-========================================================= */
+   ========================================================= */
 
 .settings-card {
     position: relative;
     margin-bottom: 18px;
     padding: 22px;
-    background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: var(--radius);
+    background: var(--bg-card);
     box-shadow: var(--shadow-sm);
     overflow: hidden;
 }
@@ -200,17 +182,8 @@ button {
     left: 0;
     right: 0;
     height: 3px;
-    background: linear-gradient(
-        90deg,
-        var(--primary),
-        #ff875c
-    );
+    background: linear-gradient(90deg, var(--primary), #ff875c);
 }
-
-
-/* =========================================================
-   CARD HEADER
-========================================================= */
 
 .settings-card-header {
     display: flex;
@@ -227,13 +200,14 @@ button {
     font-size: 9px;
     font-weight: 800;
     letter-spacing: 1.4px;
+    text-transform: uppercase;
 }
 
 .settings-card-header h2 {
     color: var(--text-dark);
     font-size: 18px;
-    line-height: 1.3;
     font-weight: 800;
+    line-height: 1.3;
 }
 
 .settings-card-header p {
@@ -256,10 +230,9 @@ button {
     font-size: 15px;
 }
 
-
 /* =========================================================
-   FORM GRID
-========================================================= */
+   FORM GRID & FIELDS
+   ========================================================= */
 
 .settings-grid {
     display: grid;
@@ -270,11 +243,6 @@ button {
 .settings-grid.four-column {
     grid-template-columns: repeat(4, minmax(0, 1fr));
 }
-
-
-/* =========================================================
-   FORM FIELD
-========================================================= */
 
 .settings-field {
     min-width: 0;
@@ -294,13 +262,11 @@ button {
     padding: 0 12px;
     border: 1px solid #dfe3e8;
     border-radius: 9px;
-    outline: none;
-    background: #fff;
+    background: #ffffff;
     color: var(--text-dark);
     font-size: 11px;
-    transition:
-        border-color 0.2s ease,
-        box-shadow 0.2s ease;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .settings-field input:hover {
@@ -309,15 +275,12 @@ button {
 
 .settings-field input:focus {
     border-color: var(--primary);
-    box-shadow:
-        0 0 0 3px
-        rgba(255, 90, 31, 0.09);
+    box-shadow: 0 0 0 3px rgba(255, 90, 31, 0.09);
 }
 
-
 /* =========================================================
-   OPTIONS
-========================================================= */
+   OPTIONS & SWITCHES
+   ========================================================= */
 
 .settings-options {
     display: flex;
@@ -327,18 +290,18 @@ button {
 
 .settings-option {
     min-height: 64px;
-    padding: 12px 13px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 14px;
+    padding: 12px 13px;
     border: 1px solid var(--border);
     border-radius: 11px;
     background: #fafafa;
 }
 
 .settings-option:hover {
-    background: #fff;
+    background: #ffffff;
 }
 
 .settings-option-info {
@@ -376,15 +339,11 @@ button {
     line-height: 1.4;
 }
 
-
-/* =========================================================
-   SWITCH
-========================================================= */
-
+/* Toggle Switch Controls */
 .switch {
     position: relative;
-    display: inline-flex;
     flex-shrink: 0;
+    display: inline-flex;
 }
 
 .switch input {
@@ -395,9 +354,9 @@ button {
 
 .switch > span {
     position: relative;
-    display: block;
     width: 42px;
     height: 23px;
+    display: block;
     border-radius: 20px;
     background: #c9cdd2;
     transition: background 0.2s ease;
@@ -411,7 +370,7 @@ button {
     width: 17px;
     height: 17px;
     border-radius: 50%;
-    background: #fff;
+    background: #ffffff;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
     transition: transform 0.2s ease;
 }
@@ -424,21 +383,20 @@ button {
     transform: translateX(19px);
 }
 
-
 /* =========================================================
-   SAVE AREA
-========================================================= */
+   SAVE AREA & BUTTONS
+   ========================================================= */
 
 .settings-save-area {
-    margin-top: 20px;
-    padding: 16px 18px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 15px;
+    margin-top: 20px;
+    padding: 16px 18px;
     border: 1px solid var(--border);
     border-radius: 14px;
-    background: #fff;
+    background: #ffffff;
     box-shadow: var(--shadow-sm);
 }
 
@@ -458,23 +416,19 @@ button {
 
 .save-settings-btn {
     height: 42px;
-    padding: 0 17px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 7px;
+    padding: 0 17px;
     border: 0;
     border-radius: 9px;
     background: var(--primary);
-    color: #fff;
+    color: #ffffff;
     font-size: 11px;
     font-weight: 800;
-    box-shadow:
-        0 7px 18px
-        rgba(255, 90, 31, 0.18);
-    transition:
-        background 0.2s ease,
-        transform 0.18s ease;
+    box-shadow: 0 7px 18px rgba(255, 90, 31, 0.18);
+    transition: background 0.2s ease, transform 0.18s ease;
 }
 
 .save-settings-btn:hover {
@@ -484,47 +438,37 @@ button {
 
 .save-settings-btn:disabled {
     opacity: 0.6;
-    cursor: not-allowed;
     transform: none;
+    cursor: not-allowed;
 }
-
 
 /* =========================================================
    FOOTER
-========================================================= */
+   ========================================================= */
 
 .settings-footer {
-    margin-top: 18px;
-    padding: 16px 2px 4px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 15px;
+    margin-top: 18px;
+    padding: 16px 2px 4px;
     border-top: 1px solid var(--border);
     color: #9a9fa7;
     font-size: 9px;
 }
 
-
 /* =========================================================
-   RESPONSIVE 1100
-========================================================= */
+   RESPONSIVE DESIGN
+   ========================================================= */
 
 @media (max-width: 1100px) {
-
     .settings-grid.four-column {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-
 }
 
-
-/* =========================================================
-   RESPONSIVE 900
-========================================================= */
-
 @media (max-width: 900px) {
-
     .settings-main {
         margin-left: 0;
         padding: 22px;
@@ -541,16 +485,9 @@ button {
     .settings-grid.four-column {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-
 }
 
-
-/* =========================================================
-   RESPONSIVE 650
-========================================================= */
-
 @media (max-width: 650px) {
-
     .settings-main {
         padding: 16px;
     }
@@ -607,8 +544,8 @@ button {
     }
 
     .settings-save-area {
-        align-items: stretch;
         flex-direction: column;
+        align-items: stretch;
     }
 
     .save-settings-btn {
@@ -616,20 +553,13 @@ button {
     }
 
     .settings-footer {
-        align-items: flex-start;
         flex-direction: column;
+        align-items: flex-start;
         gap: 5px;
     }
-
 }
 
-
-/* =========================================================
-   RESPONSIVE 420
-========================================================= */
-
 @media (max-width: 420px) {
-
     .settings-main {
         padding: 12px;
     }
@@ -649,5 +579,4 @@ button {
     .settings-option-info span {
         font-size: 8px;
     }
-
 }

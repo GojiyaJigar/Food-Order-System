@@ -1,12 +1,7 @@
 const db = require("../config/db");
 
-
-/* =====================================================
-   CATEGORIES
-===================================================== */
-
+// CATEGORIES
 const getCategories = (callback) => {
-
     const sql = `
         SELECT DISTINCT category
         FROM foods
@@ -19,14 +14,8 @@ const getCategories = (callback) => {
     db.query(sql, callback);
 };
 
-
-/* =====================================================
-   HOME FOODS
-   ONLY 6 FOODS
-===================================================== */
-
+// HOME FOODS - ONLY 6 FOODS
 const getHomeFoods = (callback) => {
-
     const sql = `
         SELECT
             id,
@@ -47,14 +36,8 @@ const getHomeFoods = (callback) => {
     db.query(sql, callback);
 };
 
-
-/* =====================================================
-   ALL FOODS
-   USED FOR MENU + SEARCH
-===================================================== */
-
+// ALL FOODS - USED FOR MENU + SEARCH
 const getAllFoods = (callback) => {
-
     const sql = `
         SELECT
             id,
@@ -74,11 +57,8 @@ const getAllFoods = (callback) => {
     db.query(sql, callback);
 };
 
-
 module.exports = {
-
     getCategories,
     getHomeFoods,
     getAllFoods
-
 };
