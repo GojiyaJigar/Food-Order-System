@@ -127,8 +127,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     <p>
                         Add some delicious food to continue.
                     </p>
-                    <a href="/restaurant">
-                        Explore Restaurants
+                    <a href="/menu">
+                        Explore Menu
                     </a>
                 </div>
             `;
