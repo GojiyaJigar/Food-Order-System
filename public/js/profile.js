@@ -379,7 +379,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                 margin-bottom:8px;
                             "
                         >
-                            桃
+                            📍
                         </div>
                         <strong>
                             No saved address
