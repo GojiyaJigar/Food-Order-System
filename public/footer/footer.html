@@ -4,62 +4,101 @@
         <div class="jg-footer-brand">
             <a href="/" class="jg-footer-logo">
                 <span class="jg-footer-logo-icon">🍔</span>
-                <span class="jg-footer-logo-text">Jigato</span>
+                <span class="jg-footer-logo-text">
+                    <strong>Jigato</strong>
+                    <small>Food Delivery</small>
+                </span>
             </a>
-
-            <p class="jg-footer-description">
-                Delivering happiness, one delicious meal at a time.
-            </p>
-
+            <p class="jg-footer-description">Delicious food, delivered fresh to your door.</p>
             <div class="jg-footer-social">
-                <a href="#" aria-label="Instagram">
-                    <i class="fa-brands fa-instagram"></i>
-                </a>
-                <a href="#" aria-label="Facebook">
-                    <i class="fa-brands fa-facebook-f"></i>
-                </a>
-                <a href="#" aria-label="Twitter">
-                    <i class="fa-brands fa-x-twitter"></i>
-                </a>
+                <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                <a href="#" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a>
             </div>
         </div>
-
-        <!-- JIGATO -->
+        <!-- EXPLORE -->
         <div class="jg-footer-column">
-            <h3>Jigato</h3>
-            <a href="/">Home</a>
-            <a href="/menu">Menu</a>
-            <a href="/offers">Offers</a>
-            <a href="/cart-page">Cart</a>
+            <h3>Explore</h3>
+            <a href="/"><i class="fa-solid fa-house"></i> Home</a>
+            <a href="/menu"><i class="fa-solid fa-utensils"></i> Menu</a>
+            <a href="/offers"><i class="fa-solid fa-tag"></i> Offers</a>
+            <a href="/cart-page"><i class="fa-solid fa-cart-shopping"></i> Cart</a>
         </div>
-
-        <!-- HELP -->
+        <!-- ACCOUNT -->
         <div class="jg-footer-column">
-            <h3>Help</h3>
-            <a href="#">Help Center</a>
-            <a href="#">Contact Us</a>
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms & Conditions</a>
+            <h3>Account</h3>
+            <a href="/login"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
+            <a href="/register"><i class="fa-solid fa-user-plus"></i> Register</a>
+            <a href="/profile"><i class="fa-solid fa-user"></i> My Profile</a>
+            <a href="/orders"><i class="fa-solid fa-bag-shopping"></i> My Orders</a>
         </div>
-
-        <!-- FOR RESTAURANTS -->
+        <!-- SUPPORT -->
         <div class="jg-footer-column">
-            <h3>For Restaurants</h3>
-            <a href="#">Partner With Us</a>
-            <a href="#">Restaurant Login</a>
-            <a href="#">Business Support</a>
+            <h3>Need Help?</h3>
+            <p class="jg-footer-support-text">Our support team is here to help you.</p>
+            <button type="button" id="footerSupportBtn" class="jg-support-btn">
+                <i class="fa-solid fa-headset"></i> Contact Support
+            </button>
         </div>
     </div>
-
-    <!-- COPYRIGHT -->
+    <!-- FOOTER BOTTOM -->
     <div class="jg-footer-bottom">
         <div class="jg-footer-bottom-inner">
-            <p>
-                © <span id="footerYear">2026</span> Jigato. All Rights Reserved.
-            </p>
-            <span>
-                Made with <span class="jg-heart">❤️</span> for food lovers
-            </span>
+            <p>© <span id="footerYear"></span> Jigato. All Rights Reserved.</p>
+            <span class="jg-footer-made">Made with <span class="jg-heart">♥</span> for food lovers</span>
         </div>
     </div>
 </footer>
+<!-- SUPPORT MODAL -->
+<div id="footerSupportModal" class="jg-support-modal" aria-hidden="true">
+    <!-- BACKDROP -->
+    <div class="jg-support-overlay" id="footerSupportOverlay"></div>
+    <!-- MODAL -->
+    <div class="jg-support-box" role="dialog" aria-modal="true">
+        <!-- HEADER -->
+        <div class="jg-support-header">
+            <div class="jg-support-heading">
+                <div class="jg-support-icon"><i class="fa-solid fa-headset"></i></div>
+                <div>
+                    <span>JIGATO SUPPORT</span>
+                    <h2>How can we help?</h2>
+                </div>
+            </div>
+            <button type="button" id="footerSupportClose" class="jg-support-close" aria-label="Close">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <!-- CONTENT -->
+        <div class="jg-support-content">
+            <p class="jg-support-intro">Need help with your order or account? Contact our support team using the details below.</p>
+            <!-- EMAIL -->
+            <a href="mailto:support@jigato.com" class="jg-support-contact">
+                <div class="jg-support-contact-icon"><i class="fa-solid fa-envelope"></i></div>
+                <div class="jg-support-contact-info">
+                    <small>SUPPORT EMAIL</small>
+                    <strong>support@jigato.com</strong>
+                </div>
+                <i class="fa-solid fa-arrow-up-right-from-square jg-support-arrow"></i>
+            </a>
+            <!-- PHONE -->
+            <a href="tel:7418520963" class="jg-support-contact">
+                <div class="jg-support-contact-icon"><i class="fa-solid fa-phone"></i></div>
+                <div class="jg-support-contact-info">
+                    <small>SUPPORT PHONE</small>
+                    <strong>7418520963</strong>
+                </div>
+                <i class="fa-solid fa-arrow-up-right-from-square jg-support-arrow"></i>
+            </a>
+            <!-- NOTE -->
+            <div class="jg-support-note">
+                <i class="fa-solid fa-circle-info"></i>
+                <span>Our support team can help with orders, account issues and general assistance.</span>
+            </div>
+        </div>
+        <!-- FOOTER -->
+        <div class="jg-support-modal-footer">
+            <span><i class="fa-solid fa-circle-check"></i> Jigato Support</span>
+            <button type="button" id="footerSupportDone">Done</button>
+        </div>
+    </div>
+</div>
